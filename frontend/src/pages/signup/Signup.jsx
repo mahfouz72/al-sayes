@@ -57,6 +57,11 @@ function LoginForm(){
             return;
         }
 
+        if(password.length > 128){
+            setPasswordError("The password must be at most 128 characters");
+            return;
+        }
+
         if (!(password === confirmPassword)) {
             setPasswordError('Passwords do not match');
             return;
