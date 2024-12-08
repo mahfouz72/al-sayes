@@ -8,8 +8,6 @@ public interface DAO<T> {
 
     void insert(T t);
 
-    Optional<T> getById(Long id);
-
     void update(Long id, T t);
 
     void delete(Long id);

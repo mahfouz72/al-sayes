@@ -40,12 +40,11 @@ public class ParkingSpotDAO implements DAO<ParkingSpot> {
                 parkingSpot.getCurrentStatus(), parkingSpot.getType());
     }
 
-    @Override
-    public Optional<ParkingSpot> getById(Long id) {
-        String sql = "SELECT * FROM ParkingSpot WHERE id = ?";
+    public Optional<ParkingSpot> getSpotBySpotIdAndLotId(Long spotId, Long lot_id) {
+        String sql = "SELECT * FROM ParkingSpot WHERE id = ? AND lot_id = ?";
         ParkingSpot parkingSpot = null;
         try {
-            parkingSpot = jdbcTemplate.queryForObject(sql, rowMapper, id);
+            parkingSpot = jdbcTemplate.queryForObject(sql, rowMapper, spotId, lot_id);
         } catch(DataAccessException e) {
             // Not Found
         }

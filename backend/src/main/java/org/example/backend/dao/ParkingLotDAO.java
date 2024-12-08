@@ -44,7 +44,6 @@ public class ParkingLotDAO implements DAO<ParkingLot> {
                 parkingLot.getNotShowingUpPenalty(), parkingLot.getOverTimeScale());
     }
 
-    @Override
     public Optional<ParkingLot> getById(Long id) {
         String sql = "SELECT * FROM ParkingLot WHERE id = ?";
         ParkingLot parkingLot = null;
