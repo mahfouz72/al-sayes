@@ -68,7 +68,7 @@ function LoginForm(){
 
         } catch (error) {
             console.log("something went wrong");
-            setErrorMessage(error.response.data);
+            setErrorMessage("Something went wrong, Try again later!");
         }
 
     };
