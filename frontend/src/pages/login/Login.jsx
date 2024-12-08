@@ -57,7 +57,7 @@ function LoginForm(){
             if(response.status === 200){
                 const token = await response.text();
                 localStorage.setItem("token", token); //to be improved later
-                console.log("Login successful");
+                console.log("Login ssuccessfully");
                 navigate('/');
             }
             else{

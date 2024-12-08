@@ -75,13 +75,21 @@ function LoginForm(){
 
 
         try {
-            const response = await registerUser(userData); 
-            console.log('User registered successfully:', response.data);
-            navigate('/');
+            const response = await registerUser(userData);
+
+            if(response.status === 200){
+                console.log("Register successfully");
+                navigate('/');
+            }
+            else{
+                const errorMessage = await response.text();
+                console.log(errorMessage);
+                setErrorMessage("Error");
+            }
 
         } catch (error) {
-            console.error('Registration failed:', error.response ? error.response.data : error.message);
-            setErrorMessage(error.response.data);
+            console.log("something went wrong");
+            setErrorMessage("Something went wrong, Try again later!");
         }
        
     };
