@@ -74,10 +74,10 @@ function LoginForm(){
             console.log('User registered successfully:', response.data);
             navigate('/');
 
-          } catch (error) {
+        } catch (error) {
             console.error('Registration failed:', error.response ? error.response.data : error.message);
             setErrorMessage(error.response.data);
-          }
+        }
        
     };
 
