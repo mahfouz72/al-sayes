@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { BACKEND_BASE, LOGIN_API } from "../../constants/Constants";
+import { loginUser } from "../../APIs/loginUser";
 import Password from '../../components/password/Password';
 import '../../styles/form.css'
 
@@ -46,12 +46,14 @@ function LoginForm(){
 
         console.log("Login attempt with:", { username, password });
 
-        try{
-            const response = await fetch(BACKEND_BASE + LOGIN_API + `?username=${username}&password=${password}`, {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-            });
-    
+        const userData = {
+            username: username,
+            password: password,
+        };
+
+        try {
+            const response = await loginUser(userData); 
+
             if(response.status === 200){
                 const token = await response.text();
                 localStorage.setItem("token", token); //to be improved later
@@ -63,9 +65,12 @@ function LoginForm(){
                 console.log(errorMessage);
                 setErrorMessage("Invalid username or password");
             }
-        }catch(error){
+
+        } catch (error) {
             console.log("something went wrong");
+            setErrorMessage(error.response.data);
         }
+
     };
 
     return(
@@ -95,7 +100,7 @@ function LoginForm(){
                     <a href="#1">Forget password</a>
                 </div>
                 <p className="error">{errorMessage}</p>
-                <button className="login-btn" type="button" onClick={handleSubmit}>Log in</button>
+                <button className="btn" type="button" onClick={handleSubmit}>Log in</button>
                 <div className="register">
                     <p>Don't have an account? <Link to="/signup">Register</Link></p>
                 </div>
