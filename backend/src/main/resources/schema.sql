@@ -17,3 +17,16 @@ CREATE TABLE IF NOT EXISTS ParkingSpot (
     type varchar(255) NOT NULL,
     PRIMARY KEY (id, lot_id)
 );
+
+CREATE TABLE IF NOT EXISTS Reservation (
+    driver_id bigint NOT NULL,
+    spot_id bigint NOT NULL,
+    lot_id bigint NOT NULL,
+    start_time timestamp NOT NULL,
+    end_time timestamp NOT NULL,
+    price decimal NOT NULL,
+    status varchar(255) NOT NULL,
+    violation_duration decimal NOT NULL,
+    penalty decimal NOT NULL,
+    PRIMARY KEY (driver_id, spot_id, lot_id, start_time)
+);
