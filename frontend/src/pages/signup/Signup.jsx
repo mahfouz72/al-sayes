@@ -101,7 +101,7 @@ function LoginForm(){
 
                 <div className="input-box">
                     <input type="text" 
-                        placeholder="username"
+                        placeholder="Username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                     />
@@ -110,7 +110,7 @@ function LoginForm(){
 
                 <div className="input-box">
                     <input type="email" 
-                        placeholder="email"
+                        placeholder="Email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                     />
@@ -121,7 +121,7 @@ function LoginForm(){
                 <Password
                     value={password}
                     setValue={setPassword}
-                    placeholder="password"
+                    placeholder="Password"
                 />
                     <p className="error">{passwordError}</p>
                 </div>
@@ -130,7 +130,7 @@ function LoginForm(){
                 <Password
                     value={confirmPassword}
                     setValue={setConfirmPassword}
-                    placeholder="confirm password"
+                    placeholder="Confirm password"
                 />
                 </div>
                 
