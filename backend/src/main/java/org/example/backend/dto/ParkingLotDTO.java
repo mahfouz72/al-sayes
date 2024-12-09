@@ -1,15 +1,13 @@
-package org.example.backend.entity;
+package org.example.backend.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-@AllArgsConstructor
 @Getter
 @Setter
 @NoArgsConstructor
-public class ParkingLot {
+@AllArgsConstructor
+@Builder
+public class ParkingLotDTO {
     private Long id;
     private int capacity;
     private String location;

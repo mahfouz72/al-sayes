@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-public class ParkingLotDAO implements DAO<ParkingLot> {
+public class ParkingLotDAO implements DAO<ParkingLot, Long> {
     private JdbcTemplate jdbcTemplate;
     private RowMapper<ParkingLot> rowMapper = (rs, rowNum) -> {
         ParkingLot parkingLot = new ParkingLot();
@@ -44,7 +44,8 @@ public class ParkingLotDAO implements DAO<ParkingLot> {
                 parkingLot.getNotShowingUpPenalty(), parkingLot.getOverTimeScale());
     }
 
-    public Optional<ParkingLot> getById(Long id) {
+    @Override
+    public Optional<ParkingLot> getByPK(Long id) {
         String sql = "SELECT * FROM ParkingLot WHERE id = ?";
         ParkingLot parkingLot = null;
         try {
