@@ -1,3 +1,12 @@
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f5f0e4;
+}
+
+
 .wrapper {
     width: 420px;
     background: transparent;
