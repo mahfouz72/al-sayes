@@ -7,23 +7,24 @@ import '../../styles/form.css'
 function LoginForm(){
 
     const [username, setUsername] = useState("");
-    const [email, setEmail] = useState("");
+    const [plateNumber, setPlateNumber] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [password, setPassword] = useState("");
     const [usernameError, setUsernameError] = useState("");
-    const [emailError, setEmailError] = useState("");
+    const [plateNumberError, setplateNumberError] = useState("");
     const [passwordError, setPasswordError] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
 
     const navigate = useNavigate();
 
-    function isValidEmail(email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
+    function isValidplate(plateNumber) {
+        const licenseRegex = /^[A-Z0-9-]{1,10}$/;
+        return licenseRegex.test(plateNumber.toUpperCase());
     }
 
     const handleSubmit = async () => {
         setUsernameError("");
+        setplateNumberError("");
         setPasswordError("");
         setErrorMessage("");
 
@@ -37,13 +38,8 @@ function LoginForm(){
             return;
         }
 
-        if(email === ''){
-            setEmailError("Email is required!");
-            return;
-        }
-
-        if(!isValidEmail(email)){
-            setEmailError("Enter a valid email");
+        if(!isValidplate(plateNumber)){
+            setplateNumberError("Invalid license number. Use letters, numbers, and hyphens only.");
             return;
         }
 
@@ -69,7 +65,7 @@ function LoginForm(){
 
         const userData = {
             username: username,
-            email: email,
+            plateNumber: plateNumber,
             password: password,
         };
 
@@ -109,12 +105,12 @@ function LoginForm(){
                 </div>
 
                 <div className="input-box">
-                    <input type="email" 
-                        placeholder="Email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                    <input type="text" 
+                        placeholder="Car plate number"
+                        value={plateNumber}
+                        onChange={(e) => setPlateNumber(e.target.value)}
                     />
-                    <p className="error">{emailError}</p>
+                    <p className="error">{plateNumberError}</p>
                 </div>
 
                 <div className="input-box">
