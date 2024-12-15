@@ -17,3 +17,12 @@ CREATE TABLE IF NOT EXISTS ParkingSpot (
     type varchar(255) NOT NULL,
     PRIMARY KEY (id, lot_id)
 );
+
+CREATE TABLE IF NOT EXISTS Driver (
+    id bigint NOT NULL AUTO_INCREMENT,
+    username varchar(45) NOT NULL,
+    email varchar(255) NOT NULL,
+    password varchar(255) NOT NULL,
+    license_plate varchar(255) NOT NULL,
+    PRIMARY KEY (id)
+);
