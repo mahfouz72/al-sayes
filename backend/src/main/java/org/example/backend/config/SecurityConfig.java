@@ -41,10 +41,11 @@ public class SecurityConfig {
     public UserDetailsManager userDetailsManager(DataSource dataSource) {
         JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager(dataSource);
         jdbcUserDetailsManager.setUsersByUsernameQuery(
-                "select username, password, 'true' as enabled from driver where username = ?"
+                "select username, password, 'true' as enabled from account where username = ?"
         );
         jdbcUserDetailsManager.setAuthoritiesByUsernameQuery(
-                "select username, 'ROLE_USER' as role from driver where username = ?");
+                "select username, role_name from account where username = ?");
+
         return jdbcUserDetailsManager;
     }
 

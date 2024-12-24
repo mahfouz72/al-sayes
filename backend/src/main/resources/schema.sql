@@ -18,11 +18,20 @@ CREATE TABLE IF NOT EXISTS ParkingSpot (
     PRIMARY KEY (id, lot_id)
 );
 
-CREATE TABLE IF NOT EXISTS Driver (
-    id bigint NOT NULL AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS Account (
+    id BIGINT NOT NULL AUTO_INCREMENT,
     username varchar(45) NOT NULL,
     email varchar(255) NOT NULL,
     password varchar(255) NOT NULL,
-    license_plate varchar(255) NOT NULL,
-    PRIMARY KEY (id)
+    role_name varchar(45) NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY (username)
 );
+
+CREATE TABLE IF NOT EXISTS Driver (
+    account_id BIGINT NOT NULL,
+    license_plate VARCHAR(255) NOT NULL,
+    PRIMARY KEY (account_id),
+    FOREIGN KEY (account_id) REFERENCES Account(id) ON DELETE CASCADE
+);
+

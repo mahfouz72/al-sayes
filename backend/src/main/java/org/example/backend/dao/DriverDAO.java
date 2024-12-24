@@ -1,5 +1,6 @@
 package org.example.backend.dao;
 
+import org.example.backend.entity.Account;
 import org.example.backend.entity.Driver;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -23,12 +24,17 @@ public class DriverDAO implements DAO<Driver, Long> {
 
     @Override
     public void insert(Driver driver) {
-        String sql =
-                "INSERT INTO Driver(username, email, password, license_plate) VALUES(?,?,?,?)";
+        Account account = driver.getAccount();
+        String AccountSql =
+                "INSERT INTO Account(username, email, password, role_name) VALUES(?,?,?,?)";
+        jdbcTemplate.update(AccountSql, account.getUsername(),
+                account.getEmail(), account.getPassword(), "ROLE_USER");
 
-        jdbcTemplate.update(sql, driver.getUsername(),
-                        driver.getEmail(), driver.getPassword(),
-                        driver.getLicensePlate());
+        String getAccountIdSql = "SELECT LAST_INSERT_ID()";
+        Long accountId = jdbcTemplate.queryForObject(getAccountIdSql, Long.class);
+
+        String DriverSql = "INSERT INTO Driver(account_id, license_plate) VALUES(?,?)";
+        jdbcTemplate.update(DriverSql, accountId, driver.getLicensePlate());
     }
 
     @Override

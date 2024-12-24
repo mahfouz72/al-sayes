@@ -6,8 +6,10 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Driver {
+public class Account {
     private Long id;
-    private String licensePlate;
-    private Account account;
+    private String username;
+    private String email;
+    private String password;
+    private String role;
 }
