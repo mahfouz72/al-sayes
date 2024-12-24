@@ -2,6 +2,7 @@ package org.example.backend.dao;
 
 import org.example.backend.entity.ParkingSpot;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.util.Pair;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
@@ -10,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-public class ParkingSpotDAO implements DAO<ParkingSpot> {
+public class ParkingSpotDAO implements DAO<ParkingSpot, Pair<Long, Long>> {
     private JdbcTemplate jdbcTemplate;
     private RowMapper<ParkingSpot> rowMapper = (rs, rowNum) -> {
         ParkingSpot parkingSpot = new ParkingSpot();
@@ -40,11 +41,14 @@ public class ParkingSpotDAO implements DAO<ParkingSpot> {
                 parkingSpot.getCurrentStatus(), parkingSpot.getType());
     }
 
-    public Optional<ParkingSpot> getSpotBySpotIdAndLotId(Long spotId, Long lot_id) {
+    @Override
+    public Optional<ParkingSpot> getByPK(Pair<Long, Long> pKey) {
         String sql = "SELECT * FROM ParkingSpot WHERE id = ? AND lot_id = ?";
+        Long spotId = pKey.getFirst();
+        Long lotId = pKey.getSecond();
         ParkingSpot parkingSpot = null;
         try {
-            parkingSpot = jdbcTemplate.queryForObject(sql, rowMapper, spotId, lot_id);
+            parkingSpot = jdbcTemplate.queryForObject(sql, rowMapper, spotId, lotId);
         } catch(DataAccessException e) {
             // Not Found
         }
@@ -52,15 +56,25 @@ public class ParkingSpotDAO implements DAO<ParkingSpot> {
     }
 
     @Override
-    public void update(Long id, ParkingSpot parkingSpot) {
+    public void update(Pair<Long, Long> pKey, ParkingSpot parkingSpot) {
         String sql = "UPDATE ParkingSpot SET lot_id = ?, cost = ?, " +
-                "current_status = ?, type = ? WHERE id = ?";
+                "current_status = ?, type = ? WHERE id = ? AND lot_id = ?";
+        Long spotId = pKey.getFirst();
+        Long lotId = pKey.getSecond();
         jdbcTemplate.update(sql, parkingSpot.getLotId(), parkingSpot.getCost(),
-                parkingSpot.getCurrentStatus(), parkingSpot.getType(), id);
+                parkingSpot.getCurrentStatus(), parkingSpot.getType(), spotId, lotId);
     }
 
     @Override
-    public void delete(Long id) {
-        jdbcTemplate.update("DELETE FROM ParkingSpot WHERE id = ?", id);
+    public void delete(Pair<Long, Long> pKey) {
+        Long spotId = pKey.getFirst();
+        Long lotId = pKey.getSecond();
+        jdbcTemplate.update("DELETE FROM ParkingSpot WHERE id = ? " +
+                "AND lot_id = ?", spotId, lotId);
+    }
+
+    public List<ParkingSpot> listAllSpotsFilterByLotId(long lot_id) {
+        String sql = "SELECT * FROM ParkingSpot WHERE lot_id = ?";
+        return jdbcTemplate.query(sql, rowMapper, lot_id);
     }
 }
