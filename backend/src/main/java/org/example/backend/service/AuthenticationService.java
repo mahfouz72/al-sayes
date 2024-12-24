@@ -42,8 +42,8 @@ public class AuthenticationService {
     }
 
     private void encodePassword(Driver driver) {
-        String encodedPassword = passwordEncoder.encode(driver.getPassword());
-        driver.setPassword(encodedPassword);
+        String encodedPassword = passwordEncoder.encode(driver.getAccount().getPassword());
+        driver.getAccount().setPassword(encodedPassword);
     }
 
     public ResponseEntity<String> login(String username, String password) {

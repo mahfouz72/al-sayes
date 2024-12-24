@@ -24,17 +24,17 @@ public class JWTService {
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + millisInADay))
                 .and()
-                .signWith(genrateSecretKey())
+                .signWith(generateSecretKey())
                 .compact();
     }
 
-    private SecretKey genrateSecretKey() {
+    private SecretKey generateSecretKey() {
         return Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
     public String extractUsername(String jwt) {
         return Jwts.parser()
-                .verifyWith(genrateSecretKey())
+                .verifyWith(generateSecretKey())
                 .build()
                 .parseSignedClaims(jwt)
                 .getPayload()
@@ -52,7 +52,7 @@ public class JWTService {
 
     private Date extractExpirationDate(String jwt) {
         return Jwts.parser()
-                .verifyWith(genrateSecretKey())
+                .verifyWith(generateSecretKey())
                 .build()
                 .parseSignedClaims(jwt)
                 .getPayload()
