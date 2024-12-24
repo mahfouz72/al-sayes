@@ -5,13 +5,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import org.example.backend.enums.ReservationStatus;
-
+import org.example.backend.models.ReservationKey;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
 @Component
-public class ReservationDAO implements DAO<Reservation> {
+// public key is composite key of driverId, spotId, lotId, startTime
+public class ReservationDAO implements DAO<Reservation, ReservationKey> {
     private JdbcTemplate jdbcTemplate;
 
     private RowMapper<Reservation> rowMapper = (rs, rowNum) -> {
@@ -51,35 +52,37 @@ public class ReservationDAO implements DAO<Reservation> {
                 reservation.getStatus().name(), reservation.getViolationDuration(), reservation.getPenalty());
     }
 
-    public Optional<Reservation> getByDriverAndSpot(Long driverId, Long spotId, Long lotId) {
-        String sql = "SELECT * FROM Reservation WHERE driver_id = ? AND spot_id = ? AND lot_id = ?";
+    @Override
+    public Optional<Reservation> getByPK(ReservationKey key) {
+        String sql = "SELECT * FROM Reservation WHERE driver_id = ? AND lot_id = ? AND spot_id = ? AND start_time = ?";
         Reservation reservation = null;
         try {
-            reservation = jdbcTemplate.queryForObject(sql, rowMapper, driverId, spotId, lotId);
+            reservation = jdbcTemplate.queryForObject(sql, rowMapper, key.getDriverId(), key.getLotId(), key.getSpotId(),
+                    key.getStartTime());
         } catch (Exception e) {
             // Not found
         }
         return Optional.ofNullable(reservation);
     }
-
+    
     @Override
-    public void update(Long id, Reservation reservation) {
-        throw new UnsupportedOperationException("Use composite keys for updating reservations.");
+    public void update(ReservationKey key, Reservation reservation) {
+        updateByKeys(key.getDriverId(), key.getLotId(), key.getSpotId(), key.getStartTime(), reservation);
     }
 
-    public void updateByKeys(Long driverId, Long spotId, Long lotId, Timestamp startTime, Reservation reservation) {
-        String sql = "UPDATE Reservation SET end_time = ?, price = ?, status = ?, violation_duration = ?, penalty = ? WHERE driver_id = ? AND spot_id = ? AND lot_id = ? AND start_time = ?";
+    public void updateByKeys(Long driverId, Long lotId, Long spotId, Timestamp startTime, Reservation reservation) {
+        String sql = "UPDATE Reservation SET end_time = ?, price = ?, status = ?, violation_duration = ?, penalty = ? WHERE driver_id = ? AND lot_id = ? AND spot_id = ? AND start_time = ?";
         jdbcTemplate.update(sql, reservation.getEndTime(), reservation.getPrice(), reservation.getStatus().name(),
-                reservation.getViolationDuration(), reservation.getPenalty(), driverId, spotId, lotId, startTime);
+                reservation.getViolationDuration(), reservation.getPenalty(), driverId, lotId, spotId, startTime);
     }
 
     @Override
-    public void delete(Long id) {
-        throw new UnsupportedOperationException("Use composite keys for deleting reservations.");
+    public void delete(ReservationKey key) {
+        deleteByKeys(key.getDriverId(), key.getLotId(), key.getSpotId(), key.getStartTime());
     }
 
-    public void deleteByKeys(Long driverId, Long spotId, Long lotId, Timestamp startTime) {
-        String sql = "DELETE FROM Reservation WHERE driver_id = ? AND spot_id = ? AND lot_id = ? AND start_time = ?";
-        jdbcTemplate.update(sql, driverId, spotId, lotId, startTime);
+    public void deleteByKeys(Long driverId, Long lotId, Long spotId, Timestamp startTime) {
+        String sql = "DELETE FROM Reservation WHERE driver_id = ? AND lot_id = ? AND spot_id = ? AND start_time = ?";
+        jdbcTemplate.update(sql, driverId, lotId, spotId, startTime);
     }
 }
