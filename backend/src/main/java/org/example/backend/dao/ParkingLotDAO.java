@@ -71,4 +71,9 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
     public void delete(Long id) {
         jdbcTemplate.update("DELETE FROM ParkingLot WHERE id = ?", id);
     }
+
+    public Integer countParkingLots() {
+        String sql = "SELECT COUNT(*) FROM ParkingLot";
+        return jdbcTemplate.queryForObject(sql, Integer.class);
+    }
 }
