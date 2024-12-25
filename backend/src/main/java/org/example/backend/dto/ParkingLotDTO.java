@@ -9,6 +9,8 @@ import lombok.*;
 @Builder
 public class ParkingLotDTO {
     private Long id;
+    private String name;
+    private Long managedBy;
     private int capacity;
     private String location;
 

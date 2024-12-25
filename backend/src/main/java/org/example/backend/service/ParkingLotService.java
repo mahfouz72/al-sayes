@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.example.backend.dao.ParkingLotDAO;
 import org.example.backend.dao.ParkingSpotDAO;
 import org.example.backend.dto.ParkingLotDTO;
+import org.example.backend.dto.ParkingLotDetails;
 import org.example.backend.dto.ParkingSpotDTO;
 import org.example.backend.entity.ParkingLot;
 import org.example.backend.entity.ParkingSpot;
@@ -40,5 +41,9 @@ public class ParkingLotService {
             requestedSpotsDTO.add(parkingSpotMapper.toDTO(spot));
         }
         return requestedSpotsDTO;
+    }
+
+    public List<ParkingLotDetails> findAllParkingLotsByManager(long managerId) {
+        return parkingLotDAO.getLotsDetailsByManagerId(managerId);
     }
 }

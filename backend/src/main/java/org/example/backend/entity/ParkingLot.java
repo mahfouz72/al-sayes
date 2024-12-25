@@ -11,9 +11,11 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ParkingLot {
     private Long id;
+    private String name;
+    private Long managedBy; // user id
+
     private int capacity;
     private String location;
-
     // Longest possible reservation duration
     private double timeLimit;
 

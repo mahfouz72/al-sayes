@@ -11,6 +11,8 @@ public class ParkingLotMapper {
     public ParkingLotDTO toDTO(ParkingLot parkingLot) {
         return  ParkingLotDTO.builder()
                 .id(parkingLot.getId())
+                .name(parkingLot.getName())
+                .managedBy(parkingLot.getManagedBy())
                 .capacity(parkingLot.getCapacity())
                 .location(parkingLot.getLocation())
                 .timeLimit(parkingLot.getTimeLimit())
@@ -23,6 +25,8 @@ public class ParkingLotMapper {
     // Converts a ParkingLotDTO to a ParkingLot entity
     public ParkingLot fromDTO(ParkingLotDTO parkingLotDTO) {
         return new ParkingLot(parkingLotDTO.getId(),
+                parkingLotDTO.getName(),
+                parkingLotDTO.getManagedBy(),
                 parkingLotDTO.getCapacity(),
                 parkingLotDTO.getLocation(),
                 parkingLotDTO.getTimeLimit(),

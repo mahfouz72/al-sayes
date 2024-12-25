@@ -11,7 +11,8 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/lots/{lot_id}/spots/")
+@RequestMapping("/api/spots")
+@CrossOrigin(origins = "*")
 public class ParkingSpotController {
     private ParkingLotService parkingLotService;
 
@@ -23,15 +24,16 @@ public class ParkingSpotController {
         this.parkingSpotService = parkingSpotService;
     }
 
-    @PostMapping("/update")
+    @PostMapping("/{lot_id}/update")
     public ResponseEntity<Void> updateSpotStatus(@RequestBody ParkingSpotDTO spotDTO,
                                                           @PathVariable Long lot_id) {
+        // TODO: Fix this non-sense :)
         spotDTO.setLotId(lot_id);
         parkingSpotService.updateParkingSpot(spotDTO);
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/")
+    @GetMapping("/{lot_id}/get")
     public ResponseEntity<List<ParkingSpotDTO>> listSpotsInParkingLot(@PathVariable Long lot_id) {
         return ResponseEntity.ok(this.parkingLotService.listAllSpotsInLot(lot_id));
     }
