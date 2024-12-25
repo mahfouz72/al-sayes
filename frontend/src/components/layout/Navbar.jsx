@@ -11,7 +11,9 @@ function classNames(...classes) {
 }
 
 export default function Navbar() {
-    const { user, role, logout } = useAuthStore();
+    const user = localStorage.getItem("username");
+    const role = localStorage.getItem("role");
+
     const navigate = useNavigate();
 
     const navigation = [
@@ -22,7 +24,7 @@ export default function Navbar() {
     ].filter(Boolean);
 
     const handleLogout = () => {
-        logout();
+        localStorage.clear();
         navigate("/login");
     };
 

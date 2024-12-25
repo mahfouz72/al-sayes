@@ -11,7 +11,7 @@ export default function AdminReservations() {
         status: "all",
         dateRange: "all",
     });
-    const { user } = useAuthStore();
+    const user = localStorage.getItem("username");
 
     const parkingLots = ["Downtown Parking", "Mall Parking", "Airport Parking"];
     const statuses = ["Active", "Completed", "Cancelled"];
