@@ -1,9 +1,12 @@
 package org.example.backend.service;
 
+import org.example.backend.dao.AccountDAO;
 import org.example.backend.dao.DriverDAO;
-import org.example.backend.dto.DriverRegistrationDTO;
+import org.example.backend.dto.LoginResponseDTO;
+import org.example.backend.dto.RegistrationDTO;
+import org.example.backend.entity.Account;
 import org.example.backend.entity.Driver;
-import org.example.backend.mapper.DriverRegistrationMapper;
+import org.example.backend.mapper.RegistrationMapper;
 import org.example.backend.security.JWTService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,48 +21,77 @@ import org.springframework.stereotype.Service;
 public class AuthenticationService {
 
     private final DriverDAO driverDAO;
-    private final DriverRegistrationMapper driverRegistrationMapper;
+    private final AccountDAO accountDAO;
+    private final RegistrationMapper registrationMapper;
     private final PasswordEncoder passwordEncoder;
     private final JWTService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    public AuthenticationService(DriverDAO driverDAO,
-                                 DriverRegistrationMapper driverRegistrationMapper,
+    public AuthenticationService(DriverDAO driverDAO, AccountDAO accountDAO,
+                                 RegistrationMapper registrationMapper,
                                  PasswordEncoder passwordEncoder,
                                  JWTService jwtService,
                                  AuthenticationManager authenticationManager) {
         this.driverDAO = driverDAO;
-        this.driverRegistrationMapper = driverRegistrationMapper;
+        this.accountDAO = accountDAO;
+        this.registrationMapper = registrationMapper;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
     }
 
-    public void register(DriverRegistrationDTO driverRegistrationDTO) {
-        Driver driver = driverRegistrationMapper.fromDto(driverRegistrationDTO);
-        encodePassword(driver);
+    public void register(RegistrationDTO registrationDTO) {
+        if ("Driver".equalsIgnoreCase(registrationDTO.role())) {
+            registerDriver(registrationDTO);
+        } else if ("Manager".equalsIgnoreCase(registrationDTO.role())) {
+            registerManager(registrationDTO);
+        }
+    }
+
+    private void registerDriver(RegistrationDTO registrationDTO) {
+        Account account = registrationMapper.accountFromDto(registrationDTO);
+        encodePassword(account);
+        Driver driver = Driver.builder()
+                .account(account)
+                .licensePlate(registrationDTO.licensePlate())
+                .build();
         driverDAO.insert(driver);
     }
 
-    private void encodePassword(Driver driver) {
-        String encodedPassword = passwordEncoder.encode(driver.getAccount().getPassword());
-        driver.getAccount().setPassword(encodedPassword);
+    private void registerManager(RegistrationDTO registrationDTO) {
+        Account account = registrationMapper.accountFromDto(registrationDTO);
+        encodePassword(account);
+        accountDAO.insert(account);
     }
 
-    public ResponseEntity<String> login(String username, String password) {
+    private void encodePassword(Account account) {
+        String encodedPassword = passwordEncoder.encode(account.getPassword());
+        account.setPassword(encodedPassword);
+    }
+
+    public ResponseEntity<LoginResponseDTO> login(String username, String password) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         username, password
                 ));
 
-        ResponseEntity<String> response;
+        ResponseEntity<LoginResponseDTO> response;
         if (authentication.isAuthenticated()) {
-            String token = jwtService.generateToken(username);
-            response = new ResponseEntity<>(token, HttpStatus.OK);
+            LoginResponseDTO loginResponse = prepareResponse(username);
+            response = new ResponseEntity<>(loginResponse, HttpStatus.OK);
         } else {
-            response = new ResponseEntity<>("User is not authenticated", HttpStatus.UNAUTHORIZED);
+            response = new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         return response;
+    }
+
+    private LoginResponseDTO prepareResponse(String username) {
+        String token = jwtService.generateToken(username);
+        String role = accountDAO.getRoleByUsername(username).toLowerCase().split("_")[1];
+        return LoginResponseDTO.builder()
+                .role(role)
+                .token(token)
+                .build();
     }
 
     public String getCurrentUsername() {
