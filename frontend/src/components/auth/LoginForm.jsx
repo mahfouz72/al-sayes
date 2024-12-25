@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import useAuthStore from "../../store/authStore";
+import axios from "axios";
 
 export default function LoginForm() {
     const {
@@ -15,40 +16,32 @@ export default function LoginForm() {
     const navigate = useNavigate();
     const login = useAuthStore((state) => state.login);
 
-    const onSubmit = (data) => {
+    const onSubmit = async (data) => {
         setError("");
-        // Simulate API call - replace with real authentication
-        if (data.email === "admin@example.com" && data.password === "admin") {
-            login({
-                id: 1,
-                email: data.email,
-                role: "admin",
-                name: "Admin User",
+
+        try {
+            const response = await axios.post('http://localhost:8080/login', null, {
+                params: {
+                    username: data.username,
+                    password: data.password,
+                },
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
             });
-            navigate("/dashboard");
-        } else if (
-            data.email === "manager@example.com" &&
-            data.password === "manager"
-        ) {
+
+            const { token, role } = response.data;
+            localStorage.setItem('token', token);
+            localStorage.setItem('role', role);
+
             login({
-                id: 2,
-                email: data.email,
-                role: "manager",
-                name: "Parking Manager",
+                username: data.username,
+                role: role,
             });
+
             navigate("/dashboard");
-        } else if (
-            data.email === "driver@example.com" &&
-            data.password === "driver"
-        ) {
-            login({
-                id: 3,
-                email: data.email,
-                role: "driver",
-                name: "John Driver",
-            });
-            navigate("/dashboard");
-        } else {
+        } catch (error) {
+            console.log(error);
             setError("Invalid credentials");
         }
     };
@@ -77,24 +70,20 @@ export default function LoginForm() {
                 >
                     <div className="rounded-md shadow-sm -space-y-px">
                         <div>
-                            <label htmlFor="email" className="sr-only">
-                                Email address
+                            <label htmlFor="username" className="sr-only">
+                                Username
                             </label>
                             <input
-                                {...register("email", {
-                                    required: "Email is required",
-                                    pattern: {
-                                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                                        message: "Invalid email address",
-                                    },
+                                {...register("username", {
+                                    required: "Username is required",
                                 })}
-                                type="email"
+                                type="text"
                                 className="appearance-none rounded-t-md relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                                placeholder="Email address"
+                                placeholder="Username"
                             />
-                            {errors.email && (
+                            {errors.username && (
                                 <p className="text-red-500 text-xs mt-1">
-                                    {errors.email.message}
+                                    {errors.username.message}
                                 </p>
                             )}
                         </div>
