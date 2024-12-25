@@ -10,13 +10,16 @@ CREATE TABLE IF NOT EXISTS Account (
 
 CREATE TABLE IF NOT EXISTS ParkingLot (
     id bigint NOT NULL AUTO_INCREMENT,
+    name varchar(255) NOT NULL,
+    managed_by bigint NOT NULL,
     location varchar(1024) NOT NULL,
     capacity int NOT NULL,
     time_limit decimal NOT NULL,
     automatic_release_time decimal NOT NULL,
     not_showing_up_penalty decimal NOT NULL,
     over_time_scale decimal NOT NULL,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    FOREIGN KEY (managed_by) REFERENCES Account(id)
 );
 
 CREATE TABLE IF NOT EXISTS ParkingSpot (
