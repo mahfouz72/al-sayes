@@ -13,13 +13,14 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/lots")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:5173")
 public class ParkingLotController {
     private ParkingLotService parkingLotService;
 
     public ParkingLotController(ParkingLotService parkingLotService) {
         this.parkingLotService = parkingLotService;
     }
+
     @GetMapping("/get")
     public ResponseEntity<List<ParkingLotDetails>> listUserManagedLots() {
         Long userId = 1L;
