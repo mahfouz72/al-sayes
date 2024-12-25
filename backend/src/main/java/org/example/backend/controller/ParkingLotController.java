@@ -28,7 +28,7 @@ public class ParkingLotController {
     @GetMapping("/get")
     public ResponseEntity<List<ParkingLotDetails>> listUserManagedLots() {
         Account currentUser = authenticationService.getCurrentAccount();
-        if ("ROLE_MANAGER".equals(currentUser.getRole())) {
+        if (!"ROLE_MANAGER".equals(currentUser.getRole())) {
             return ResponseEntity.status(401).build();
         }
         List<ParkingLotDetails> lots = this.parkingLotService.findAllParkingLotsByManager(currentUser.getId());
