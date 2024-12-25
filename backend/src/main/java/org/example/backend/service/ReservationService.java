@@ -3,6 +3,7 @@ package org.example.backend.service;
 import org.example.backend.dao.ParkingLotDAO;
 import org.example.backend.dao.ParkingSpotDAO;
 import org.example.backend.dao.ReservationDAO;
+import org.example.backend.dto.ReservationDTO;
 import org.example.backend.entity.ParkingLot;
 import org.example.backend.entity.ParkingSpot;
 import org.example.backend.entity.Reservation;
@@ -29,13 +30,29 @@ public class ReservationService {
         this.parkingLotDAO = parkingLotDAO;
     }
 
-    public boolean reserveSpot(Long driverId, Long lotId, Long spotId, LocalDateTime startTime, LocalDateTime endTime) {
+    public boolean reserveSpot(ReservationDTO reservationDTO) {
+        Optional<ParkingSpot> spot = parkingSpotDAO.getByPK(Pair.of(reservationDTO.getSpotId(), reservationDTO.getLotId()));
+        if (spot.isPresent()) {
+            parkingSpotDAO.update(Pair.of(reservationDTO.getSpotId(), reservationDTO.getLotId()),
+                    new ParkingSpot(reservationDTO.getSpotId(), reservationDTO.getLotId(), spot.get().getCost(),
+                            "RESERVED", spot.get().getType()));
+            reservationDAO.insert(new Reservation(reservationDTO.getDriverId(), reservationDTO.getLotId(),
+                    reservationDTO.getSpotId(), reservationDTO.getStartTime(), reservationDTO.getEndTime(),
+                    reservationDTO.getPrice(), reservationDTO.getStatus(), reservationDTO.getViolationDuration(),
+                    reservationDTO.getPenalty()));
+            return true;
+        }
+        return false;
+    }
+
+    public boolean reserveSpot(Long driverId, Long lotId, Long spotId, Timestamp startTime, Timestamp endTime) {
         Optional<ParkingSpot> spot = parkingSpotDAO.getByPK(Pair.of(spotId, lotId));
 
         if (spot.isPresent() && "AVAILABLE".equalsIgnoreCase(spot.get().getCurrentStatus())) {
-            double price = calculatePrice(spot.get(), startTime, endTime);
-            Reservation reservation = new Reservation(driverId, lotId, spotId, Timestamp.valueOf(startTime),
-                    Timestamp.valueOf(endTime), price, ReservationStatus.PENDING, 0, 0);
+            // double price = calculatePrice(spot.get(), startTime, endTime);
+            double price = 0.0;
+            Reservation reservation = new Reservation(driverId, lotId, spotId, startTime,
+                    endTime, price, ReservationStatus.PENDING, 0, 0);
 
             reservationDAO.insert(reservation);
             parkingSpotDAO.update(Pair.of(spotId, lotId),
@@ -43,13 +60,6 @@ public class ReservationService {
             return true;
         }
         return false;
-    }
-
-    // Dynamic pricing May be implemented here
-    private double calculatePrice(ParkingSpot spot, LocalDateTime startTime, LocalDateTime endTime) {
-        Duration duration = Duration.between(startTime, endTime);
-        double hours = duration.toSeconds() / 3600.0;
-        return hours * spot.getCost();
     }
 
     public void releaseExpiredReservations() {

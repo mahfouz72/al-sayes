@@ -1,15 +1,12 @@
 package org.example.backend.dao;
 
 import org.example.backend.entity.ParkingSpot;
-import org.example.backend.entity.Reservation;
-import org.example.backend.enums.ReservationStatus;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.util.Pair;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 

@@ -52,21 +52,31 @@ export default function DriverDashboard() {
     const [isReservationModalOpen, setIsReservationModalOpen] = useState(false);
     const [parkingLots, setParkingLots] = useState([]);
     const [selectedLotSpots, setSelectedLotSpots] = useState([]);
+    const fetchParkingLots = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get(
+                "http://localhost:8080/api/lots/get/cards",
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
 
+            setParkingLots(response.data);
+        } catch (error) {
+            console.error("Error fetching parking lots:", error);
+        }
+    };
     useEffect(() => {
-        const fetchParkingLots = async () => {
-            try {
-                const response = await axios.get(
-                    "http://localhost:8080/api/lots/get/cards"
-                ); // Replace with your actual API endpoint
-                setParkingLots(response.data);
-            } catch (error) {
-                console.error("Error fetching parking lots:", error);
-            }
-        };
-
         fetchParkingLots();
     }, []);
+
+    const onCloseReservationModal = () => {
+        setIsReservationModalOpen(false);
+        fetchParkingLots();
+    };
 
     const handleReservation = (lot) => {
         setSelectedLot(lot);
@@ -77,7 +87,14 @@ export default function DriverDashboard() {
                 const start = now.toISOString();
                 const endStr = end.toISOString();
                 const response = await axios.get(
-                    `http://localhost:8080/api/spots/${lot.id}/get/available?start=${start}&end=${endStr}`
+                    `http://localhost:8080/api/spots/${lot.id}/get/available?start=${start}&end=${endStr}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem(
+                                "token"
+                            )}`,
+                        },
+                    }
                 );
                 setSelectedLotSpots(response.data);
                 console.log(response.data);
@@ -126,7 +143,7 @@ export default function DriverDashboard() {
 
             <ReservationModal
                 isOpen={isReservationModalOpen}
-                onClose={() => setIsReservationModalOpen(false)}
+                onClose={onCloseReservationModal}
                 parkingLot={selectedLot}
                 parkingLotSpots={selectedLotSpots}
                 setParkingLotSpots={setSelectedLotSpots}

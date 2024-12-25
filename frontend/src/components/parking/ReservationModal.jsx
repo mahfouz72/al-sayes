@@ -37,7 +37,14 @@ export default function ReservationModal({
             const startStr = new Date(start).toISOString();
             const endStr = new Date(end).toISOString();
             const response = await axios.get(
-                `http://localhost:8080/api/spots/${parkingLot.id}/get/available?start=${startStr}&end=${endStr}`
+                `http://localhost:8080/api/spots/${parkingLot.id}/get/available?start=${startStr}&end=${endStr}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem(
+                            "token"
+                        )}`,
+                    },
+                }
             );
             setParkingLotSpots(response.data);
             console.log(response.data);
@@ -70,19 +77,62 @@ export default function ReservationModal({
         return (selectedSpot.cost * hours).toFixed(2);
     };
 
-    const handleReserve = () => {
-        if (!startTime || !endTime || !selectedSpot) return;
-        if (error) return;
+    const handleReserve = async () => {
+        if (!startTime || !endTime || !selectedSpot || error) return;
 
-        // Handle reservation logic
-        console.log("Reserving spot:", {
-            spot: selectedSpot,
-            startTime,
-            endTime,
-            total: calculateTotal(),
-        });
-        onClose();
+        const reservationData = {
+            driverId: null, // Leave this null; backend determines the driver
+            lotId: parkingLot.id,
+            spotId: selectedSpot.id,
+            startTime: new Date(startTime).toISOString(),
+            endTime: new Date(endTime).toISOString(),
+            price: parseFloat(calculateTotal()),
+            status: "PENDING", // Initial reservation status
+            violationDuration: 0,
+            penalty: 0,
+        };
+
+        try {
+            const response = await axios.post(
+                "http://localhost:8080/api/reservations/create",
+                reservationData,
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem(
+                            "token"
+                        )}`,
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            if (response.status === 200) {
+                // Reservation was successful
+                console.log("Reservation successful:", reservationData);
+                onClose(); // Close the modal
+            } else {
+                console.error("Unexpected response status:", response.status);
+                setError("Failed to reserve the spot. Please try again.");
+            }
+        } catch (error) {
+            // Handle errors during the request
+            console.error("Error creating reservation:", error);
+            setError(
+                error.response?.data?.message ||
+                    "Failed to reserve the spot. Please try again."
+            );
+        }
     };
+
+    // // Handle reservation logic
+    // console.log("Reserving spot:", {
+    //     spot: selectedSpot,
+    //     startTime,
+    //     endTime,
+    //     total: calculateTotal(),
+    // });
+    //     onClose();
+    // };
 
     const minDateTime = format(new Date(), "yyyy-MM-dd'T'HH:mm");
     const maxDateTime = format(addHours(new Date(), 48), "yyyy-MM-dd'T'HH:mm");
