@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import useAuthStore from "../../store/authStore";
 
 export default function LoginForm() {
@@ -10,6 +11,7 @@ export default function LoginForm() {
         formState: { errors },
     } = useForm();
     const [error, setError] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
     const login = useAuthStore((state) => state.login);
 
@@ -68,6 +70,7 @@ export default function LoginForm() {
                         </Link>
                     </p>
                 </div>
+
                 <form
                     className="mt-8 space-y-6"
                     onSubmit={handleSubmit(onSubmit)}
@@ -95,7 +98,7 @@ export default function LoginForm() {
                                 </p>
                             )}
                         </div>
-                        <div>
+                        <div className="relative">
                             <label htmlFor="password" className="sr-only">
                                 Password
                             </label>
@@ -103,10 +106,21 @@ export default function LoginForm() {
                                 {...register("password", {
                                     required: "Password is required",
                                 })}
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 className="appearance-none rounded-b-md relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                                 placeholder="Password"
                             />
+                            <button
+                                type="button"
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? (
+                                    <EyeSlashIcon className="h-5 w-5 text-gray-400" />
+                                ) : (
+                                    <EyeIcon className="h-5 w-5 text-gray-400" />
+                                )}
+                            </button>
                             {errors.password && (
                                 <p className="text-red-500 text-xs mt-1">
                                     {errors.password.message}
