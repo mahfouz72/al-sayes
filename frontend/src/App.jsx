@@ -21,7 +21,8 @@ import useAuthStore from "./store/authStore";
 import "./index.css";
 
 function PrivateRoute({ children, allowedRoles }) {
-    const { isAuthenticated, role } = useAuthStore();
+    const role = localStorage.getItem("role");
+    const isAuthenticated = localStorage.getItem("token");
 
     if (!isAuthenticated) {
         return <Navigate to="/login" />;
@@ -40,7 +41,7 @@ function PrivateRoute({ children, allowedRoles }) {
 }
 
 function DashboardRouter() {
-    const { role } = useAuthStore();
+    const role = localStorage.getItem("role");
 
     switch (role) {
         case "driver":
@@ -55,7 +56,7 @@ function DashboardRouter() {
 }
 
 function ReservationsRouter() {
-    const { role } = useAuthStore();
+    const role = localStorage.getItem("role");
 
     switch (role) {
         case "driver":

@@ -20,19 +20,24 @@ export default function LoginForm() {
         setError("");
 
         try {
-            const response = await axios.post('http://localhost:8080/login', null, {
-                params: {
-                    username: data.username,
-                    password: data.password,
-                },
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-            });
+            const response = await axios.post(
+                "http://localhost:8080/login",
+                null,
+                {
+                    params: {
+                        username: data.username,
+                        password: data.password,
+                    },
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                }
+            );
 
             const { token, role } = response.data;
-            localStorage.setItem('token', token);
-            localStorage.setItem('role', role);
+            localStorage.setItem("token", token);
+            localStorage.setItem("role", role);
+            localStorage.setItem("username", data.username);
 
             login({
                 username: data.username,

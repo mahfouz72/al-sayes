@@ -10,7 +10,7 @@ export default function ReservationList({
     isLoading = false,
 }) {
     const [currentPage, setCurrentPage] = useState(1);
-    const { role } = useAuthStore();
+    const role = localStorage.getItem("role");
 
     const totalPages = Math.ceil(reservations.length / ITEMS_PER_PAGE);
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
