@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
 import ParkingSpotGrid from '../parking/ParkingSpotGrid'
 import axios from 'axios'
+import LotAPI from '../../apis/LotAPI'
+import SpotAPI from '../../apis/SpotAPI'
 
 /*
 const mockParkingLots = [
