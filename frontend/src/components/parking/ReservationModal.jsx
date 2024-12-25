@@ -2,21 +2,54 @@ import { Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import ParkingSpotGrid from "./ParkingSpotGrid";
+import { format, addHours, isAfter } from "date-fns";
 
 export default function ReservationModal({ isOpen, onClose, parkingLot }) {
     const [selectedSpot, setSelectedSpot] = useState(null);
-    const [duration, setDuration] = useState(1);
-    const spotTypes = {
-        REGULAR: { color: "bg-blue-500", label: "Regular" },
-        DISABLED: { color: "bg-yellow-500", label: "Disabled" },
-        EV: { color: "bg-green-500", label: "EV Charging" },
+    const [startTime, setStartTime] = useState("");
+    const [endTime, setEndTime] = useState("");
+    const [error, setError] = useState("");
+
+    const handleTimeChange = (start, end) => {
+        setStartTime(start);
+        setEndTime(end);
+        setError("");
+
+        if (start && end) {
+            const startDate = new Date(start);
+            const endDate = new Date(end);
+
+            if (isAfter(startDate, endDate)) {
+                setError("End time must be after start time");
+            }
+        }
+    };
+
+    const calculateTotal = () => {
+        if (!startTime || !endTime) return 0;
+
+        const start = new Date(startTime);
+        const end = new Date(endTime);
+        const hours = Math.ceil((end - start) / (1000 * 60 * 60));
+        return (parkingLot.pricePerHour * hours).toFixed(2);
     };
 
     const handleReserve = () => {
+        if (!startTime || !endTime || !selectedSpot) return;
+        if (error) return;
+
         // Handle reservation logic
-        console.log("Reserving spot:", selectedSpot, "for", duration, "hours");
+        console.log("Reserving spot:", {
+            spot: selectedSpot,
+            startTime,
+            endTime,
+            total: calculateTotal(),
+        });
         onClose();
     };
+
+    const minDateTime = format(new Date(), "yyyy-MM-dd'T'HH:mm");
+    const maxDateTime = format(addHours(new Date(), 48), "yyyy-MM-dd'T'HH:mm");
 
     if (!parkingLot) return null;
 
@@ -74,76 +107,104 @@ export default function ReservationModal({ isOpen, onClose, parkingLot }) {
                                                 onSpotSelect={setSelectedSpot}
                                             />
                                         </div>
-                                        <div className="mt-6">
-                                            <label
-                                                htmlFor="duration"
-                                                className="block text-sm font-medium text-gray-700"
-                                            >
-                                                Duration (hours)
-                                            </label>
-                                            <select
-                                                id="duration"
-                                                value={duration}
-                                                onChange={(e) =>
-                                                    setDuration(
-                                                        Number(e.target.value)
-                                                    )
-                                                }
-                                                className="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-                                            >
-                                                {[1, 2, 3, 4, 5, 6, 7, 8].map(
-                                                    (hours) => (
-                                                        <option
-                                                            key={hours}
-                                                            value={hours}
-                                                        >
-                                                            {hours}{" "}
-                                                            {hours === 1
-                                                                ? "hour"
-                                                                : "hours"}
-                                                        </option>
-                                                    )
-                                                )}
-                                            </select>
-                                        </div>
-                                        {selectedSpot && (
-                                            <div className="mt-4 bg-gray-50 p-4 rounded-lg">
-                                                <h4 className="font-medium text-gray-900">
-                                                    Reservation Summary
-                                                </h4>
-                                                <p className="mt-2 text-sm text-gray-600">
-                                                    Spot #{selectedSpot.number}{" "}
-                                                    (
-                                                    {
-                                                        spotTypes[
-                                                            selectedSpot.type
-                                                        ].label
+                                        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                            <div>
+                                                <label
+                                                    htmlFor="start-time"
+                                                    className="block text-sm font-medium text-gray-700"
+                                                >
+                                                    Start Time
+                                                </label>
+                                                <input
+                                                    type="datetime-local"
+                                                    id="start-time"
+                                                    min={minDateTime}
+                                                    max={maxDateTime}
+                                                    value={startTime}
+                                                    onChange={(e) =>
+                                                        handleTimeChange(
+                                                            e.target.value,
+                                                            endTime
+                                                        )
                                                     }
-                                                    )
-                                                </p>
-                                                <p className="text-sm text-gray-600">
-                                                    Duration: {duration}{" "}
-                                                    {duration === 1
-                                                        ? "hour"
-                                                        : "hours"}
-                                                </p>
-                                                <p className="mt-2 text-lg font-semibold text-gray-900">
-                                                    Total: $
-                                                    {(
-                                                        parkingLot.pricePerHour *
-                                                        duration
-                                                    ).toFixed(2)}
-                                                </p>
+                                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                                />
                                             </div>
+                                            <div>
+                                                <label
+                                                    htmlFor="end-time"
+                                                    className="block text-sm font-medium text-gray-700"
+                                                >
+                                                    End Time
+                                                </label>
+                                                <input
+                                                    type="datetime-local"
+                                                    id="end-time"
+                                                    min={
+                                                        startTime || minDateTime
+                                                    }
+                                                    max={maxDateTime}
+                                                    value={endTime}
+                                                    onChange={(e) =>
+                                                        handleTimeChange(
+                                                            startTime,
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                                />
+                                            </div>
+                                        </div>
+                                        {error && (
+                                            <p className="mt-2 text-sm text-red-600">
+                                                {error}
+                                            </p>
                                         )}
+                                        {selectedSpot &&
+                                            startTime &&
+                                            endTime &&
+                                            !error && (
+                                                <div className="mt-4 bg-gray-50 p-4 rounded-lg">
+                                                    <h4 className="font-medium text-gray-900">
+                                                        Reservation Summary
+                                                    </h4>
+                                                    <p className="mt-2 text-sm text-gray-600">
+                                                        Spot #
+                                                        {selectedSpot.number}
+                                                    </p>
+                                                    <p className="text-sm text-gray-600">
+                                                        From:{" "}
+                                                        {format(
+                                                            new Date(startTime),
+                                                            "MMM d, yyyy h:mm a"
+                                                        )}
+                                                    </p>
+                                                    <p className="text-sm text-gray-600">
+                                                        To:{" "}
+                                                        {format(
+                                                            new Date(endTime),
+                                                            "MMM d, yyyy h:mm a"
+                                                        )}
+                                                    </p>
+                                                    <p className="mt-2 text-lg font-semibold text-gray-900">
+                                                        Total: $
+                                                        {calculateTotal()}
+                                                    </p>
+                                                </div>
+                                            )}
                                     </div>
                                 </div>
                                 <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
                                     <button
                                         type="button"
-                                        className="inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto"
+                                        className="inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
                                         onClick={handleReserve}
-                                        disabled={!selectedSpot}
+                                        disabled={
+                                            !selectedSpot ||
+                                            !startTime ||
+                                            !endTime ||
+                                            error
+                                        }
                                     >
                                         Confirm Reservation
                                     </button>
