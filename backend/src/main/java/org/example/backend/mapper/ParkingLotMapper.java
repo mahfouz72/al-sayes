@@ -7,13 +7,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class ParkingLotMapper {
 
-    // Converts a ParkingLot entity to a ParkingLotDTO
+    // Converts a ParkingLot entity to a ParkingLotDTO (Need to calculate capacity)
     public ParkingLotDTO toDTO(ParkingLot parkingLot) {
         return  ParkingLotDTO.builder()
                 .id(parkingLot.getId())
                 .name(parkingLot.getName())
                 .managedBy(parkingLot.getManagedBy())
-                .capacity(parkingLot.getCapacity())
                 .location(parkingLot.getLocation())
                 .timeLimit(parkingLot.getTimeLimit())
                 .notShowingUpPenalty(parkingLot.getNotShowingUpPenalty())
@@ -27,7 +26,6 @@ public class ParkingLotMapper {
         return new ParkingLot(parkingLotDTO.getId(),
                 parkingLotDTO.getName(),
                 parkingLotDTO.getManagedBy(),
-                parkingLotDTO.getCapacity(),
                 parkingLotDTO.getLocation(),
                 parkingLotDTO.getTimeLimit(),
                 parkingLotDTO.getAutomaticReleaseTime(),
