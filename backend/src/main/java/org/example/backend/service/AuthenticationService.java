@@ -98,4 +98,7 @@ public class AuthenticationService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication.getName();
     }
+    public Account getCurrentAccount() {
+        return accountDAO.getAccountByUsername(getCurrentUsername());
+    }
 }
