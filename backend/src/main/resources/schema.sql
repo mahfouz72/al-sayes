@@ -1,3 +1,13 @@
+CREATE TABLE IF NOT EXISTS Account (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    username varchar(45) NOT NULL,
+    email varchar(255) NOT NULL,
+    password varchar(255) NOT NULL,
+    role_name varchar(45) NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY (username)
+);
+
 CREATE TABLE IF NOT EXISTS ParkingLot (
     id bigint NOT NULL AUTO_INCREMENT,
     location varchar(1024) NOT NULL,
