@@ -1,14 +1,13 @@
 package org.example.backend.controller;
 
 
+import org.example.backend.dto.LoginResponseDTO;
 import org.example.backend.service.AuthenticationService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:5173")
 public class LoginController {
     private final AuthenticationService authenticationService;
 
@@ -17,7 +16,7 @@ public class LoginController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestParam String username,
+    public ResponseEntity<LoginResponseDTO> login(@RequestParam String username,
                                         @RequestParam String password) {
         return authenticationService.login(username, password);
     }

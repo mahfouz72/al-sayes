@@ -12,9 +12,11 @@ import java.util.Optional;
 public class DriverDAO implements DAO<Driver, Long> {
 
     private JdbcTemplate jdbcTemplate;
+    private AccountDAO accountDAO;
 
-    public DriverDAO(JdbcTemplate jdbcTemplate) {
+    public DriverDAO(JdbcTemplate jdbcTemplate, AccountDAO accountDAO) {
         this.jdbcTemplate = jdbcTemplate;
+        this.accountDAO = accountDAO;
     }
 
     @Override
@@ -24,11 +26,7 @@ public class DriverDAO implements DAO<Driver, Long> {
 
     @Override
     public void insert(Driver driver) {
-        Account account = driver.getAccount();
-        String AccountSql =
-                "INSERT INTO Account(username, email, password, role_name) VALUES(?,?,?,?)";
-        jdbcTemplate.update(AccountSql, account.getUsername(),
-                account.getEmail(), account.getPassword(), "ROLE_USER");
+        accountDAO.insert(driver.getAccount());
 
         String getAccountIdSql = "SELECT LAST_INSERT_ID()";
         Long accountId = jdbcTemplate.queryForObject(getAccountIdSql, Long.class);
