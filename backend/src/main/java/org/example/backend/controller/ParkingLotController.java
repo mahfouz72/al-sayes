@@ -1,5 +1,6 @@
 package org.example.backend.controller;
 
+import org.example.backend.dto.ParkingLotCard;
 import org.example.backend.dto.ParkingLotDTO;
 import org.example.backend.dto.ParkingLotDetails;
 import org.example.backend.dto.ParkingSpotDTO;
@@ -22,10 +23,19 @@ public class ParkingLotController {
     }
     @GetMapping("/get")
     public ResponseEntity<List<ParkingLotDetails>> listUserManagedLots() {
-        Long userId = 1L;
+        Long userId = 3L;
         // TODO: Get Current User ID (Needed ROLES: Manager/Admin)
         // TODO: If admin get all
         List<ParkingLotDetails> lots = this.parkingLotService.findAllParkingLotsByManager(userId);
+        if (lots.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(lots);
+    }
+
+    @GetMapping("/get/cards")
+    public ResponseEntity<List<ParkingLotCard>> listParkingLotsCards() {
+        List<ParkingLotCard> lots = this.parkingLotService.findAllParkingLotsCards();
         if (lots.isEmpty()) {
             return ResponseEntity.noContent().build();
         }

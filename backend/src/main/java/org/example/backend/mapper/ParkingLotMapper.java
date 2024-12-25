@@ -13,7 +13,6 @@ public class ParkingLotMapper {
                 .id(parkingLot.getId())
                 .name(parkingLot.getName())
                 .managedBy(parkingLot.getManagedBy())
-                .capacity(parkingLot.getCapacity())
                 .location(parkingLot.getLocation())
                 .timeLimit(parkingLot.getTimeLimit())
                 .notShowingUpPenalty(parkingLot.getNotShowingUpPenalty())
@@ -27,7 +26,6 @@ public class ParkingLotMapper {
         return new ParkingLot(parkingLotDTO.getId(),
                 parkingLotDTO.getName(),
                 parkingLotDTO.getManagedBy(),
-                parkingLotDTO.getCapacity(),
                 parkingLotDTO.getLocation(),
                 parkingLotDTO.getTimeLimit(),
                 parkingLotDTO.getAutomaticReleaseTime(),

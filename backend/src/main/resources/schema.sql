@@ -13,7 +13,6 @@ CREATE TABLE IF NOT EXISTS ParkingLot (
     name varchar(255) NOT NULL,
     managed_by bigint NOT NULL,
     location varchar(1024) NOT NULL,
-    capacity int NOT NULL,
     time_limit decimal NOT NULL,
     automatic_release_time decimal NOT NULL,
     not_showing_up_penalty decimal NOT NULL,
