@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
+
 public class ParkingLotDAO implements DAO<ParkingLot, Long> {
     private JdbcTemplate jdbcTemplate;
 
