@@ -7,7 +7,7 @@ export default function ManagerReservations() {
     const [reservations, setReservations] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedLot, setSelectedLot] = useState("all");
-    const { user } = useAuthStore();
+    const user = localStorage.getItem("username");
 
     const parkingLots = ["Downtown Parking", "Mall Parking"];
 
