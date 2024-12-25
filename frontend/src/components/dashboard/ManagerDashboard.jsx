@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
 import ParkingSpotGrid from '../parking/ParkingSpotGrid'
+import axios from 'axios'
 
+/*
 const mockParkingLots = [
   {
     id: 1,
@@ -32,22 +34,58 @@ const mockParkingLots = [
     }))
   }
 ]
+*/
 
 export default function ManagerDashboard() {
-  const [selectedLot, setSelectedLot] = useState(mockParkingLots[0])
+  const [parkingLots, setParkingLots] = useState([])
+  const [selectedLot, setSelectedLot] = useState(parkingLots[0])
+  const [selectedLotSpots, setSelectedLotSpots] = useState([])  // Store spots for selected lot
   const [showSpotGrid, setShowSpotGrid] = useState(false)
+  useEffect(() => {
+    // Fetch all parking lots when the page first renders
+    axios.get('http://localhost:8080/api/lots/get')
+      .then(response => {
+        setParkingLots(response.data)
+        setSelectedLot(response.data[0]) // Select the first lot by default
+        console.log("Selected lot: ", response.data[0]);
+      })
+      .catch(error => {
+        console.error('There was an error fetching the parking lots data:', error)
+      })
+  }, [])
+
+  // Fetch parking spots when selected lot changes
+  useEffect(() => {
+    if (selectedLot) {
+      axios.get(`http://localhost:8080/api/spots/${selectedLot.id}/get`)
+        .then(response => {
+          setSelectedLotSpots(response.data)
+        })
+        .catch(error => {
+          console.error('Error fetching parking spots:', error)
+        })
+    }
+  }, [selectedLot])
 
   const handleSpotUpdate = (spot) => {
     console.log('Updating spot status:', spot)
     // Update spot status logic here
   }
-
-  const data = mockParkingLots.map(lot => ({
+  
+  const data = parkingLots.map(lot => ({
     name: lot.name,
-    occupancy: lot.occupancy,
+    occupancy: lot.occupancyRate,
     revenue: lot.revenue,
-    violations: lot.violations
   }))
+
+  if (parkingLots === null) {
+    return <div>Loading...</div>;  // Show loading state while the data is being fetched
+  }
+  
+  if (parkingLots.length === 0) {
+    return <div>No parking lots available.</div>;  // Show message if the list is empty
+  }
+  
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -60,19 +98,19 @@ export default function ManagerDashboard() {
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold text-gray-900">Total Revenue</h3>
           <p className="mt-2 text-3xl font-bold text-blue-600">
-            ${mockParkingLots.reduce((sum, lot) => sum + lot.revenue, 0)}
+            ${parkingLots.reduce((sum, lot) => sum + lot.revenue, 0)}
           </p>
         </div>
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold text-gray-900">Average Occupancy</h3>
           <p className="mt-2 text-3xl font-bold text-green-600">
-            {Math.round(mockParkingLots.reduce((sum, lot) => sum + lot.occupancy, 0) / mockParkingLots.length)}%
+            {Math.round(parkingLots.reduce((sum, lot) => sum + lot.occupancyRate, 0) / parkingLots.length)}%
           </p>
         </div>
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold text-gray-900">Total Violations</h3>
           <p className="mt-2 text-3xl font-bold text-red-600">
-            {mockParkingLots.reduce((sum, lot) => sum + lot.violations, 0)}
+            ${parkingLots.reduce((sum, lot) => sum + lot.violations, 0)}
           </p>
         </div>
       </div>
@@ -100,10 +138,10 @@ export default function ManagerDashboard() {
             <h2 className="text-xl font-semibold text-gray-900">Parking Lots</h2>
             <select
               value={selectedLot.id}
-              onChange={(e) => setSelectedLot(mockParkingLots.find(lot => lot.id === Number(e.target.value)))}
+              onChange={(e) => setSelectedLot(parkingLots.find(lot => lot.id === Number(e.target.value)))}
               className="rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500"
             >
-              {mockParkingLots.map(lot => (
+              {parkingLots.map(lot => (
                 <option key={lot.id} value={lot.id}>{lot.name}</option>
               ))}
             </select>
@@ -117,7 +155,7 @@ export default function ManagerDashboard() {
               </div>
               <div className="bg-gray-50 rounded-lg p-4">
                 <h4 className="text-sm font-medium text-gray-500">Current Occupancy</h4>
-                <p className="mt-1 text-lg font-semibold">{selectedLot.occupancy}%</p>
+                <p className="mt-1 text-lg font-semibold">{selectedLot.occupancyRate}%</p>
               </div>
               <div className="bg-gray-50 rounded-lg p-4">
                 <h4 className="text-sm font-medium text-gray-500">Today's Revenue</h4>
@@ -136,7 +174,7 @@ export default function ManagerDashboard() {
               {showSpotGrid && (
                 <div className="mt-4">
                   <ParkingSpotGrid
-                    spots={selectedLot.spots}
+                    spots={selectedLotSpots}
                     onSpotSelect={handleSpotUpdate}
                     isManager={true}
                   />

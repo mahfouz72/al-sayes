@@ -1,9 +1,9 @@
 import { useState } from 'react'
 
 const spotTypes = {
-  REGULAR: { color: 'bg-blue-500', label: 'Regular' },
-  DISABLED: { color: 'bg-yellow-500', label: 'Disabled' },
-  EV: { color: 'bg-green-500', label: 'EV Charging' }
+  Regular: { color: 'bg-blue-500', label: 'Regular' },
+  Disabled: { color: 'bg-yellow-500', label: 'Disabled' },
+  'EV Charging': { color: 'bg-green-500', label: 'EV Charging' }
 }
 
 const spotStatuses = {
@@ -16,7 +16,7 @@ export default function ParkingSpotGrid({ spots = [], onSpotSelect, isManager = 
   const [selectedSpot, setSelectedSpot] = useState(null)
 
   const handleSpotClick = (spot) => {
-    if (spot.status === 'OCCUPIED' && !isManager) return
+    if (spot.currentStatus === 'OCCUPIED' && !isManager) return
     setSelectedSpot(spot.id === selectedSpot?.id ? null : spot)
     if (onSpotSelect) {
       onSpotSelect(spot)
@@ -41,15 +41,15 @@ export default function ParkingSpotGrid({ spots = [], onSpotSelect, isManager = 
             onClick={() => handleSpotClick(spot)}
             className={`
               ${spotTypes[spot.type]?.color || 'bg-gray-500'}
-              ${spotStatuses[spot.status]?.color || ''}
+              ${spotStatuses[spot.currentStatus]?.color || ''}
               p-4 rounded-lg text-white
               ${selectedSpot?.id === spot.id ? 'ring-4 ring-indigo-500' : ''}
               transition-all duration-200
-              ${spot.status === 'OCCUPIED' && !isManager ? 'cursor-not-allowed' : 'hover:scale-105'}
+              ${spot.currentStatus === 'OCCUPIED' && !isManager ? 'cursor-not-allowed' : 'hover:scale-105'}
             `}
           >
-            <div className="text-sm font-bold">{spot.number}</div>
-            <div className="text-xs">{spotStatuses[spot.status]?.label || spot.status}</div>
+            <div className="text-sm font-bold">S{spot.id}</div>
+            <div className="text-xs">{spotStatuses[spot.currentStatus]?.label || spot.currentStatus}</div>
           </button>
         ))}
       </div>
