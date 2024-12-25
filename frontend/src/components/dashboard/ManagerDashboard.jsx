@@ -45,11 +45,13 @@ export default function ManagerDashboard() {
   const [showSpotGrid, setShowSpotGrid] = useState(false)
   useEffect(() => {
     // Fetch all parking lots when the page first renders
-    axios.get('http://localhost:8080/api/lots/get')
+    LotAPI.getParkingLots()
       .then(response => {
-        setParkingLots(response.data)
-        setSelectedLot(response.data[0]) // Select the first lot by default
-        console.log("Selected lot: ", response.data[0]);
+        setParkingLots(response)
+        if (response.length>0) {
+          setSelectedLot(response[0]) // Select the first lot by default
+          console.log("Selected lot: ", response[0]);
+        }
       })
       .catch(error => {
         console.error('There was an error fetching the parking lots data:', error)
@@ -59,9 +61,9 @@ export default function ManagerDashboard() {
   // Fetch parking spots when selected lot changes
   useEffect(() => {
     if (selectedLot) {
-      axios.get(`http://localhost:8080/api/spots/${selectedLot.id}/get`)
+      SpotAPI.getParkingSpots(selectedLot.id)
         .then(response => {
-          setSelectedLotSpots(response.data)
+          setSelectedLotSpots(response)
         })
         .catch(error => {
           console.error('Error fetching parking spots:', error)
@@ -100,19 +102,19 @@ export default function ManagerDashboard() {
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold text-gray-900">Total Revenue</h3>
           <p className="mt-2 text-3xl font-bold text-blue-600">
-            ${parkingLots.reduce((sum, lot) => sum + lot.revenue, 0)}
+            ${(parkingLots.reduce((sum, lot) => sum + lot.revenue, 0).toFixed(2))}
           </p>
         </div>
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold text-gray-900">Average Occupancy</h3>
           <p className="mt-2 text-3xl font-bold text-green-600">
-            {Math.round(parkingLots.reduce((sum, lot) => sum + lot.occupancyRate, 0) / parkingLots.length)}%
+            {(Math.round(parkingLots.reduce((sum, lot) => sum + lot.occupancyRate, 0) / parkingLots.length)).toFixed(2)}%
           </p>
         </div>
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold text-gray-900">Total Violations</h3>
           <p className="mt-2 text-3xl font-bold text-red-600">
-            ${parkingLots.reduce((sum, lot) => sum + lot.violations, 0)}
+            ${(parkingLots.reduce((sum, lot) => sum + lot.violations, 0)).toFixed(2)}
           </p>
         </div>
       </div>
@@ -157,11 +159,11 @@ export default function ManagerDashboard() {
               </div>
               <div className="bg-gray-50 rounded-lg p-4">
                 <h4 className="text-sm font-medium text-gray-500">Current Occupancy</h4>
-                <p className="mt-1 text-lg font-semibold">{selectedLot.occupancyRate}%</p>
+                <p className="mt-1 text-lg font-semibold">{selectedLot.occupancyRate.toFixed(2)}%</p>
               </div>
               <div className="bg-gray-50 rounded-lg p-4">
-                <h4 className="text-sm font-medium text-gray-500">Today's Revenue</h4>
-                <p className="mt-1 text-lg font-semibold">${selectedLot.revenue}</p>
+                <h4 className="text-sm font-medium text-gray-500"> Revenue</h4>
+                <p className="mt-1 text-lg font-semibold">${selectedLot.revenue.toFixed(2)}</p>
               </div>
             </div>
 
