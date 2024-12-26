@@ -13,10 +13,12 @@ CREATE TABLE IF NOT EXISTS ParkingLot (
     name varchar(255) NOT NULL,
     managed_by bigint NOT NULL,
     location varchar(1024) NOT NULL,
-    time_limit decimal NOT NULL,
-    automatic_release_time decimal NOT NULL,
-    not_showing_up_penalty decimal NOT NULL,
-    over_time_scale decimal NOT NULL,
+    latitude decimal(10, 6) NOT NULL,
+    longitude decimal(10, 6) NOT NULL,
+    time_limit decimal(10, 6) NOT NULL,
+    automatic_release_time decimal(10, 6) NOT NULL,
+    not_showing_up_penalty decimal(10, 6) NOT NULL,
+    over_time_scale decimal(10, 6) NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (managed_by) REFERENCES Account(id)
 );
@@ -24,7 +26,7 @@ CREATE TABLE IF NOT EXISTS ParkingLot (
 CREATE TABLE IF NOT EXISTS ParkingSpot (
     id bigint NOT NULL,
     lot_id bigint NOT NULL,
-    cost decimal NOT NULL,
+    cost decimal(10, 6) NOT NULL,
     current_status varchar(255) NOT NULL,
     type varchar(255) NOT NULL,
     PRIMARY KEY (id, lot_id)
@@ -36,11 +38,13 @@ CREATE TABLE IF NOT EXISTS Reservation (
     lot_id bigint NOT NULL,
     start_time timestamp NOT NULL,
     end_time timestamp NOT NULL,
-    price decimal NOT NULL,
+    price decimal(10, 6) NOT NULL,
     status varchar(255) NOT NULL,
-    violation_duration decimal NOT NULL,
-    penalty decimal NOT NULL,
-    PRIMARY KEY (driver_id, spot_id, lot_id, start_time)
+    violation_duration decimal(10, 6) NOT NULL,
+    penalty decimal(10, 6) NOT NULL,
+    PRIMARY KEY (driver_id, spot_id, lot_id, start_time),
+    FOREIGN KEY (driver_id) REFERENCES Account(id) ON DELETE CASCADE,
+    FOREIGN KEY (spot_id, lot_id) REFERENCES ParkingSpot(id, lot_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Driver (

@@ -8,11 +8,12 @@ import org.springframework.stereotype.Component;
 public class ParkingLotMapper {
     // Converts a ParkingLotDTO to a ParkingLot entity
     public ParkingLot fromDTO(ParkingLotDTO parkingLotDTO, Long managerId) {
-
         return ParkingLot.builder()
                 .name(parkingLotDTO.getName())
                 .managedBy(managerId)
                 .location(parkingLotDTO.getLocation())
+                .latitude(parkingLotDTO.getLatitude())
+                .longitude(parkingLotDTO.getLongitude())
                 .timeLimit(parkingLotDTO.getTimeLimit())
                 .notShowingUpPenalty(parkingLotDTO.getNotShowingUpPenalty())
                 .automaticReleaseTime(parkingLotDTO.getAutomaticReleaseTime())

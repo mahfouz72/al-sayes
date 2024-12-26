@@ -1,50 +1,9 @@
 import { useState, useEffect } from "react";
-import { MapPinIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import ParkingLotCard from "../parking/ParkingLotCard";
 import ReservationModal from "../parking/ReservationModal";
+import ParkingLotsMap from "../map/ParkingLotsMap";
 import axios from "axios";
-import { set } from "date-fns";
-
-// const mockParkingLots = [
-//   {
-//     id: 1,
-//     name: 'Downtown Parking',
-//     location: '123 Main St, Downtown',
-//     available: 45,
-//     total: 100,
-//     pricePerHour: 5,
-//     spotTypes: {
-//       regular: 80,
-//       disabled: 10,
-//       ev: 10
-//     },
-//     spots: Array(100).fill(null).map((_, i) => ({
-//       id: i + 1,
-//       number: `A${i + 1}`,
-//       type: i < 80 ? 'REGULAR' : i < 90 ? 'DISABLED' : 'EV',
-//       status: Math.random() > 0.5 ? 'AVAILABLE' : 'OCCUPIED'
-//     }))
-//   },
-//   {
-//     id: 2,
-//     name: 'Mall Parking',
-//     location: '456 Shopping Ave',
-//     available: 20,
-//     total: 150,
-//     pricePerHour: 3,
-//     spotTypes: {
-//       regular: 120,
-//       disabled: 20,
-//       ev: 10
-//     },
-//     spots: Array(150).fill(null).map((_, i) => ({
-//       id: i + 1,
-//       number: `B${i + 1}`,
-//       type: i < 120 ? 'REGULAR' : i < 140 ? 'DISABLED' : 'EV',
-//       status: Math.random() > 0.5 ? 'AVAILABLE' : 'OCCUPIED'
-//     }))
-//   }
-// ]
 
 export default function DriverDashboard() {
     const [searchLocation, setSearchLocation] = useState("");
@@ -52,6 +11,7 @@ export default function DriverDashboard() {
     const [isReservationModalOpen, setIsReservationModalOpen] = useState(false);
     const [parkingLots, setParkingLots] = useState([]);
     const [selectedLotSpots, setSelectedLotSpots] = useState([]);
+
     const fetchParkingLots = async () => {
         try {
             const token = localStorage.getItem("token");
@@ -63,18 +23,19 @@ export default function DriverDashboard() {
                     },
                 }
             );
-
             setParkingLots(response.data);
         } catch (error) {
             console.error("Error fetching parking lots:", error);
         }
     };
+
     useEffect(() => {
         fetchParkingLots();
     }, []);
 
     const onCloseReservationModal = () => {
         setIsReservationModalOpen(false);
+        setSelectedLot(null);
         fetchParkingLots();
     };
 
@@ -97,7 +58,6 @@ export default function DriverDashboard() {
                     }
                 );
                 setSelectedLotSpots(response.data);
-                console.log(response.data);
             } catch (error) {
                 console.error("Error fetching parking spots:", error);
             }
@@ -118,7 +78,7 @@ export default function DriverDashboard() {
                 </p>
             </div>
 
-            <div className="mb-8">
+            {/* <div className="mb-8">
                 <div className="max-w-xl relative">
                     <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-3 text-gray-400" />
                     <input
@@ -129,6 +89,13 @@ export default function DriverDashboard() {
                         onChange={(e) => setSearchLocation(e.target.value)}
                     />
                 </div>
+            </div> */}
+
+            <div className="mb-8">
+                <ParkingLotsMap
+                    parkingLots={parkingLots}
+                    onLotSelect={handleReservation}
+                />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
