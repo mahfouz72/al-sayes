@@ -1,0 +1,31 @@
+/* Map container styles */
+.map-container {
+    position: relative;
+    z-index: 0;
+}
+
+/* Leaflet specific overrides */
+.leaflet-popup {
+    z-index: 1;
+}
+
+.leaflet-popup-content-wrapper {
+    padding: 0;
+}
+
+.leaflet-popup-content {
+    margin: 0;
+    padding: 1rem;
+}
+
+/* Custom marker styles */
+.parking-marker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    background-color: rgb(37, 99, 235);
+    border-radius: 9999px;
+    color: white;
+}

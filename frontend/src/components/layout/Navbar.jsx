@@ -58,9 +58,14 @@ export default function Navbar() {
                                     to="/dashboard"
                                     className="flex flex-shrink-0 items-center"
                                 >
-                                    <span className="text-white font-bold">
+                                    <img
+                                        src="/logo.png"
+                                        alt="logo"
+                                        className="h-12"
+                                    />
+                                    {/* <span className="text-white font-bold">
                                         Al-sayes
-                                    </span>
+                                    </span> */}
                                 </Link>
                                 <div className="hidden sm:ml-6 sm:block">
                                     <div className="flex space-x-4">
