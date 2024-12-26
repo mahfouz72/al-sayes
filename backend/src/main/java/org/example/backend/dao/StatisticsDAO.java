@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class StatisticsDAO {
@@ -36,5 +37,37 @@ public class StatisticsDAO {
         return jdbcTemplate.queryForObject(sql, Integer.class);
     }
 
+    public Integer getTotalRevenue() {
+        String sql = "SELECT SUM(price) FROM Reservation WHERE status = 'PAID'";
+        return jdbcTemplate.queryForObject(sql, Integer.class);
+    }
+
+    public Integer getTotalViolations() {
+        String sql = "SELECT COUNT(*) FROM Reservation WHERE status = 'VIOLATED'";
+        return jdbcTemplate.queryForObject(sql, Integer.class);
+    }
+
+    public Integer getMonthlyRevenue() {
+        String sql = "SELECT SUM(price) FROM Reservation WHERE MONTH(start_time) = MONTH(CURRENT_DATE())";
+        return jdbcTemplate.queryForObject(sql, Integer.class);
+    }
+    public Integer getMonthlyRevenue(int month) {
+        String sql = "SELECT SUM(price) FROM Reservation WHERE MONTH(start_time) = ?";
+        return jdbcTemplate.queryForObject(sql, Integer.class, month);
+    }
+
+    public List<Map<String, Object>> getParkingSlotsWithRevenueAndOccupancy(int limit) {
+        String sql = "SELECT name, SUM(price) AS total_revenue, SUM(0) AS occupancy_rate " +
+                     "FROM ParkingLot JOIN Reservation ON ParkingLot.id = lot_id " +
+                     "GROUP BY lot_id ORDER BY total_revenue DESC LIMIT ?";
+        return jdbcTemplate.queryForList(sql, limit);
+    }
+
+    public List<Map<String, Object>> getTopUsersWithMostReservations(int limit) {
+        String sql = "SELECT username, COUNT(*) as total_reservations, SUM(price) as total_revenue, 0 " +
+                     "FROM Reservation JOIN Account ON driver_id = id " +
+                     "GROUP BY driver_id ORDER BY total_reservations DESC LIMIT ?";
+        return jdbcTemplate.queryForList(sql, limit);
+    }
 
 }

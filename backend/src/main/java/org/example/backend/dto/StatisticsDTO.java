@@ -11,5 +11,8 @@ public class StatisticsDTO {
 
     Integer totalUsers;
     Integer totalParkingLots;
+    Integer totalRevenue;
+    Integer totalViolations;
+    Integer monthlyRevenue;
 
 }

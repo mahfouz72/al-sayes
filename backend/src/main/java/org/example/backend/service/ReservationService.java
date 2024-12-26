@@ -94,7 +94,7 @@ public class ReservationService {
                 Optional<ParkingLot> lot = parkingLotDAO.getByPK(res.getLotId());
                 double pricePerHour = spot.map(ParkingSpot::getCost).orElse(0.0)
                         * lot.map(ParkingLot::getOverTimeScale).orElse(0.0);
-                double penalty = extraTime.toSeconds() / 3600.0 * pricePerHour;
+                double penalty = extraTime.getSeconds() / 3600.0 * pricePerHour;
                 reservationDAO.updateByKeys(res.getDriverId(), res.getSpotId(), res.getLotId(), res.getStartTime(),
                         new Reservation(res.getDriverId(), res.getLotId(), res.getSpotId(), res.getStartTime(),
                                 Timestamp.valueOf(now), res.getPrice() + penalty, ReservationStatus.ONGOING,

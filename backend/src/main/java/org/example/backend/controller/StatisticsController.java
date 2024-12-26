@@ -32,5 +32,21 @@ public class StatisticsController {
         List<Account> users = statisticsService.getAllUsers(page, size);
         return ResponseEntity.ok(users);
     }
+
+    @PostMapping("/top-parking-lots")
+    public ResponseEntity<?> getParkingSlotsWithRevenueAndOccupancy(
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+        List<?> parkingSlots = statisticsService.getParkingSlotsWithRevenueAndOccupancy(limit);
+        return ResponseEntity.ok(parkingSlots);
+    }
+
+    @PostMapping("/top-users")
+    public ResponseEntity<?> getTopUsersWithMostReservations(
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+        List<?> topUsers = statisticsService.getTopUsersWithMostReservations(limit);
+        return ResponseEntity.ok(topUsers);
+    }
 }
 
