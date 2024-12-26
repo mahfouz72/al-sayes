@@ -59,7 +59,7 @@ export default function Navbar() {
                                     className="flex flex-shrink-0 items-center"
                                 >
                                     <span className="text-white font-bold">
-                                        Smart Parking
+                                        Al-sayes
                                     </span>
                                 </Link>
                                 <div className="hidden sm:ml-6 sm:block">

@@ -35,9 +35,10 @@ public class ParkingSpotDAO implements DAO<ParkingSpot, Pair<Long, Long>> {
 
     @Override
     public void insert(ParkingSpot parkingSpot) {
-        String sql = "INSERT TO TABLE ParkingSpot(lot_id, cost, " +
-                "current_status, type) VALUES(?,?,?,?)";
-        jdbcTemplate.update(sql, parkingSpot.getLotId(), parkingSpot.getCost(),
+        String sql = "INSERT INTO ParkingSpot(id, lot_id, cost, " +
+                     "current_status, type) VALUES(?,?,?,?,?)";
+        jdbcTemplate.update(sql, parkingSpot.getId(),
+                parkingSpot.getLotId(), parkingSpot.getCost(),
                 parkingSpot.getCurrentStatus(), parkingSpot.getType());
     }
 

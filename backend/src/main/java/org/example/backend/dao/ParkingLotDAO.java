@@ -7,8 +7,12 @@ import org.example.backend.entity.ParkingSpot;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -42,13 +46,13 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
 
     @Override
     public void insert(ParkingLot parkingLot) {
-    String sql = "INSERT INTO ParkingLot(name, managed_by, location, " +
-                 "time_limit, automatic_release_time, not_showing_up_penalty, over_time_scale) " +
-                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    jdbcTemplate.update(sql, parkingLot.getName(), parkingLot.getManagedBy(),
-            parkingLot.getLocation(), parkingLot.getTimeLimit(),
-            parkingLot.getAutomaticReleaseTime(), parkingLot.getNotShowingUpPenalty(),
-            parkingLot.getOverTimeScale());
+        String sql = "INSERT INTO ParkingLot(name, managed_by, location, " +
+                     "time_limit, automatic_release_time, not_showing_up_penalty, over_time_scale) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        jdbcTemplate.update(sql, parkingLot.getName(), parkingLot.getManagedBy(),
+                parkingLot.getLocation(), parkingLot.getTimeLimit(),
+                parkingLot.getAutomaticReleaseTime(), parkingLot.getNotShowingUpPenalty(),
+                parkingLot.getOverTimeScale());
     }
 
     @Override
@@ -66,8 +70,8 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
     @Override
     public void update(Long id, ParkingLot parkingLot) {
         String sql = "UPDATE ParkingLot SET location = ?, time_limit = ?, " +
-                "automatic_release_time = ?, not_showing_up_penalty = ?, " +
-                "over_time_scale = ? WHERE id = ?";
+                     "automatic_release_time = ?, not_showing_up_penalty = ?, " +
+                     "over_time_scale = ? WHERE id = ?";
         jdbcTemplate.update(sql, parkingLot.getLocation(),
                 parkingLot.getTimeLimit(), parkingLot.getAutomaticReleaseTime(),
                 parkingLot.getNotShowingUpPenalty(), parkingLot.getOverTimeScale(),
@@ -81,23 +85,23 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
 
     public List<ParkingLotDetails> getLotsDetailsByManagerId(long managerId) {
         String sql = """
-            SELECT 
+            SELECT
                 p.id AS lot_id,
                 p.name AS lot_name,
                 p.location,
-                COUNT(CASE WHEN ps.current_status = 'OCCUPIED' THEN 1 END) AS occupied_count,
-                COUNT(ps.id) AS capacity,
+                COUNT(DISTINCT ps.id) AS capacity,
+                COUNT(DISTINCT CASE WHEN ps.current_status = 'OCCUPIED' THEN ps.id END) AS occupied_count,
                 SUM(CASE WHEN r.status IN ('ONGOING', 'FULFILLED', 'EXPIRED', 'CONFIRMED') THEN r.price ELSE 0 END) AS total_revenue,
                 SUM(CASE WHEN r.violation_duration IS NOT NULL THEN r.penalty * r.violation_duration ELSE 0 END) AS total_violations
-            FROM 
+            FROM
                 ParkingLot p
-            LEFT JOIN 
+            LEFT JOIN
                 ParkingSpot ps ON p.id = ps.lot_id
             LEFT JOIN
-                Reservation r ON ps.id = r.spot_id
-            WHERE 
+                Reservation r ON ps.id = r.spot_id AND p.id = r.lot_id
+            WHERE
                 p.managed_by = ?
-            GROUP BY 
+            GROUP BY
                 p.id, p.name, p.location
         """;
 
@@ -106,13 +110,37 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
             details.setId(rs.getLong("lot_id"));
             details.setName(rs.getString("lot_name"));
             details.setLocation(rs.getString("location"));
+            details.setCapacity(rs.getInt("capacity"));
             details.setRevenue(rs.getDouble("total_revenue"));
-            details.setOccupancyRate(rs.getInt("occupied_count") / (double) rs.getInt("capacity"));
+            details.setOccupancyRate(rs.getInt("occupied_count") * 100.0 / details.getCapacity());
             details.setViolations(rs.getDouble("total_violations"));
             return details;
         }, managerId);
     }
 
+    public Long insertAndReturnKey(ParkingLot parkingLot) {
+        String sql = "INSERT INTO ParkingLot(name, managed_by, location, " +
+             "time_limit, automatic_release_time, not_showing_up_penalty, over_time_scale) " +
+             "VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+        // Prepare the KeyHolder to capture the generated key
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        // Use the PreparedStatementCreator to capture the generated key
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1, parkingLot.getName());
+            ps.setLong(2, parkingLot.getManagedBy());
+            ps.setString(3, parkingLot.getLocation());
+            ps.setDouble(4, parkingLot.getTimeLimit());
+            ps.setDouble(5, parkingLot.getAutomaticReleaseTime());
+            ps.setDouble(6, parkingLot.getNotShowingUpPenalty());
+            ps.setDouble(7, parkingLot.getOverTimeScale());
+            return ps;
+        }, keyHolder);
+        Number key = keyHolder.getKey();
+        return key != null ? key.longValue() : null;
+    }
     public List<ParkingLotCard> getLotsCards() {
         String sql = """
             SELECT 

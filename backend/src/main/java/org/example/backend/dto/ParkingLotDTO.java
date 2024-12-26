@@ -1,5 +1,9 @@
 package org.example.backend.dto;
 
+import java.util.Map;
+
+import org.example.backend.enums.ParkingType;
+
 import lombok.*;
 
 @Getter
@@ -8,9 +12,8 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class ParkingLotDTO {
-    private Long id;
     private String name;
-    private Long managedBy;
+
     private String location;
 
     // Longest possible reservation duration
@@ -24,4 +27,6 @@ public class ParkingLotDTO {
 
     // Penalty for staying parked over reserved time (scale per extra hour)
     private double overTimeScale;
+
+    private Map<ParkingType, ParkingTypeDetails> parkingTypes;
 }
