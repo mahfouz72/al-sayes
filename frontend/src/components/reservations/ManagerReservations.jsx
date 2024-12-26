@@ -7,17 +7,19 @@ export default function ManagerReservations() {
     const [isLoading, setIsLoading] = useState(true);
     const [selectedLot, setSelectedLot] = useState("all");
     const user = localStorage.getItem("username");
-
-    const parkingLots = ["Downtown Parking", "Mall Parking"];
+    const [parkingLots, setParkingLots] = useState([]);
 
     useEffect(() => {
         const fetchReservations = async () => {
             try {
                 const token = localStorage.getItem("token");
                 const headers = {
-                    'Authorization': `Bearer ${token}`,
+                    Authorization: `Bearer ${token}`,
                 };
-                const response = await axios.get("http://localhost:8080/lot-manager/reservations", { headers });
+                const response = await axios.get(
+                    "http://localhost:8080/lot-manager/reservations",
+                    { headers }
+                );
                 const data = response.data;
 
                 const reservationsWithId = data.map((reservation, index) => ({
@@ -25,10 +27,16 @@ export default function ManagerReservations() {
                     ...reservation,
                 }));
 
+                const lots = new Set();
+                reservationsWithId.forEach((r) => lots.add(r.parkingLot));
+                setParkingLots([...lots]);
+
                 const filteredReservations =
                     selectedLot === "all"
                         ? reservationsWithId
-                        : reservationsWithId.filter((r) => r.parkingLot === selectedLot);
+                        : reservationsWithId.filter(
+                              (r) => r.parkingLot === selectedLot
+                          );
 
                 setReservations(filteredReservations);
             } catch (error) {

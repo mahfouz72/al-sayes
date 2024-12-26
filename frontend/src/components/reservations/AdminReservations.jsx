@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
 import ReservationList from "./ReservationList";
 import axios from "axios";
+import { set } from "date-fns";
 
 export default function AdminReservations() {
     const [reservations, setReservations] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [parkingLots, setParkingLots] = useState([]);
+    const [statuses, setStatuses] = useState([]);
     const [filters, setFilters] = useState({
         parkingLot: "all",
         status: "all",
@@ -12,25 +15,33 @@ export default function AdminReservations() {
     });
     const user = localStorage.getItem("username");
 
-    const parkingLots = ["Downtown Parking", "Mall Parking", "Airport Parking"];
-    const statuses = ["Active", "Completed", "Cancelled"];
-
     useEffect(() => {
         // Simulate API call
         const fetchReservations = async () => {
             try {
-
                 const token = localStorage.getItem("token");
                 const headers = {
-                    'Authorization': `Bearer ${token}`,
+                    Authorization: `Bearer ${token}`,
                 };
-                const response = await axios.get("http://localhost:8080/admin/reservations", { headers });
+                const response = await axios.get(
+                    "http://localhost:8080/admin/reservations",
+                    { headers }
+                );
+
                 const data = response.data;
 
                 const reservationsWithId = data.map((reservation, index) => ({
                     id: index + 1,
                     ...reservation,
                 }));
+                const lots = new Set();
+                const statuses = new Set();
+                reservationsWithId.forEach((r) => {
+                    lots.add(r.parkingLot);
+                    statuses.add(r.status);
+                });
+                setParkingLots([...lots]);
+                setStatuses([...statuses]);
 
                 let filteredReservations = [...reservationsWithId];
 
@@ -46,6 +57,36 @@ export default function AdminReservations() {
                             r.status.toLowerCase() ===
                             filters.status.toLowerCase()
                     );
+                }
+
+                if (filters.dateRange !== "all") {
+                    // Filter by date range
+                    const now = new Date();
+                    let start = new Date();
+                    let end = new Date();
+                    if (filters.dateRange === "today") {
+                        start = new Date(
+                            now.getFullYear(),
+                            now.getMonth(),
+                            now.getDate()
+                        );
+                    }
+                    if (filters.dateRange === "week") {
+                        start = new Date(
+                            now.getFullYear(),
+                            now.getMonth(),
+                            now.getDate() - now.getDay()
+                        );
+                    }
+                    if (filters.dateRange === "month") {
+                        start = new Date(now.getFullYear(), now.getMonth(), 1);
+                    }
+                    filteredReservations = filteredReservations.filter((r) => {
+                        const reservationDate = new Date(r.startTime);
+                        return (
+                            reservationDate >= start && reservationDate <= end
+                        );
+                    });
                 }
 
                 setReservations(filteredReservations);
