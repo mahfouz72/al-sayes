@@ -10,6 +10,8 @@ import lombok.*;
 public class StatisticsDTO {
 
     Integer totalUsers;
+    Integer totalManagers;
+    Integer totalDrivers;
     Integer totalParkingLots;
     Integer totalRevenue;
     Integer totalViolations;

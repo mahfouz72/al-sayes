@@ -1,6 +1,7 @@
 package org.example.backend.controller;
 
 import org.example.backend.dto.StatisticsDTO;
+import org.example.backend.dto.UserDetailsDTO;
 import org.example.backend.entity.Account;
 import org.example.backend.service.StatisticsService;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ public class StatisticsController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        List<Account> users = statisticsService.getAllUsers(page, size);
+        List<UserDetailsDTO> users = statisticsService.getAllUsers(page, size);
         return ResponseEntity.ok(users);
     }
 
@@ -47,6 +48,22 @@ public class StatisticsController {
     ) {
         List<?> topUsers = statisticsService.getTopUsersWithMostReservations(limit);
         return ResponseEntity.ok(topUsers);
+    }
+
+    @PostMapping("/daily-revenue")
+    public ResponseEntity<?> getDailyRevenue(
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+        List<?> dailyRevenue = statisticsService.getDailyRevenue(limit);
+        return ResponseEntity.ok(dailyRevenue);
+    }
+
+    @PostMapping("/daily-reserved-spots")
+    public ResponseEntity<?> getDailyReservedSpots(
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+        List<?> dailyReservedSpots = statisticsService.getDailyReservedSpots(limit);
+        return ResponseEntity.ok(dailyReservedSpots);
     }
 }
 
