@@ -1,5 +1,6 @@
 package org.example.backend.dao;
 
+import org.example.backend.dto.ReservationDetailsDTO;
 import org.example.backend.entity.Reservation;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -92,5 +93,75 @@ public class ReservationDAO implements DAO<Reservation, ReservationKey> {
         String sql = "SELECT * FROM Reservation WHERE lot_id = ? AND spot_id = ? AND ((start_time <= ? AND ? < end_time) OR (start_time < ? AND ? <= end_time)) AND status != ?";
         List<Reservation> reservations = jdbcTemplate.query(sql, rowMapper, lotId, spotId, startTime, startTime, endTime, endTime, ReservationStatus.CANCELLED.name());
         return reservations.isEmpty();
+    }
+
+    public List<ReservationDetailsDTO> getReservationsByLotManagerID(Long lotManagerId) {
+        String sql = """
+                   SELECT
+                   	a.username,
+                       a.email,
+                       p.name,
+                       CONCAT('S', e.spot_id) AS spot_id,
+                       e.start_time,
+                   	ROUND(
+                   			TIMESTAMPDIFF(HOUR, e.start_time, e.end_time) +
+                   			(TIMESTAMPDIFF(MINUTE, e.start_time, e.end_time) % 60) / 60.0,\s
+                   			1) AS durations,
+                       e.status,\s
+                       e.price
+                   FROM reservation e
+                   JOIN parkinglot p
+                   ON e.lot_id = p.id
+                   JOIN account a
+                   ON a.id = e.driver_id
+                   WHERE p.managed_by = ?
+                """;
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            ReservationDetailsDTO reservationDetailsDTO = new ReservationDetailsDTO();
+            reservationDetailsDTO.setDriverName(rs.getString("username"));
+            reservationDetailsDTO.setDriverEmail(rs.getString("email"));
+            reservationDetailsDTO.setParkingLot(rs.getString("name"));
+            reservationDetailsDTO.setSpotNumber(rs.getString("spot_id"));
+            reservationDetailsDTO.setStartTime(rs.getTimestamp("start_time").toString());
+            reservationDetailsDTO.setDuration(rs.getDouble("durations"));
+            reservationDetailsDTO.setStatus(rs.getString("status"));
+            reservationDetailsDTO.setTotal(rs.getDouble("price"));
+            return reservationDetailsDTO;
+        }, lotManagerId);
+
+    }
+
+    public List<ReservationDetailsDTO> getAllReservations() {
+         String sql = """
+                   SELECT
+                   	a.username,
+                       a.email,
+                       p.name,
+                       CONCAT('S', e.spot_id) AS spot_id,
+                       e.start_time,
+                   	ROUND(
+                   			TIMESTAMPDIFF(HOUR, e.start_time, e.end_time) +
+                   			(TIMESTAMPDIFF(MINUTE, e.start_time, e.end_time) % 60) / 60.0,\s
+                   			1) AS durations,
+                       e.status,\s
+                       e.price
+                   FROM reservation e
+                   JOIN parkinglot p
+                   ON e.lot_id = p.id
+                   JOIN account a
+                   ON a.id = e.driver_id
+                """;
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            ReservationDetailsDTO reservationDetailsDTO = new ReservationDetailsDTO();
+            reservationDetailsDTO.setDriverName(rs.getString("username"));
+            reservationDetailsDTO.setDriverEmail(rs.getString("email"));
+            reservationDetailsDTO.setParkingLot(rs.getString("name"));
+            reservationDetailsDTO.setSpotNumber(rs.getString("spot_id"));
+            reservationDetailsDTO.setStartTime(rs.getTimestamp("start_time").toString());
+            reservationDetailsDTO.setDuration(rs.getDouble("durations"));
+            reservationDetailsDTO.setStatus(rs.getString("status"));
+            reservationDetailsDTO.setTotal(rs.getDouble("price"));
+            return reservationDetailsDTO;
+        });
     }
 }

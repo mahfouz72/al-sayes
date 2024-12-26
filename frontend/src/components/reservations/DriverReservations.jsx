@@ -1,28 +1,6 @@
-import { useState, useEffect } from "react";
+import {useEffect, useState} from "react";
 import ReservationList from "./ReservationList";
-import useAuthStore from "../../store/authStore";
-
-// Mock data - replace with actual API calls
-const mockDriverReservations = [
-    {
-        id: 1,
-        parkingLot: "Downtown Parking",
-        spotNumber: "A12",
-        startTime: "2024-03-15T10:00:00",
-        duration: 2,
-        status: "Active",
-        total: 10.0,
-    },
-    {
-        id: 2,
-        parkingLot: "Mall Parking",
-        spotNumber: "B15",
-        startTime: "2024-03-14T14:00:00",
-        duration: 3,
-        status: "Completed",
-        total: 15.0,
-    },
-];
+import axios from "axios";
 
 export default function DriverReservations() {
     const [reservations, setReservations] = useState([]);
@@ -30,19 +8,27 @@ export default function DriverReservations() {
     const user = localStorage.getItem("username");
 
     useEffect(() => {
-        // Simulate API call
         const fetchReservations = async () => {
             try {
-                // Replace with actual API call
-                await new Promise((resolve) => setTimeout(resolve, 1000));
-                setReservations(mockDriverReservations);
+                const token = localStorage.getItem("token");
+                const headers = {
+                    'Authorization': `Bearer ${token}`,
+                };
+                const response = await axios.get("http://localhost:8080/drivers/reservations", { headers });
+                const data = response.data;
+
+                const reservationsWithId = data.map((reservation, index) => ({
+                    ...reservation,
+                    id: index + 1,
+                }));
+
+                setReservations(reservationsWithId);
             } catch (error) {
                 console.error("Error fetching reservations:", error);
             } finally {
                 setIsLoading(false);
             }
         };
-
         fetchReservations();
     }, [user.id]);
 

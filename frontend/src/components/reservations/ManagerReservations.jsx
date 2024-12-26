@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
+import axios from "axios";
 import ReservationList from "./ReservationList";
-import useAuthStore from "../../store/authStore";
-import { mockManagerReservations } from "./mockData";
 
 export default function ManagerReservations() {
     const [reservations, setReservations] = useState([]);
@@ -12,17 +11,25 @@ export default function ManagerReservations() {
     const parkingLots = ["Downtown Parking", "Mall Parking"];
 
     useEffect(() => {
-        // Simulate API call
         const fetchReservations = async () => {
             try {
-                // Replace with actual API call
-                await new Promise((resolve) => setTimeout(resolve, 1000));
+                const token = localStorage.getItem("token");
+                const headers = {
+                    'Authorization': `Bearer ${token}`,
+                };
+                const response = await axios.get("http://localhost:8080/lot-manager/reservations", { headers });
+                const data = response.data;
+
+                const reservationsWithId = data.map((reservation, index) => ({
+                    id: index + 1,
+                    ...reservation,
+                }));
+
                 const filteredReservations =
                     selectedLot === "all"
-                        ? mockManagerReservations
-                        : mockManagerReservations.filter(
-                              (r) => r.parkingLot === selectedLot
-                          );
+                        ? reservationsWithId
+                        : reservationsWithId.filter((r) => r.parkingLot === selectedLot);
+
                 setReservations(filteredReservations);
             } catch (error) {
                 console.error("Error fetching reservations:", error);

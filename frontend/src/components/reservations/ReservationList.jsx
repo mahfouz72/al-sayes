@@ -19,12 +19,18 @@ export default function ReservationList({
 
     const getStatusColor = (status) => {
         switch (status.toLowerCase()) {
-            case "active":
+            case "pending":
+                return "bg-yellow-100 text-yellow-800";
+            case "confirmed":
+                return "bg-blue-100 text-blue-800";
+            case "ongoing":
                 return "bg-green-100 text-green-800";
-            case "completed":
+            case "fulfilled":
                 return "bg-gray-100 text-gray-800";
             case "cancelled":
                 return "bg-red-100 text-red-800";
+            case "expired":
+                return "bg-gray-100 text-gray-800";
             default:
                 return "bg-blue-100 text-blue-800";
         }
@@ -81,10 +87,10 @@ export default function ReservationList({
                                 {(role === "manager" || role === "admin") && (
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="text-sm font-medium text-gray-900">
-                                            {reservation.driver?.name}
+                                            {reservation.driverName}
                                         </div>
                                         <div className="text-sm text-gray-500">
-                                            {reservation.driver?.email}
+                                            {reservation.driverEmail}
                                         </div>
                                     </td>
                                 )}

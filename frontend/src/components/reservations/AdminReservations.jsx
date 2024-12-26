@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import ReservationList from "./ReservationList";
-import useAuthStore from "../../store/authStore";
-import { mockAdminReservations } from "./mockData";
+import axios from "axios";
 
 export default function AdminReservations() {
     const [reservations, setReservations] = useState([]);
@@ -20,9 +19,20 @@ export default function AdminReservations() {
         // Simulate API call
         const fetchReservations = async () => {
             try {
-                // Replace with actual API call
-                await new Promise((resolve) => setTimeout(resolve, 1000));
-                let filteredReservations = [...mockAdminReservations];
+
+                const token = localStorage.getItem("token");
+                const headers = {
+                    'Authorization': `Bearer ${token}`,
+                };
+                const response = await axios.get("http://localhost:8080/admin/reservations", { headers });
+                const data = response.data;
+
+                const reservationsWithId = data.map((reservation, index) => ({
+                    id: index + 1,
+                    ...reservation,
+                }));
+
+                let filteredReservations = [...reservationsWithId];
 
                 if (filters.parkingLot !== "all") {
                     filteredReservations = filteredReservations.filter(
