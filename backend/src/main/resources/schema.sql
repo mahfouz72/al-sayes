@@ -42,3 +42,11 @@ CREATE TABLE IF NOT EXISTS Reservation (
     penalty decimal NOT NULL,
     PRIMARY KEY (driver_id, spot_id, lot_id, start_time)
 );
+
+CREATE TABLE IF NOT EXISTS Driver (
+    account_id BIGINT NOT NULL,
+    license_plate VARCHAR(255) NOT NULL,
+    PRIMARY KEY (account_id),
+    FOREIGN KEY (account_id) REFERENCES Account(id) ON DELETE CASCADE
+);
+

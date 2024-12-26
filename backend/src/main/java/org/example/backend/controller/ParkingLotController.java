@@ -1,5 +1,6 @@
 package org.example.backend.controller;
 
+import org.example.backend.dto.ParkingLotCard;
 import org.example.backend.dto.ParkingLotDTO;
 import org.example.backend.dto.ParkingLotDetails;
 import org.example.backend.dto.ParkingSpotDTO;
@@ -28,7 +29,11 @@ public class ParkingLotController {
 
     @GetMapping("/get")
     public ResponseEntity<List<ParkingLotDetails>> listUserManagedLots() {
-        Account currentUser = authenticationService.getCurrentAccount();
+        Optional<Account> currentUserOptional = authenticationService.getCurrentAccount();
+        if (!currentUserOptional.isPresent()) {
+            return ResponseEntity.status(401).build();
+        }
+        Account currentUser = currentUserOptional.get();
         if (!"ROLE_MANAGER".equals(currentUser.getRole())
             && !"ROLE_ADMIN".equals(currentUser.getRole())) {
             return ResponseEntity.status(401).build();
@@ -40,9 +45,22 @@ public class ParkingLotController {
         return ResponseEntity.ok(lots);
     }
 
+    @GetMapping("/get/cards")
+    public ResponseEntity<List<ParkingLotCard>> listParkingLotsCards() {
+        List<ParkingLotCard> lots = this.parkingLotService.findAllParkingLotsCards();
+        if (lots.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(lots);
+    }
+
     @PostMapping("/create")
     public ResponseEntity<Void> createParkingLot(@RequestBody ParkingLotDTO parkingLotDTO) {
-        Account currentUser = authenticationService.getCurrentAccount();
+        Optional<Account> currentUserOptional = authenticationService.getCurrentAccount();
+        if (!currentUserOptional.isPresent()) {
+            return ResponseEntity.status(401).build();
+        }
+        Account currentUser = currentUserOptional.get();
         if (!"ROLE_MANAGER".equals(currentUser.getRole())
         && !"ROLE_ADMIN".equals(currentUser.getRole())) {
             return ResponseEntity.status(401).build();

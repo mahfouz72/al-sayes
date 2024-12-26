@@ -28,16 +28,20 @@ export default function SignupForm() {
                 return;
             }
 
-            const response = await axios.post("http://localhost:8080/register", {
-                username: data.name,
-                email: data.email,
-                password: data.password,
-                role: data.role,
-                licensePlate: data.role === "Driver" ? data.licensePlate : null,
-            });
+            const response = await axios.post(
+                "http://localhost:8080/register",
+                {
+                    username: data.name,
+                    email: data.email,
+                    password: data.password,
+                    role: data.role,
+                    licensePlate:
+                        data.role === "Driver" ? data.licensePlate : null,
+                }
+            );
 
             console.log("Registration successful:", response.data);
-    
+
             navigate("/login");
         } catch (err) {
             console.error("Registration error:", err);
@@ -51,8 +55,7 @@ export default function SignupForm() {
     };
 
     return (
-        <div
-            className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-2xl">
                 <div>
                     <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
@@ -201,9 +204,9 @@ export default function SignupForm() {
                                 onClick={() => setShowPassword(!showPassword)}
                             >
                                 {showPassword ? (
-                                    <EyeSlashIcon className="h-5 w-5 text-gray-400"/>
+                                    <EyeSlashIcon className="h-5 w-5 text-gray-400" />
                                 ) : (
-                                    <EyeIcon className="h-5 w-5 text-gray-400"/>
+                                    <EyeIcon className="h-5 w-5 text-gray-400" />
                                 )}
                             </button>
                             {errors.password && (
@@ -238,9 +241,9 @@ export default function SignupForm() {
                                 }
                             >
                                 {showConfirmPassword ? (
-                                    <EyeSlashIcon className="h-5 w-5 text-gray-400"/>
+                                    <EyeSlashIcon className="h-5 w-5 text-gray-400" />
                                 ) : (
-                                    <EyeIcon className="h-5 w-5 text-gray-400"/>
+                                    <EyeIcon className="h-5 w-5 text-gray-400" />
                                 )}
                             </button>
                             {errors.confirmPassword && (

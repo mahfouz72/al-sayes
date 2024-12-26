@@ -90,12 +90,16 @@ export default function ManagerDashboard() {
   }
   
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Parking Lot Management</h1>
-        <p className="mt-2 text-gray-600">Monitor and manage your parking facilities</p>
-      </div>
+    return (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="mb-8">
+                <h1 className="text-3xl font-bold text-gray-900">
+                    Parking Lot Management
+                </h1>
+                <p className="mt-2 text-gray-600">
+                    Monitor and manage your parking facilities
+                </p>
+            </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-white rounded-lg shadow p-6">
@@ -118,22 +122,32 @@ export default function ManagerDashboard() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow mb-8">
-        <div className="p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Performance Overview</h2>
-          <div className="w-full overflow-x-auto">
-            <BarChart width={800} height={300} data={data}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="occupancy" fill="#8884d8" name="Occupancy %" />
-              <Bar dataKey="revenue" fill="#82ca9d" name="Revenue ($)" />
-            </BarChart>
-          </div>
-        </div>
-      </div>
+            <div className="bg-white rounded-lg shadow mb-8">
+                <div className="p-6">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                        Performance Overview
+                    </h2>
+                    <div className="w-full overflow-x-auto">
+                        <BarChart width={800} height={300} data={data}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="name" />
+                            <YAxis />
+                            <Tooltip />
+                            <Legend />
+                            <Bar
+                                dataKey="occupancy"
+                                fill="#8884d8"
+                                name="Occupancy %"
+                            />
+                            <Bar
+                                dataKey="revenue"
+                                fill="#82ca9d"
+                                name="Revenue ($)"
+                            />
+                        </BarChart>
+                    </div>
+                </div>
+            </div>
 
       <div className="bg-white rounded-lg shadow">
         <div className="p-6">
@@ -166,13 +180,15 @@ export default function ManagerDashboard() {
               </div>
             </div>
 
-            <div>
-              <button
-                onClick={() => setShowSpotGrid(!showSpotGrid)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                {showSpotGrid ? 'Hide Spot Grid' : 'Show Spot Grid'}
-              </button>
+                        <div>
+                            <button
+                                onClick={() => setShowSpotGrid(!showSpotGrid)}
+                                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                            >
+                                {showSpotGrid
+                                    ? "Hide Spot Grid"
+                                    : "Show Spot Grid"}
+                            </button>
 
               {showSpotGrid && (
                 <div className="mt-4">

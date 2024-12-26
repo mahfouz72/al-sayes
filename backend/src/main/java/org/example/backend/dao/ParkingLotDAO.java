@@ -1,5 +1,6 @@
 package org.example.backend.dao;
 
+import org.example.backend.dto.ParkingLotCard;
 import org.example.backend.dto.ParkingLotDetails;
 import org.example.backend.entity.ParkingLot;
 import org.example.backend.entity.ParkingSpot;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
+
 public class ParkingLotDAO implements DAO<ParkingLot, Long> {
     private JdbcTemplate jdbcTemplate;
 
@@ -115,6 +117,7 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
             return details;
         }, managerId);
     }
+
     public Long insertAndReturnKey(ParkingLot parkingLot) {
         String sql = "INSERT INTO ParkingLot(name, managed_by, location, " +
              "time_limit, automatic_release_time, not_showing_up_penalty, over_time_scale) " +
@@ -137,5 +140,47 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
         }, keyHolder);
         Number key = keyHolder.getKey();
         return key != null ? key.longValue() : null;
+    }
+    public List<ParkingLotCard> getLotsCards() {
+        String sql = """
+            SELECT 
+                p.id AS lot_id,
+                p.name AS lot_name,
+                p.location,
+                IFNULL(ROUND(AVG(ps.cost), 2), 0) AS average_price,
+                COUNT(ps.id) AS total_spots,
+                COUNT(CASE WHEN ps.current_status = 'AVAILABLE' THEN 1 END) AS available_spots,
+                COUNT(CASE WHEN ps.type = 'REGULAR' THEN 1 END) AS regular_spots,
+                COUNT(CASE WHEN ps.type = 'DISABLED' THEN 1 END) AS disabled_spots,
+                COUNT(CASE WHEN ps.type = 'EV' THEN 1 END) AS ev_spots
+            FROM 
+                ParkingLot p
+            LEFT JOIN 
+                ParkingSpot ps ON p.id = ps.lot_id
+            GROUP BY 
+                p.id, p.name, p.location
+        """;
+
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            ParkingLotCard card = new ParkingLotCard();
+            card.setId(rs.getLong("lot_id"));
+            card.setName(rs.getString("lot_name"));
+            card.setLocation(rs.getString("location"));
+            card.setAveragePrice(rs.getDouble("average_price"));
+            card.setTotalSpots(rs.getInt("total_spots"));
+            card.setAvailableSpots(rs.getInt("available_spots"));
+            card.setRegularSpots(rs.getInt("regular_spots"));
+            card.setDisabledSpots(rs.getInt("disabled_spots"));
+            card.setEvSpots(rs.getInt("ev_spots"));
+            return card;
+        });
+    }
+
+    public static void main(String[] args) {
+        ParkingLotDAO parkingLotDAO = new ParkingLotDAO(null);
+        List<ParkingLotCard> cards = parkingLotDAO.getLotsCards();
+        for (ParkingLotCard card : cards) {
+            System.out.println(card);
+        }
     }
 }

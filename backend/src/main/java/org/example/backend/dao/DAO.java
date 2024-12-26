@@ -3,6 +3,7 @@ package org.example.backend.dao;
 import java.util.List;
 import java.util.Optional;
 
+
 public interface DAO<T, K> {
     List<T> listAll();
 

@@ -72,7 +72,7 @@ public class AccountDAO implements DAO<Account, Long>  {
         jdbcTemplate.update(sql, pKey);
     }
 
-    public Account getAccountByUsername(String username) {
+    public Optional<Account> getByUsername(String username) {
         String sql = "SELECT * FROM Account WHERE username = ?";
         Account account = null;
         try {
@@ -80,6 +80,6 @@ public class AccountDAO implements DAO<Account, Long>  {
         } catch(DataAccessException e) {
             // Not Found
         }
-        return account;
+        return Optional.ofNullable(account);
     }
 }
