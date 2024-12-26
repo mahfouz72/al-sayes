@@ -92,7 +92,7 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
                 COUNT(DISTINCT ps.id) AS capacity,
                 COUNT(DISTINCT CASE WHEN ps.current_status = 'OCCUPIED' THEN ps.id END) AS occupied_count,
                 SUM(CASE WHEN r.status IN ('ONGOING', 'FULFILLED', 'EXPIRED', 'CONFIRMED') THEN r.price ELSE 0 END) AS total_revenue,
-                SUM(CASE WHEN r.violation_duration IS NOT NULL THEN r.penalty * r.violation_duration ELSE 0 END) AS total_violations
+                COUNT(CASE WHEN r.violation_duration IS NOT NULL AND r.violation_duration > 0 THEN 1 ELSE NULL END) AS total_violations
             FROM
                 ParkingLot p
             LEFT JOIN

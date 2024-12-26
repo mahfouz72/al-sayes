@@ -78,11 +78,11 @@ export default function SignupForm() {
                     <div className="rounded-md shadow-sm -space-y-px">
                         <div>
                             <label htmlFor="name" className="sr-only">
-                                Full name
+                                Username
                             </label>
                             <input
                                 {...register("name", {
-                                    required: "Full name is required",
+                                    required: "Username is required",
                                     minLength: {
                                         value: 2,
                                         message:
@@ -91,7 +91,7 @@ export default function SignupForm() {
                                 })}
                                 type="text"
                                 className="appearance-none rounded-t-md relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                                placeholder="Full name"
+                                placeholder="Username"
                             />
                             {errors.name && (
                                 <p className="text-red-500 text-xs mt-1">

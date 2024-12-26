@@ -117,7 +117,7 @@ export default function ManagerDashboard() {
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold text-gray-900">Total Violations</h3>
           <p className="mt-2 text-3xl font-bold text-red-600">
-            ${(parkingLots.reduce((sum, lot) => sum + lot.violations, 0)).toFixed(2)}
+            {(parkingLots.reduce((sum, lot) => sum + lot.violations, 0))}
           </p>
         </div>
       </div>
