@@ -6,31 +6,18 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ParkingLotMapper {
-
-    // Converts a ParkingLot entity to a ParkingLotDTO (Need to calculate capacity)
-    public ParkingLotDTO toDTO(ParkingLot parkingLot) {
-        return  ParkingLotDTO.builder()
-                .id(parkingLot.getId())
-                .name(parkingLot.getName())
-                .managedBy(parkingLot.getManagedBy())
-                .location(parkingLot.getLocation())
-                .timeLimit(parkingLot.getTimeLimit())
-                .notShowingUpPenalty(parkingLot.getNotShowingUpPenalty())
-                .automaticReleaseTime(parkingLot.getAutomaticReleaseTime())
-                .overTimeScale(parkingLot.getOverTimeScale())
-                .build();
-    }
-
     // Converts a ParkingLotDTO to a ParkingLot entity
-    public ParkingLot fromDTO(ParkingLotDTO parkingLotDTO) {
-        return new ParkingLot(parkingLotDTO.getId(),
-                parkingLotDTO.getName(),
-                parkingLotDTO.getManagedBy(),
-                parkingLotDTO.getLocation(),
-                parkingLotDTO.getTimeLimit(),
-                parkingLotDTO.getAutomaticReleaseTime(),
-                parkingLotDTO.getNotShowingUpPenalty(),
-                parkingLotDTO.getOverTimeScale());
+    public ParkingLot fromDTO(ParkingLotDTO parkingLotDTO, Long managerId) {
+
+        return ParkingLot.builder()
+                .name(parkingLotDTO.getName())
+                .managedBy(managerId)
+                .location(parkingLotDTO.getLocation())
+                .timeLimit(parkingLotDTO.getTimeLimit())
+                .notShowingUpPenalty(parkingLotDTO.getNotShowingUpPenalty())
+                .automaticReleaseTime(parkingLotDTO.getAutomaticReleaseTime())
+                .overTimeScale(parkingLotDTO.getOverTimeScale())
+                .build();
     }
 
 }

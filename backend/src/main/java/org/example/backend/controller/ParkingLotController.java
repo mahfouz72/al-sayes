@@ -29,7 +29,8 @@ public class ParkingLotController {
     @GetMapping("/get")
     public ResponseEntity<List<ParkingLotDetails>> listUserManagedLots() {
         Account currentUser = authenticationService.getCurrentAccount();
-        if (!"ROLE_MANAGER".equals(currentUser.getRole())) {
+        if (!"ROLE_MANAGER".equals(currentUser.getRole())
+            && !"ROLE_ADMIN".equals(currentUser.getRole())) {
             return ResponseEntity.status(401).build();
         }
         List<ParkingLotDetails> lots = this.parkingLotService.findAllParkingLotsByManager(currentUser.getId());
@@ -37,5 +38,18 @@ public class ParkingLotController {
             return ResponseEntity.ok(Collections.emptyList());
         }
         return ResponseEntity.ok(lots);
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<Void> createParkingLot(@RequestBody ParkingLotDTO parkingLotDTO) {
+        Account currentUser = authenticationService.getCurrentAccount();
+        if (!"ROLE_MANAGER".equals(currentUser.getRole())
+        && !"ROLE_ADMIN".equals(currentUser.getRole())) {
+            return ResponseEntity.status(401).build();
+        }
+        if (this.parkingLotService.createParkingLot(parkingLotDTO, currentUser.getId())) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.status(400).build();
     }
 }

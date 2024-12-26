@@ -6,8 +6,12 @@ import org.example.backend.entity.ParkingSpot;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -40,13 +44,13 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
 
     @Override
     public void insert(ParkingLot parkingLot) {
-    String sql = "INSERT INTO ParkingLot(name, managed_by, location, " +
-                 "time_limit, automatic_release_time, not_showing_up_penalty, over_time_scale) " +
-                 "VALUES (?, ?, ?, ?, ?, ?, ?)";
-    jdbcTemplate.update(sql, parkingLot.getName(), parkingLot.getManagedBy(),
-            parkingLot.getLocation(), parkingLot.getTimeLimit(),
-            parkingLot.getAutomaticReleaseTime(), parkingLot.getNotShowingUpPenalty(),
-            parkingLot.getOverTimeScale());
+        String sql = "INSERT INTO ParkingLot(name, managed_by, location, " +
+                     "time_limit, automatic_release_time, not_showing_up_penalty, over_time_scale) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        jdbcTemplate.update(sql, parkingLot.getName(), parkingLot.getManagedBy(),
+                parkingLot.getLocation(), parkingLot.getTimeLimit(),
+                parkingLot.getAutomaticReleaseTime(), parkingLot.getNotShowingUpPenalty(),
+                parkingLot.getOverTimeScale());
     }
 
     @Override
@@ -110,5 +114,28 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
             details.setViolations(rs.getDouble("total_violations"));
             return details;
         }, managerId);
+    }
+    public Long insertAndReturnKey(ParkingLot parkingLot) {
+        String sql = "INSERT INTO ParkingLot(name, managed_by, location, " +
+             "time_limit, automatic_release_time, not_showing_up_penalty, over_time_scale) " +
+             "VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+        // Prepare the KeyHolder to capture the generated key
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        // Use the PreparedStatementCreator to capture the generated key
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1, parkingLot.getName());
+            ps.setLong(2, parkingLot.getManagedBy());
+            ps.setString(3, parkingLot.getLocation());
+            ps.setDouble(4, parkingLot.getTimeLimit());
+            ps.setDouble(5, parkingLot.getAutomaticReleaseTime());
+            ps.setDouble(6, parkingLot.getNotShowingUpPenalty());
+            ps.setDouble(7, parkingLot.getOverTimeScale());
+            return ps;
+        }, keyHolder);
+        Number key = keyHolder.getKey();
+        return key != null ? key.longValue() : null;
     }
 }

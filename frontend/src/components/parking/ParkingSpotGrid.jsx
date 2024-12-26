@@ -1,9 +1,9 @@
 import { useState } from 'react'
 
 const spotTypes = {
-  Regular: { color: 'bg-blue-500', label: 'Regular' },
-  Disabled: { color: 'bg-yellow-500', label: 'Disabled' },
-  'EV Charging': { color: 'bg-green-500', label: 'EV Charging' }
+  REGULAR: { color: 'bg-blue-500', label: 'Regular' },
+  DISABLED: { color: 'bg-yellow-500', label: 'Disabled' },
+  EV_CHARGING: { color: 'bg-green-500', label: 'EV Charging' }
 }
 
 const spotStatuses = {

@@ -1,4 +1,4 @@
-package org.example.backend.entity;
+package org.example.backend.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -6,15 +6,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Setter
-@Getter
-public class ParkingSpot {
-    Long id;
-    Long lotId;
-    double cost;
-    String currentStatus;
-    String type;
+public class ParkingTypeDetails {
+    private int capacity;
+    private double basePricePerHour;
 }

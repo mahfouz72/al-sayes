@@ -55,7 +55,6 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow preflight OPTIONS requests
                                 .requestMatchers("/login", "/register").permitAll()
                                 .anyRequest().authenticated()
             );
