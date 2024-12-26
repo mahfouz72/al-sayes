@@ -1,7 +1,6 @@
 package org.example.backend.service;
 
-import org.example.backend.dao.DriverDAO;
-import org.example.backend.dao.ParkingLotDAO;
+import org.example.backend.dao.StatisticsDAO;
 import org.example.backend.dto.StatisticsDTO;
 import org.example.backend.entity.Account;
 import org.springframework.stereotype.Service;
@@ -11,17 +10,15 @@ import java.util.List;
 @Service
 public class StatisticsService {
 
-    private final DriverDAO driverDAO;
-    private final ParkingLotDAO parkingLotDAO;
+    private final StatisticsDAO statisticsDAO;
 
-    public StatisticsService(DriverDAO driverDAO, ParkingLotDAO parkingLotDAO) {
-        this.driverDAO = driverDAO;
-        this.parkingLotDAO = parkingLotDAO;
+    public StatisticsService(StatisticsDAO statisticsDAO) {
+        this.statisticsDAO = statisticsDAO;
     }
 
     public StatisticsDTO getStatistics() {
-        int numberOfUsers = driverDAO.countUsers();
-        int numberOfParkingLots = parkingLotDAO.countParkingLots();
+        int numberOfUsers = statisticsDAO.countUsers();
+        int numberOfParkingLots = statisticsDAO.countParkingLots();
 
         return StatisticsDTO.builder()
                 .totalUsers(numberOfUsers)
@@ -30,6 +27,6 @@ public class StatisticsService {
     }
 
     public List<Account> getAllUsers(int page, int size) {
-        return driverDAO.listAllUsers(page, size);
+        return statisticsDAO.listAllUsers(page, size);
     }
 }

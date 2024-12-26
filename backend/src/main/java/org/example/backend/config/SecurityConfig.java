@@ -54,10 +54,10 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("/login", "/register", "/api/**").permitAll()
+                                .requestMatchers("/login/**", "/register/**", "/api/**").permitAll()
                                 .anyRequest().authenticated()
             );
-
+        http.cors(Customizer.withDefaults());
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         http.httpBasic(Customizer.withDefaults());
         http.csrf(AbstractHttpConfigurer::disable);

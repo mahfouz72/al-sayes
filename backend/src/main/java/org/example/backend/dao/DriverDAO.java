@@ -50,19 +50,5 @@ public class DriverDAO implements DAO<Driver, Long> {
 
     }
 
-    public Integer countUsers() {
-        String sql = "SELECT COUNT(*) FROM Account WHERE role_name = 'ROLE_USER'";
-        return jdbcTemplate.queryForObject(sql, Integer.class);
-    }
 
-    public List<Account> listAllUsers(int page, int size) {
-        int offset = (page - 1) * size;
-        String sql = "SELECT username, role_name FROM Account WHERE role_name = 'ROLE_USER' LIMIT ? OFFSET ?";
-        return jdbcTemplate.query(sql, new Object[]{size, offset}, (rs, rowNum) -> {
-            Account account = new Account();
-            account.setUsername(rs.getString("username"));
-            account.setRole(rs.getString("role_name"));
-            return account;
-        });
-    }
 }
