@@ -1,52 +1,57 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import ParkingSpotGrid from './ParkingSpotGrid';
 import AddEditLotModal from './modals/AddEditLotModal';
 import SpotManagementModal from './modals/SpotManagementModal';
-
-const mockParkingLots = [
-  {
-    id: 1,
-    name: 'Downtown Parking',
-    location: '123 Main St',
-    totalSpots: 100,
-    pricePerHour: 5,
-    spots: Array(100).fill(null).map((_, i) => ({
-      id: i + 1,
-      number: `A${i + 1}`,
-      type: i < 80 ? 'REGULAR' : i < 90 ? 'DISABLED' : 'EV',
-      status: Math.random() > 0.5 ? 'AVAILABLE' : 'OCCUPIED'
-    }))
-  },
-  {
-    id: 2,
-    name: 'Mall Parking',
-    location: '456 Shopping Ave',
-    totalSpots: 150,
-    pricePerHour: 3,
-    spots: Array(150).fill(null).map((_, i) => ({
-      id: i + 1,
-      number: `B${i + 1}`,
-      type: i < 120 ? 'REGULAR' : i < 140 ? 'DISABLED' : 'EV',
-      status: Math.random() > 0.5 ? 'AVAILABLE' : 'OCCUPIED'
-    }))
-  }
-];
+import LotAPI from '../../apis/LotAPI';
 
 export default function ManageLots() {
-  const [parkingLots, setParkingLots] = useState(mockParkingLots);
+  const [parkingLots, setParkingLots] = useState([]);
   const [selectedLot, setSelectedLot] = useState(null);
   const [showSpotGrid, setShowSpotGrid] = useState(false);
   const [showAddEditModal, setShowAddEditModal] = useState(false);
   const [showSpotModal, setShowSpotModal] = useState(false);
   const [selectedSpot, setSelectedSpot] = useState(null);
   const [editingLot, setEditingLot] = useState(null);
-
+  useEffect(() => {
+    // Fetch all parking lots when the page first renders
+    LotAPI.getParkingLotsCardsViewInManager()
+      .then(response => {
+        console.log(response);
+        const responseConverted = response.map( lot => ({
+          id: lot.id,
+          name: lot.name,
+          location: lot.location,
+          timeLimit: 0, // Assuming default value as it's not present in response
+          automaticReleaseTime: 0, // Assuming default value as it's not present in response
+          notShowingUpPenalty: 0, // Assuming default value as it's not present in response
+          overTimeScale: 0, // Assuming default value as it's not present in response,
+          parkingTypes: {
+            REGULAR: { capacity: lot.regularSpots, basePricePerHour: 0 },
+            EV_CHARGING: { capacity: lot.evSpots, basePricePerHour: 0 },
+            DISABLED: { capacity: lot.disabledSpots, basePricePerHour: 0 }
+          },
+          averagePrice: lot.averagePrice
+        }));
+        setParkingLots(responseConverted);
+      })
+      .catch(error => {
+        console.error('There was an error fetching the parking lots data:', error)
+      })
+  }, [])
   const handleAddLot = () => {
     setEditingLot(null);
     setShowAddEditModal(true);
   };
-
+  const handleSaveLot = (lot, newlyCreated) => {
+    if (newlyCreated) {
+      setParkingLots([...parkingLots, lot]);
+    } else {
+      setParkingLots(parkingLots.map(existingLot => 
+        existingLot.id === lot.id ? lot : existingLot
+      ));
+    }
+  };
   const handleEditLot = (lot) => {
     setEditingLot(lot);
     setShowAddEditModal(true);
@@ -68,6 +73,9 @@ export default function ManageLots() {
     setShowSpotModal(true);
   };
 
+  const getTotalCapacity = (parkingTypes) => {
+    return Object.values(parkingTypes).reduce((total, type) => total + type.capacity, 0);
+  };
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="sm:flex sm:items-center sm:justify-between">
@@ -104,7 +112,7 @@ export default function ManageLots() {
                       Total Spots
                     </th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Price/Hour
+                      Average Price/Hour
                     </th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                       Status
@@ -121,8 +129,8 @@ export default function ManageLots() {
                         {lot.name}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{lot.location}</td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{lot.totalSpots}</td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">${lot.pricePerHour}</td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{getTotalCapacity(lot.parkingTypes)}</td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">${lot.averagePrice}</td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">
                           Active
@@ -183,6 +191,7 @@ export default function ManageLots() {
       <AddEditLotModal
         isOpen={showAddEditModal}
         onClose={() => setShowAddEditModal(false)}
+        onSaveLot={handleSaveLot}
         lot={editingLot}
       />
 

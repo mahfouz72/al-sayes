@@ -10,6 +10,7 @@ public class ParkingLotMapper {
     public ParkingLot fromDTO(ParkingLotDTO parkingLotDTO, Long managerId) {
 
         return ParkingLot.builder()
+                .id(parkingLotDTO.getId())
                 .name(parkingLotDTO.getName())
                 .managedBy(managerId)
                 .location(parkingLotDTO.getLocation())

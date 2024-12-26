@@ -12,6 +12,8 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class ParkingLotDTO {
+    private Long id;
+
     private String name;
 
     private String location;

@@ -5,8 +5,9 @@ import { SpotTypeSection  } from './SpotTypeSection';
 import { RulesSection } from './RulesSection';
 import LotAPI from '../../../apis/LotAPI'
 
-export default function AddEditLotModal({ isOpen, onClose, lot = null }) {
+export default function AddEditLotModal({ isOpen, onClose, lot = null, onSaveLot }) {
   const [formData, setFormData] = useState({
+    lot_id: lot?.id || -1,
     name: lot?.name || '',
     location: lot?.location || '',
     spotTypes: {
@@ -34,7 +35,8 @@ export default function AddEditLotModal({ isOpen, onClose, lot = null }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     // Handle form submission
-    const payload = {
+    let payload = {
+      id: formData.lot_id,
       name: formData.name,
       location: formData.location,
       timeLimit: formData.rules.timeLimit,
@@ -42,20 +44,29 @@ export default function AddEditLotModal({ isOpen, onClose, lot = null }) {
       notShowingUpPenalty: formData.rules.notShowingUpPenalty,
       overTimeScale: formData.rules.overTimeScale,
       parkingTypes: formData.spotTypes,
+      averagePrice: formData.averagePrice > 0 ? formData.averagePrice : getAveragePrice(formData.spotTypes)
     };
     console.log('Form data:', payload);
     try {
       if (!lot) {
-        await LotAPI.handleCreateNewLot(payload);
+        const insertedId = await LotAPI.handleCreateNewLot(payload);
+        payload.id = insertedId;
+        formData.id = insertedId;
+        onSaveLot(payload, true);
       } else {
         await LotAPI.handleUpdateLot(payload);
+        onSaveLot(payload, false);
       }
     } catch(error) {
       console.log("Error submitting form ", error);
     }
     onClose();
   };
-
+  const getAveragePrice = (spotTypes) => {
+    const totalBasePrice = Object.values(spotTypes).reduce((total, type) => total + (type.basePricePerHour * type.capacity), 0);
+    const numberOfTypes = Object.values(spotTypes).length;
+    return totalBasePrice / numberOfTypes;
+  };
 
   const updateSpotType = (type, field, value) => {
     setFormData({

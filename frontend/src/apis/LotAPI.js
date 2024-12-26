@@ -16,14 +16,29 @@ const getParkingLots = async () => {
   }
 };
 
+const getParkingLotsCardsViewInManager = async () => {
+  try {
+    const token = getUserToken();
+    let headers = {
+      'Authorization': `Bearer ${token}`
+    };
+    const response = await axios.get(`${config.BASE_API_URL}/lots/get/cards`, { headers });
+    console.log(response);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching parking lots:', error);
+    throw error;
+  }
+};
+
 const handleCreateNewLot = async (payload) => {
   try {
     const token = getUserToken();
     let headers = {
       'Authorization': `Bearer ${token}`
     };
-    await axios.post(`${config.BASE_API_URL}/lots/create`, payload, { headers });
-    return;
+    const response =  await axios.post(`${config.BASE_API_URL}/lots/create`, payload, { headers });
+    return response.data; // the inserted id
   } catch (error) {
     console.error('Error creating new lot:', error);
     throw error;
@@ -46,5 +61,5 @@ const handleUpdateLot = async (payload) => {
 };
 
 export default {
-  getParkingLots, handleCreateNewLot, handleUpdateLot
+  getParkingLots, handleCreateNewLot, handleUpdateLot, getParkingLotsCardsViewInManager
 };

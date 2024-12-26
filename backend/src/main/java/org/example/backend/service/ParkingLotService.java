@@ -63,10 +63,10 @@ public class ParkingLotService {
         return parkingLotDAO.getLotsDetailsByManagerId(managerId);
     }
 
-    public boolean createParkingLot(ParkingLotDTO parkingLotDTO, Long id) {
+    public Long createParkingLot(ParkingLotDTO parkingLotDTO, Long id) {
         Long lotId = parkingLotDAO.insertAndReturnKey(parkingLotMapper.fromDTO(parkingLotDTO, id));
         if (lotId == null) {
-            return false;
+            return -1L;
         }
         Long index = 1L;
         for (Map.Entry<ParkingType, ParkingTypeDetails> entry : parkingLotDTO.getParkingTypes().entrySet()) {
@@ -83,7 +83,7 @@ public class ParkingLotService {
                 index++;
             }
         }
-        return true;
+        return lotId;
     }
 
     public List<ParkingLotCard> findAllParkingLotsCards() {
