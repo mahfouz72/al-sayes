@@ -4,6 +4,7 @@ import ParkingSpotGrid from './ParkingSpotGrid';
 import AddEditLotModal from './modals/AddEditLotModal';
 import SpotManagementModal from './modals/SpotManagementModal';
 import LotAPI from '../../apis/LotAPI';
+import SpotAPI from '../../apis/SpotAPI';
 
 export default function ManageLots() {
   const [parkingLots, setParkingLots] = useState([]);
@@ -13,6 +14,8 @@ export default function ManageLots() {
   const [showSpotModal, setShowSpotModal] = useState(false);
   const [selectedSpot, setSelectedSpot] = useState(null);
   const [editingLot, setEditingLot] = useState(null);
+  const [selectedLotSpots, setSelectedLotSpots] = useState([])  // Store spots for selected lot
+
   useEffect(() => {
     // Fetch all parking lots when the page first renders
     LotAPI.getParkingLotsCardsViewInManager()
@@ -39,6 +42,20 @@ export default function ManageLots() {
         console.error('There was an error fetching the parking lots data:', error)
       })
   }, [])
+
+  // Fetch parking spots when selected lot changes
+  useEffect(() => {
+    if (selectedLot) {
+      SpotAPI.getParkingSpots(selectedLot.id)
+        .then(response => {
+          setSelectedLotSpots(response)
+        })
+        .catch(error => {
+          console.error('Error fetching parking spots:', error)
+        })
+    }
+  }, [selectedLot])
+
   const handleAddLot = () => {
     setEditingLot(null);
     setShowAddEditModal(true);
@@ -68,12 +85,12 @@ export default function ManageLots() {
     setShowSpotModal(true);
   };
 
-  const handleAddSpot = () => {
-    setSelectedSpot(null);
-    setShowSpotModal(true);
+  const handleSaveSpot = (spot) => {
+    setSelectedLotSpots(selectedLotSpots.map(existingSpot => 
+      existingSpot.id === spot.id ? spot : existingSpot
+    ));
   };
-
-  const getTotalCapacity = (parkingTypes) => {
+  const getTotalCapacity = (parkingTypes)  => {
     return Object.values(parkingTypes).reduce((total, type) => total + type.capacity, 0);
   };
   return (
@@ -170,7 +187,7 @@ export default function ManageLots() {
 
       {selectedLot && showSpotGrid && (
         <div className="mt-8">
-          <div className="flex justify-between items-center mb-4">
+          {/* <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold">{selectedLot.name} - Spot Layout</h2>
             <button
               onClick={handleAddSpot}
@@ -179,9 +196,9 @@ export default function ManageLots() {
               <PlusIcon className="-ml-0.5 mr-1.5 h-5 w-5" />
               Add Spot
             </button>
-          </div>
+          </div> */}
           <ParkingSpotGrid
-            spots={selectedLot.spots}
+            spots={selectedLotSpots}
             onSpotSelect={handleSpotUpdate}
             isManager={true}
           />
@@ -199,6 +216,7 @@ export default function ManageLots() {
         isOpen={showSpotModal}
         onClose={() => setShowSpotModal(false)}
         spot={selectedSpot}
+        onSaveSpot = {handleSaveSpot}
       />
     </div>
   );
