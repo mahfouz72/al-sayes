@@ -12,6 +12,8 @@
   "dependencies": {
     "@headlessui/react": "^1.7.18",
     "@heroicons/react": "^2.1.1",
+    "al-sayes-city-parking": "file:",
+    "al-sayes-parking": "file:",
     "autoprefixer": "^10.4.18",
     "axios": "^1.7.9",
     "date-fns": "^3.3.1",
@@ -24,7 +26,6 @@
     "react-hook-form": "^7.51.0",
     "react-router-dom": "^6.22.3",
     "recharts": "^2.12.2",
-    "al-sayes-city-parking": "file:",
     "tailwindcss": "^3.4.1",
     "zustand": "^4.5.2"
   },
