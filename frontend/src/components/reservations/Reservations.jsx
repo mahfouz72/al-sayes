@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import ReservationList from "./ReservationList";
 import axios from "axios";
 
-export default function AdminReservations() {
+export default function Reservations() {
     const [reservations, setReservations] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [parkingLots, setParkingLots] = useState([]);
@@ -17,7 +17,26 @@ export default function AdminReservations() {
         direction: "asc",
     });
 
+    const endPointMapper = {
+        admin: "admin",
+        driver: "drivers",
+        manager: "lot-manager",
+    };
+
+    const h1Mapper = {
+        admin: "System Reservations",
+        driver: "My Reservations",
+        manager: "My Parking Lots Reservations",
+    };
+
+    const pMapper = {
+        admin: "View and manage all parking reservations",
+        driver: "View and manage your parking reservations",
+        manager: "View and manage your parking lots reservations",
+    };
+
     const user = localStorage.getItem("username");
+    const role = localStorage.getItem("role");
 
     const sortData = (data, key, direction) => {
         return [...data].sort((a, b) => {
@@ -50,7 +69,7 @@ export default function AdminReservations() {
                     Authorization: `Bearer ${token}`,
                 };
                 const response = await axios.get(
-                    "http://localhost:8080/admin/reservations",
+                    `http://localhost:8080/${endPointMapper[role]}/reservations`,
                     { headers }
                 );
 
@@ -147,11 +166,9 @@ export default function AdminReservations() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="mb-8">
                 <h1 className="text-2xl font-bold text-gray-900">
-                    System Reservations
+                    {h1Mapper[role]}
                 </h1>
-                <p className="mt-2 text-gray-600">
-                    View and manage all parking reservations
-                </p>
+                <p className="mt-2 text-gray-600">{pMapper[role]}</p>
             </div>
 
             <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">

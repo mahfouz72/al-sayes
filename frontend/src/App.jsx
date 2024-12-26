@@ -13,11 +13,8 @@ import AdminDashboard from "./components/dashboard/AdminDashboard";
 import UserProfile from "./components/profile/UserProfile";
 import TopUsersReport from "./components/admin/TopUsersReport";
 import TopLotsReport from "./components/admin/TopLotsReport";
-import DriverReservations from "./components/reservations/DriverReservations";
-import ManagerReservations from "./components/reservations/ManagerReservations";
-import AdminReservations from "./components/reservations/AdminReservations";
 import ManageLots from "./components/parking/ManageLots";
-import useAuthStore from "./store/authStore";
+import Reservations from "./components/reservations/Reservations";
 import "./index.css";
 
 function PrivateRoute({ children, allowedRoles }) {
@@ -55,21 +52,6 @@ function DashboardRouter() {
     }
 }
 
-function ReservationsRouter() {
-    const role = localStorage.getItem("role");
-
-    switch (role) {
-        case "driver":
-            return <DriverReservations />;
-        case "manager":
-            return <ManagerReservations />;
-        case "admin":
-            return <AdminReservations />;
-        default:
-            return <Navigate to="/login" />;
-    }
-}
-
 function App() {
     return (
         <Router>
@@ -88,7 +70,7 @@ function App() {
                     path="/reservations"
                     element={
                         <PrivateRoute>
-                            <ReservationsRouter />
+                            <Reservations />
                         </PrivateRoute>
                     }
                 />
