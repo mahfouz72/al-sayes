@@ -2,6 +2,7 @@ package org.example.backend.entity;
 
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,11 +10,13 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 public class ParkingLot {
     private Long id;
     private String name;
     private Long managedBy; // user id
+
     private String location;
     // Longest possible reservation duration
     private double timeLimit;

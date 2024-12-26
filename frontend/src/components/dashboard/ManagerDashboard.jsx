@@ -1,15 +1,8 @@
-import { useEffect, useState } from "react";
-import {
-    BarChart,
-    Bar,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    Legend,
-} from "recharts";
-import ParkingSpotGrid from "../parking/ParkingSpotGrid";
-import axios from "axios";
+import { useEffect, useState } from 'react'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
+import ParkingSpotGrid from '../parking/ParkingSpotGrid'
+import LotAPI from '../../apis/LotAPI'
+import SpotAPI from '../../apis/SpotAPI'
 
 /*
 const mockParkingLots = [
@@ -45,59 +38,57 @@ const mockParkingLots = [
 */
 
 export default function ManagerDashboard() {
-    const [parkingLots, setParkingLots] = useState([]);
-    const [selectedLot, setSelectedLot] = useState(parkingLots[0]);
-    const [selectedLotSpots, setSelectedLotSpots] = useState([]); // Store spots for selected lot
-    const [showSpotGrid, setShowSpotGrid] = useState(false);
-    useEffect(() => {
-        // Fetch all parking lots when the page first renders
-        axios
-            .get("http://localhost:8080/api/lots/get")
-            .then((response) => {
-                setParkingLots(response.data);
-                setSelectedLot(response.data[0]); // Select the first lot by default
-                console.log("Selected lot: ", response.data[0]);
-            })
-            .catch((error) => {
-                console.error(
-                    "There was an error fetching the parking lots data:",
-                    error
-                );
-            });
-    }, []);
-
-    // Fetch parking spots when selected lot changes
-    useEffect(() => {
-        if (selectedLot) {
-            axios
-                .get(`http://localhost:8080/api/spots/${selectedLot.id}/get`)
-                .then((response) => {
-                    setSelectedLotSpots(response.data);
-                })
-                .catch((error) => {
-                    console.error("Error fetching parking spots:", error);
-                });
+  const [parkingLots, setParkingLots] = useState([])
+  const [selectedLot, setSelectedLot] = useState(parkingLots[0])
+  const [selectedLotSpots, setSelectedLotSpots] = useState([])  // Store spots for selected lot
+  const [showSpotGrid, setShowSpotGrid] = useState(false)
+  useEffect(() => {
+    // Fetch all parking lots when the page first renders
+    LotAPI.getParkingLots()
+      .then(response => {
+        setParkingLots(response)
+        if (response.length>0) {
+          setSelectedLot(response[0]) // Select the first lot by default
+          console.log("Selected lot: ", response[0]);
         }
-    }, [selectedLot]);
+      })
+      .catch(error => {
+        console.error('There was an error fetching the parking lots data:', error)
+      })
+  }, [])
 
-    const handleSpotUpdate = (spot) => {
-        console.log("Updating spot status:", spot);
-        // Update spot status logic here
-    };
-
-    const data = parkingLots.map((lot) => ({
-        name: lot.name,
-        occupancy: lot.occupancyRate,
-        revenue: lot.revenue,
-    }));
-
-    if (parkingLots === null) {
-        return <div>Loading...</div>; // Show loading state while the data is being fetched
+  // Fetch parking spots when selected lot changes
+  useEffect(() => {
+    if (selectedLot) {
+      SpotAPI.getParkingSpots(selectedLot.id)
+        .then(response => {
+          setSelectedLotSpots(response)
+        })
+        .catch(error => {
+          console.error('Error fetching parking spots:', error)
+        })
     }
+  }, [selectedLot])
 
-    if (parkingLots.length === 0) {
-        return <div>No parking lots available.</div>; // Show message if the list is empty
-    }
+  const handleSpotUpdate = (spot) => {
+    console.log('Updating spot status:', spot)
+    // Update spot status logic here
+  }
+  
+  const data = parkingLots.map(lot => ({
+    name: lot.name,
+    occupancy: lot.occupancyRate,
+    revenue: lot.revenue,
+  }))
+
+  if (parkingLots === null) {
+    return <div>Loading...</div>;  // Show loading state while the data is being fetched
+  }
+  
+  if (parkingLots.length === 0) {
+    return <div>No parking lots available.</div>;  // Show message if the list is empty
+  }
+  
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -110,43 +101,26 @@ export default function ManagerDashboard() {
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-white rounded-lg shadow p-6">
-                    <h3 className="text-lg font-semibold text-gray-900">
-                        Total Revenue
-                    </h3>
-                    <p className="mt-2 text-3xl font-bold text-blue-600">
-                        $
-                        {parkingLots.reduce((sum, lot) => sum + lot.revenue, 0)}
-                    </p>
-                </div>
-                <div className="bg-white rounded-lg shadow p-6">
-                    <h3 className="text-lg font-semibold text-gray-900">
-                        Average Occupancy
-                    </h3>
-                    <p className="mt-2 text-3xl font-bold text-green-600">
-                        {Math.round(
-                            parkingLots.reduce(
-                                (sum, lot) => sum + lot.occupancyRate,
-                                0
-                            ) / parkingLots.length
-                        )}
-                        %
-                    </p>
-                </div>
-                <div className="bg-white rounded-lg shadow p-6">
-                    <h3 className="text-lg font-semibold text-gray-900">
-                        Total Violations
-                    </h3>
-                    <p className="mt-2 text-3xl font-bold text-red-600">
-                        $
-                        {parkingLots.reduce(
-                            (sum, lot) => sum + lot.violations,
-                            0
-                        )}
-                    </p>
-                </div>
-            </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="bg-white rounded-lg shadow p-6">
+          <h3 className="text-lg font-semibold text-gray-900">Total Revenue</h3>
+          <p className="mt-2 text-3xl font-bold text-blue-600">
+            ${(parkingLots.reduce((sum, lot) => sum + lot.revenue, 0).toFixed(2))}
+          </p>
+        </div>
+        <div className="bg-white rounded-lg shadow p-6">
+          <h3 className="text-lg font-semibold text-gray-900">Average Occupancy</h3>
+          <p className="mt-2 text-3xl font-bold text-green-600">
+            {(Math.round(parkingLots.reduce((sum, lot) => sum + lot.occupancyRate, 0) / parkingLots.length)).toFixed(2)}%
+          </p>
+        </div>
+        <div className="bg-white rounded-lg shadow p-6">
+          <h3 className="text-lg font-semibold text-gray-900">Total Violations</h3>
+          <p className="mt-2 text-3xl font-bold text-red-600">
+            ${(parkingLots.reduce((sum, lot) => sum + lot.violations, 0)).toFixed(2)}
+          </p>
+        </div>
+      </div>
 
             <div className="bg-white rounded-lg shadow mb-8">
                 <div className="p-6">
@@ -175,59 +149,36 @@ export default function ManagerDashboard() {
                 </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow">
-                <div className="p-6">
-                    <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-xl font-semibold text-gray-900">
-                            Parking Lots
-                        </h2>
-                        <select
-                            value={selectedLot.id}
-                            onChange={(e) =>
-                                setSelectedLot(
-                                    parkingLots.find(
-                                        (lot) =>
-                                            lot.id === Number(e.target.value)
-                                    )
-                                )
-                            }
-                            className="rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500"
-                        >
-                            {parkingLots.map((lot) => (
-                                <option key={lot.id} value={lot.id}>
-                                    {lot.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+      <div className="bg-white rounded-lg shadow">
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-semibold text-gray-900">Parking Lots</h2>
+            <select
+              value={selectedLot.id}
+              onChange={(e) => setSelectedLot(parkingLots.find(lot => lot.id === Number(e.target.value)))}
+              className="rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+            >
+              {parkingLots.map(lot => (
+                <option key={lot.id} value={lot.id}>{lot.name}</option>
+              ))}
+            </select>
+          </div>
 
-                    <div className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="bg-gray-50 rounded-lg p-4">
-                                <h4 className="text-sm font-medium text-gray-500">
-                                    Location
-                                </h4>
-                                <p className="mt-1 text-lg font-semibold">
-                                    {selectedLot.location}
-                                </p>
-                            </div>
-                            <div className="bg-gray-50 rounded-lg p-4">
-                                <h4 className="text-sm font-medium text-gray-500">
-                                    Current Occupancy
-                                </h4>
-                                <p className="mt-1 text-lg font-semibold">
-                                    {selectedLot.occupancyRate}%
-                                </p>
-                            </div>
-                            <div className="bg-gray-50 rounded-lg p-4">
-                                <h4 className="text-sm font-medium text-gray-500">
-                                    Today's Revenue
-                                </h4>
-                                <p className="mt-1 text-lg font-semibold">
-                                    ${selectedLot.revenue}
-                                </p>
-                            </div>
-                        </div>
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-gray-500">Location</h4>
+                <p className="mt-1 text-lg font-semibold">{selectedLot.location}</p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-gray-500">Current Occupancy</h4>
+                <p className="mt-1 text-lg font-semibold">{selectedLot.occupancyRate.toFixed(2)}%</p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-gray-500"> Revenue</h4>
+                <p className="mt-1 text-lg font-semibold">${selectedLot.revenue.toFixed(2)}</p>
+              </div>
+            </div>
 
                         <div>
                             <button
@@ -239,19 +190,19 @@ export default function ManagerDashboard() {
                                     : "Show Spot Grid"}
                             </button>
 
-                            {showSpotGrid && (
-                                <div className="mt-4">
-                                    <ParkingSpotGrid
-                                        spots={selectedLotSpots}
-                                        onSpotSelect={handleSpotUpdate}
-                                        isManager={true}
-                                    />
-                                </div>
-                            )}
-                        </div>
-                    </div>
+              {showSpotGrid && (
+                <div className="mt-4">
+                  <ParkingSpotGrid
+                    spots={selectedLotSpots}
+                    onSpotSelect={handleSpotUpdate}
+                    isManager={true}
+                  />
                 </div>
+              )}
             </div>
+          </div>
         </div>
-    );
+      </div>
+    </div>
+  )
 }

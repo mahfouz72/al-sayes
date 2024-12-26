@@ -18,6 +18,7 @@ import lombok.Setter;
 public class ParkingLotDetails {
     private Long id;
     private String name;
+    private int capacity;
     private String location;
     private double occupancyRate;
     private double revenue;
