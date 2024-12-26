@@ -3,6 +3,8 @@ import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { SpotTypeSection  } from './SpotTypeSection';
 import { RulesSection } from './RulesSection';
+import LotAPI from '../../../apis/LotAPI'
+
 export default function AddEditLotModal({ isOpen, onClose, lot = null }) {
   const [formData, setFormData] = useState({
     name: lot?.name || '',
@@ -29,12 +31,31 @@ export default function AddEditLotModal({ isOpen, onClose, lot = null }) {
     },
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     // Handle form submission
-    console.log('Form data:', formData);
+    const payload = {
+      name: formData.name,
+      location: formData.location,
+      timeLimit: formData.rules.timeLimit,
+      automaticReleaseTime: formData.rules.automaticReleaseTime,
+      notShowingUpPenalty: formData.rules.notShowingUpPenalty,
+      overTimeScale: formData.rules.overTimeScale,
+      parkingTypes: formData.spotTypes,
+    };
+    console.log('Form data:', payload);
+    try {
+      if (!lot) {
+        await LotAPI.handleCreateNewLot(payload);
+      } else {
+        await LotAPI.handleUpdateLot(payload);
+      }
+    } catch(error) {
+      console.log("Error submitting form ", error);
+    }
     onClose();
   };
+
 
   const updateSpotType = (type, field, value) => {
     setFormData({
@@ -112,7 +133,7 @@ export default function AddEditLotModal({ isOpen, onClose, lot = null }) {
                           <input
                             type="text"
                             id="name"
-                            placeholder="Enter Parking Lot Name"
+                            value={formData.name}
                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             required
@@ -125,7 +146,7 @@ export default function AddEditLotModal({ isOpen, onClose, lot = null }) {
                           <input
                             type="text"
                             id="location"
-                            placeholder={formData.location}
+                            value={formData.location}
                             onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             required

@@ -18,7 +18,7 @@ export function RulesSection({ rules, onUpdate }) {
             type="number"
             min="0"
             step="0.5"
-            placeholder="0.0"
+            value={rules.timeLimit}
             onChange={(e) => onUpdate('timeLimit', Number(e.target.value))}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           />
@@ -31,7 +31,7 @@ export function RulesSection({ rules, onUpdate }) {
             type="number"
             min="0"
             step="0.5"
-            placeholder="0.0"
+            value={rules.automaticReleaseTime}
             onChange={(e) => onUpdate('automaticReleaseTime', Number(e.target.value))}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           />
@@ -44,7 +44,7 @@ export function RulesSection({ rules, onUpdate }) {
             type="number"
             min="0"
             step="0.01"
-            placeholder="0.0"
+            value={rules.notShowingUpPenalty}
             onChange={(e) => onUpdate('notShowingUpPenalty', Number(e.target.value))}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           />
@@ -57,7 +57,7 @@ export function RulesSection({ rules, onUpdate }) {
             type="number"
             min="0"
             step="0.01"
-            placeholder="0.0"
+            value={rules.overTimeScale}
             onChange={(e) => onUpdate('overTimeScale', Number(e.target.value))}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           />

@@ -16,6 +16,35 @@ const getParkingLots = async () => {
   }
 };
 
+const handleCreateNewLot = async (payload) => {
+  try {
+    const token = getUserToken();
+    let headers = {
+      'Authorization': `Bearer ${token}`
+    };
+    await axios.post(`${config.BASE_API_URL}/lots/create`, payload, { headers });
+    return;
+  } catch (error) {
+    console.error('Error creating new lot:', error);
+    throw error;
+  }
+};
+
+// Update an existing lot
+const handleUpdateLot = async (payload) => {
+  try {
+    const token = getUserToken();
+    let headers = {
+      'Authorization': `Bearer ${token}`
+    };
+    await axios.put(`${config.BASE_API_URL}/lots/update`, payload, { headers });
+    return;
+  } catch (error) {
+    console.error('Error creating new lot:', error);
+    throw error;
+  }
+};
+
 export default {
-  getParkingLots,
+  getParkingLots, handleCreateNewLot, handleUpdateLot
 };

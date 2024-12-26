@@ -23,7 +23,7 @@ export function SpotTypeSection({ spotTypes, onUpdate }) {
               <input
                 type="number"
                 min="0"
-                placeholder="0"
+                value={data.capacity}
                 onChange={(e) => onUpdate(type, 'capacity', Number(e.target.value))}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 required
@@ -31,13 +31,13 @@ export function SpotTypeSection({ spotTypes, onUpdate }) {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                Base Price per Hour ($/hour)
+                Base Price per Hour ($/hr)
               </label>
               <input
                 type="number"
                 min="0"
                 step="0.01"
-                placeholder="0.0"
+                value={data.basePricePerHour}
                 onChange={(e) => onUpdate(type, 'basePricePerHour', Number(e.target.value))}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 required
