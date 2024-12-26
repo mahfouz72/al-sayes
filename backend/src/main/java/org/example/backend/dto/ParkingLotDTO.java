@@ -9,7 +9,8 @@ import lombok.*;
 @Builder
 public class ParkingLotDTO {
     private Long id;
-    private int capacity;
+    private String name;
+    private Long managedBy;
     private String location;
 
     // Longest possible reservation duration

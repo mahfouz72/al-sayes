@@ -71,4 +71,15 @@ public class AccountDAO implements DAO<Account, Long>  {
         String sql = "DELETE FROM Account WHERE id = ?";
         jdbcTemplate.update(sql, pKey);
     }
+
+    public Optional<Account> getByUsername(String username) {
+        String sql = "SELECT * FROM Account WHERE username = ?";
+        Account account = null;
+        try {
+            account = jdbcTemplate.queryForObject(sql, rowMapper, username);
+        } catch(DataAccessException e) {
+            // Not Found
+        }
+        return Optional.ofNullable(account);
+    }
 }

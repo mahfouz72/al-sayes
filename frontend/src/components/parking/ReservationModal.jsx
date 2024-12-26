@@ -1,27 +1,70 @@
-import { Fragment, useState } from "react";
+import { Fragment, useState, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import ParkingSpotGrid from "./ParkingSpotGrid";
 import { format, addHours, isAfter } from "date-fns";
+import axios from "axios";
 
-export default function ReservationModal({ isOpen, onClose, parkingLot }) {
+export default function ReservationModal({
+    isOpen,
+    onClose,
+    parkingLot,
+    parkingLotSpots,
+    setParkingLotSpots,
+}) {
     const [selectedSpot, setSelectedSpot] = useState(null);
     const [startTime, setStartTime] = useState("");
     const [endTime, setEndTime] = useState("");
     const [error, setError] = useState("");
 
+    useEffect(() => {
+        if (isOpen) {
+            // Set start time to current time
+            const now = new Date();
+            const newStartTime = format(now, "yyyy-MM-dd'T'HH:mm");
+            // Set end time to current time + 2 hours
+            const newEndTime = format(addHours(now, 2), "yyyy-MM-dd'T'HH:mm");
+
+            setSelectedSpot(null); // Reset selected spot
+            setStartTime(newStartTime); // Set start time to now
+            setEndTime(newEndTime); // Set end time to 2 hours from now
+            setError(""); // Reset any previous error
+        }
+    }, [isOpen, setParkingLotSpots]);
+
+    const fetchParkingLotSpots = async (start, end) => {
+        try {
+            const startStr = new Date(start).toISOString();
+            const endStr = new Date(end).toISOString();
+            const response = await axios.get(
+                `http://localhost:8080/api/spots/${parkingLot.id}/get/available?start=${startStr}&end=${endStr}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem(
+                            "token"
+                        )}`,
+                    },
+                }
+            );
+            setParkingLotSpots(response.data);
+            console.log(response.data);
+        } catch (error) {
+            console.error("Error fetching parking spots:", error);
+        }
+    };
+
     const handleTimeChange = (start, end) => {
         setStartTime(start);
         setEndTime(end);
+        setSelectedSpot(null);
+        setParkingLotSpots([]);
         setError("");
-
         if (start && end) {
             const startDate = new Date(start);
             const endDate = new Date(end);
-
             if (isAfter(startDate, endDate)) {
                 setError("End time must be after start time");
-            }
+            } else fetchParkingLotSpots(start, end);
         }
     };
 
@@ -31,26 +74,68 @@ export default function ReservationModal({ isOpen, onClose, parkingLot }) {
         const start = new Date(startTime);
         const end = new Date(endTime);
         const hours = Math.ceil((end - start) / (1000 * 60 * 60));
-        return (parkingLot.pricePerHour * hours).toFixed(2);
+        return (selectedSpot.cost * hours).toFixed(2);
     };
 
-    const handleReserve = () => {
-        if (!startTime || !endTime || !selectedSpot) return;
-        if (error) return;
+    const handleReserve = async () => {
+        if (!startTime || !endTime || !selectedSpot || error) return;
 
-        // Handle reservation logic
-        console.log("Reserving spot:", {
-            spot: selectedSpot,
-            startTime,
-            endTime,
-            total: calculateTotal(),
-        });
-        onClose();
+        const reservationData = {
+            driverId: null, // Leave this null; backend determines the driver
+            lotId: parkingLot.id,
+            spotId: selectedSpot.id,
+            startTime: new Date(startTime).toISOString(),
+            endTime: new Date(endTime).toISOString(),
+            price: parseFloat(calculateTotal()),
+            status: "PENDING", // Initial reservation status
+            violationDuration: 0,
+            penalty: 0,
+        };
+
+        try {
+            const response = await axios.post(
+                "http://localhost:8080/api/reservations/create",
+                reservationData,
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem(
+                            "token"
+                        )}`,
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            if (response.status === 200) {
+                // Reservation was successful
+                console.log("Reservation successful:", reservationData);
+                onClose(); // Close the modal
+            } else {
+                console.error("Unexpected response status:", response.status);
+                setError("Failed to reserve the spot. Please try again.");
+            }
+        } catch (error) {
+            // Handle errors during the request
+            console.error("Error creating reservation:", error);
+            setError(
+                error.response?.data?.message ||
+                    "Failed to reserve the spot. Please try again."
+            );
+        }
     };
+
+    // // Handle reservation logic
+    // console.log("Reserving spot:", {
+    //     spot: selectedSpot,
+    //     startTime,
+    //     endTime,
+    //     total: calculateTotal(),
+    // });
+    //     onClose();
+    // };
 
     const minDateTime = format(new Date(), "yyyy-MM-dd'T'HH:mm");
     const maxDateTime = format(addHours(new Date(), 48), "yyyy-MM-dd'T'HH:mm");
-
     if (!parkingLot) return null;
 
     return (
@@ -101,12 +186,6 @@ export default function ReservationModal({ isOpen, onClose, parkingLot }) {
                                         >
                                             Reserve a Spot at {parkingLot.name}
                                         </Dialog.Title>
-                                        <div className="mt-6">
-                                            <ParkingSpotGrid
-                                                spots={parkingLot.spots}
-                                                onSpotSelect={setSelectedSpot}
-                                            />
-                                        </div>
                                         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
                                             <div>
                                                 <label
@@ -160,6 +239,12 @@ export default function ReservationModal({ isOpen, onClose, parkingLot }) {
                                                 {error}
                                             </p>
                                         )}
+                                        <div className="mt-6">
+                                            <ParkingSpotGrid
+                                                spots={parkingLotSpots}
+                                                onSpotSelect={setSelectedSpot}
+                                            />
+                                        </div>
                                         {selectedSpot &&
                                             startTime &&
                                             endTime &&
@@ -169,8 +254,7 @@ export default function ReservationModal({ isOpen, onClose, parkingLot }) {
                                                         Reservation Summary
                                                     </h4>
                                                     <p className="mt-2 text-sm text-gray-600">
-                                                        Spot #
-                                                        {selectedSpot.number}
+                                                        Spot #{selectedSpot.id}
                                                     </p>
                                                     <p className="text-sm text-gray-600">
                                                         From:{" "}
