@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import ReservationList from "./ReservationList";
 import axios from "axios";
-import { set } from "date-fns";
 
 export default function AdminReservations() {
     const [reservations, setReservations] = useState([]);
@@ -13,10 +12,37 @@ export default function AdminReservations() {
         status: "all",
         dateRange: "all",
     });
+    const [sortConfig, setSortConfig] = useState({
+        key: null,
+        direction: "asc",
+    });
+
     const user = localStorage.getItem("username");
 
+    const sortData = (data, key, direction) => {
+        return [...data].sort((a, b) => {
+            if (key === "startTime") {
+                return direction === "asc"
+                    ? new Date(a[key]) - new Date(b[key])
+                    : new Date(b[key]) - new Date(a[key]);
+            }
+            if (key === "total") {
+                return direction === "asc"
+                    ? parseFloat(a[key]) - parseFloat(b[key])
+                    : parseFloat(b[key]) - parseFloat(a[key]);
+            }
+            if (key === "spotNumber") {
+                const aNum = parseInt(a[key].substring(1));
+                const bNum = parseInt(b[key].substring(1));
+                return direction === "asc" ? aNum - bNum : bNum - aNum;
+            }
+            if (a[key] < b[key]) return direction === "asc" ? -1 : 1;
+            if (a[key] > b[key]) return direction === "asc" ? 1 : -1;
+            return 0;
+        });
+    };
+
     useEffect(() => {
-        // Simulate API call
         const fetchReservations = async () => {
             try {
                 const token = localStorage.getItem("token");
@@ -60,7 +86,6 @@ export default function AdminReservations() {
                 }
 
                 if (filters.dateRange !== "all") {
-                    // Filter by date range
                     const now = new Date();
                     let start = new Date();
                     let end = new Date();
@@ -89,6 +114,14 @@ export default function AdminReservations() {
                     });
                 }
 
+                if (sortConfig.key) {
+                    filteredReservations = sortData(
+                        filteredReservations,
+                        sortConfig.key,
+                        sortConfig.direction
+                    );
+                }
+
                 setReservations(filteredReservations);
             } catch (error) {
                 console.error("Error fetching reservations:", error);
@@ -98,7 +131,17 @@ export default function AdminReservations() {
         };
 
         fetchReservations();
-    }, [filters, user.id]);
+    }, [filters, sortConfig, user.id]);
+
+    const handleSort = (key) => {
+        setSortConfig((prevConfig) => ({
+            key,
+            direction:
+                prevConfig.key === key && prevConfig.direction === "asc"
+                    ? "desc"
+                    : "asc",
+        }));
+    };
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -192,6 +235,8 @@ export default function AdminReservations() {
             <ReservationList
                 reservations={reservations}
                 isLoading={isLoading}
+                sortConfig={sortConfig}
+                onSort={handleSort}
             />
         </div>
     );

@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { format } from "date-fns";
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import {
+    ChevronLeftIcon,
+    ChevronRightIcon,
+    ChevronUpIcon,
+    ChevronDownIcon,
+} from "@heroicons/react/24/outline";
 import useAuthStore from "../../store/authStore";
 
 const ITEMS_PER_PAGE = 5;
@@ -8,6 +13,8 @@ const ITEMS_PER_PAGE = 5;
 export default function ReservationList({
     reservations = [],
     isLoading = false,
+    sortConfig,
+    onSort,
 }) {
     const [currentPage, setCurrentPage] = useState(1);
     const role = localStorage.getItem("role");
@@ -36,6 +43,29 @@ export default function ReservationList({
         }
     };
 
+    const getSortIcon = (key) => {
+        if (sortConfig.key === key) {
+            return sortConfig.direction === "asc" ? (
+                <ChevronUpIcon className="h-4 w-4 inline-block ml-1" />
+            ) : (
+                <ChevronDownIcon className="h-4 w-4 inline-block ml-1" />
+            );
+        }
+        return null;
+    };
+
+    const renderSortableHeader = (key, label) => (
+        <th
+            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+            onClick={() => onSort(key)}
+        >
+            <div className="flex items-center">
+                {label}
+                {getSortIcon(key)}
+            </div>
+        </th>
+    );
+
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -50,32 +80,15 @@ export default function ReservationList({
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                         <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                ID
-                            </th>
-                            {(role === "manager" || role === "admin") && (
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Driver
-                                </th>
-                            )}
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Parking Lot
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Spot
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Start Time
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Duration
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Status
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Total
-                            </th>
+                            {renderSortableHeader("id", "ID")}
+                            {(role === "manager" || role === "admin") &&
+                                renderSortableHeader("driverName", "Driver")}
+                            {renderSortableHeader("parkingLot", "Parking Lot")}
+                            {renderSortableHeader("spotNumber", "Spot")}
+                            {renderSortableHeader("startTime", "Start Time")}
+                            {renderSortableHeader("duration", "Duration")}
+                            {renderSortableHeader("status", "Status")}
+                            {renderSortableHeader("total", "Total")}
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
@@ -126,7 +139,6 @@ export default function ReservationList({
                     </tbody>
                 </table>
             </div>
-            {/* Pagination section remains the same */} {/* Pagination */}
             <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 sm:px-6">
                 <div className="flex justify-between flex-1 sm:hidden">
                     <button
