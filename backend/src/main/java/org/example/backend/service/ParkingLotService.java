@@ -102,15 +102,17 @@ public class ParkingLotService {
 
     public boolean updateParkingLot(ParkingLotDTO parkingLotDTO, Long id) {
         Optional<ParkingLot> existingLot = parkingLotDAO.getByPK(id);
-
         // Check if the parking lot exists
         if (existingLot.isEmpty()) {
+            System.out.println("ID: " + id + " not found");
             return false;
         }
 
         ParkingLot lotToUpdate = parkingLotMapper.fromDTO(parkingLotDTO, id);
         lotToUpdate.setName(parkingLotDTO.getName());
         lotToUpdate.setLocation(parkingLotDTO.getLocation());
+        lotToUpdate.setLatitude(parkingLotDTO.getLatitude());
+        lotToUpdate.setLongitude(parkingLotDTO.getLongitude());
         parkingLotDAO.update(lotToUpdate.getId(), lotToUpdate);
         return true;
     }

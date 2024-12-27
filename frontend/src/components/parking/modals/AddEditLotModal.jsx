@@ -10,25 +10,27 @@ export default function AddEditLotModal({ isOpen, onClose, lot = null, onSaveLot
     id: lot?.id ?? null,
     name: lot?.name ?? '',
     location: lot?.location ?? '',
+    latitude: lot?.latitude ?? '',
+    longitude: lot?.longitude ?? '',
     spotTypes: {
       REGULAR: {
-        capacity: lot?.spotTypes?.REGULAR?.capacity ?? 0,
-        basePricePerHour: lot?.spotTypes?.REGULAR?.basePricePerHour ?? 0,
+        capacity: lot?.parkingTypes?.REGULAR?.capacity ?? 0,
+        basePricePerHour: lot?.parkingTypes?.REGULAR?.basePricePerHour ?? 0,
       },
       DISABLED: {
-        capacity: lot?.spotTypes?.DISABLED?.capacity ?? 0,
-        basePricePerHour: lot?.spotTypes?.DISABLED?.basePricePerHour ?? 0,
+        capacity: lot?.parkingTypes?.DISABLED?.capacity ?? 0,
+        basePricePerHour: lot?.parkingTypes?.DISABLED?.basePricePerHour ?? 0,
       },
       EV_CHARGING: {
-        capacity: lot?.spotTypes?.EV_CHARGING?.capacity ?? 0,
-        basePricePerHour: lot?.spotTypes?.EV_CHARGING?.basePricePerHour ?? 0,
+        capacity: lot?.parkingTypes?.EV_CHARGING?.capacity ?? 0,
+        basePricePerHour: lot?.parkingTypes?.EV_CHARGING?.basePricePerHour ?? 0,
       },
     },
     rules: {
-      timeLimit: lot?.rules?.timeLimit ?? 24,
-      automaticReleaseTime: lot?.rules?.automaticReleaseTime ?? 0.5,
-      notShowingUpPenalty: lot?.rules?.notShowingUpPenalty ?? 10,
-      overTimeScale: lot?.rules?.overTimeScale ?? 1.5,
+      timeLimit: lot?.timeLimit ?? 24,
+      automaticReleaseTime: lot?.automaticReleaseTime ?? 0.5,
+      notShowingUpPenalty: lot?.notShowingUpPenalty ?? 10,
+      overTimeScale: lot?.overTimeScale ?? 1.5,
     },
     averagePrice: lot?.averagePrice ?? 0.0,
   });
@@ -39,26 +41,28 @@ export default function AddEditLotModal({ isOpen, onClose, lot = null, onSaveLot
         setFormData({
           id: lot.id ?? null,
           name: lot.name ?? '',
-          location: lot.location ?? '',
+          location: lot?.location ?? '',
+          latitude: lot?.latitude ?? '',
+          longitude: lot?.longitude ?? '',
           spotTypes: {
             REGULAR: {
-              capacity: lot?.spotTypes?.REGULAR?.capacity ?? 0,
-              basePricePerHour: lot?.spotTypes?.REGULAR?.basePricePerHour ?? 0,
+              capacity: lot?.parkingTypes?.REGULAR?.capacity ?? 0,
+              basePricePerHour: lot?.parkingTypes?.REGULAR?.basePricePerHour ?? 0,
             },
             DISABLED: {
-              capacity: lot?.spotTypes?.DISABLED?.capacity ?? 0,
-              basePricePerHour: lot?.spotTypes?.DISABLED?.basePricePerHour ?? 0,
+              capacity: lot?.parkingTypes?.DISABLED?.capacity ?? 0,
+              basePricePerHour: lot?.parkingTypes?.DISABLED?.basePricePerHour ?? 0,
             },
             EV_CHARGING: {
-              capacity: lot?.spotTypes?.EV_CHARGING?.capacity ?? 0,
-              basePricePerHour: lot?.spotTypes?.EV_CHARGING?.basePricePerHour ?? 0,
+              capacity: lot?.parkingTypes?.EV_CHARGING?.capacity ?? 0,
+              basePricePerHour: lot?.parkingTypes?.EV_CHARGING?.basePricePerHour ?? 0,
             },
           },
           rules: {
-            timeLimit: lot?.rules?.timeLimit ?? 24,
-            automaticReleaseTime: lot?.rules?.automaticReleaseTime ?? 0.5,
-            notShowingUpPenalty: lot?.rules?.notShowingUpPenalty ?? 10,
-            overTimeScale: lot?.rules?.overTimeScale ?? 1.5,
+            timeLimit: lot?.timeLimit ?? 24,
+            automaticReleaseTime: lot?.automaticReleaseTime ?? 0.5,
+            notShowingUpPenalty: lot?.notShowingUpPenalty ?? 10,
+            overTimeScale: lot?.overTimeScale ?? 1.5,
           },
           averagePrice: lot.averagePrice,
         });
@@ -73,6 +77,8 @@ export default function AddEditLotModal({ isOpen, onClose, lot = null, onSaveLot
       id: lot?.id ?? null,
       name: formData.name,
       location: formData.location,
+      latitude: formData.latitude,
+      longitude: formData.longitude,
       timeLimit: formData?.rules.timeLimit,
       automaticReleaseTime: formData.rules.automaticReleaseTime,
       notShowingUpPenalty: formData.rules.notShowingUpPenalty,
@@ -205,6 +211,34 @@ export default function AddEditLotModal({ isOpen, onClose, lot = null, onSaveLot
                             id="location"
                             value={formData.location}
                             onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="latitude" className="block text-sm font-medium text-gray-700">
+                            Latitude
+                          </label>
+                          <input
+                            type="number"
+                            step="any"
+                            id="latitude"
+                            value={formData.latitude}
+                            onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="longitude" className="block text-sm font-medium text-gray-700">
+                            Longitude
+                          </label>
+                          <input
+                            type="number"
+                            step="any"
+                            id="longitude"
+                            value={formData.longitude}
+                            onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             required
                           />

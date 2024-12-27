@@ -93,9 +93,11 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
                 p.id AS lot_id,
                 p.name AS lot_name,
                 p.location,
+                p.latitude,
+                p.longitude,
                 COUNT(DISTINCT ps.id) AS capacity,
                 COUNT(DISTINCT CASE WHEN ps.current_status = 'OCCUPIED' THEN ps.id END) AS occupied_count,
-                SUM(CASE WHEN r.status IN ('ONGOING', 'FULFILLED', 'EXPIRED', 'CONFIRMED') THEN r.price ELSE 0 END) AS total_revenue,
+                COALESCE(SUM(r.price + r.penalty), 0) AS total_revenue,
                 COUNT(CASE WHEN r.violation_duration IS NOT NULL AND r.violation_duration > 0 THEN 1 ELSE NULL END) AS total_violations
             FROM
                 ParkingLot p
@@ -106,7 +108,7 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
             WHERE
                 p.managed_by = ?
             GROUP BY
-                p.id, p.name, p.location
+                p.id, p.name, p.location, p.latitude, p.longitude
         """;
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
@@ -114,6 +116,8 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
             details.setId(rs.getLong("lot_id"));
             details.setName(rs.getString("lot_name"));
             details.setLocation(rs.getString("location"));
+            details.setLatitude(rs.getDouble("latitude"));
+            details.setLongitude(rs.getDouble("longitude"));
             details.setCapacity(rs.getInt("capacity"));
             details.setRevenue(rs.getDouble("total_revenue"));
             details.setOccupancyRate(rs.getInt("occupied_count") * 100.0 / details.getCapacity());
@@ -123,9 +127,9 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
     }
 
     public Long insertAndReturnKey(ParkingLot parkingLot) {
-        String sql = "INSERT INTO ParkingLot(name, managed_by, location, " +
+        String sql = "INSERT INTO ParkingLot(name, managed_by, location, latitude, longitude, " +
              "time_limit, automatic_release_time, not_showing_up_penalty, over_time_scale) " +
-             "VALUES (?, ?, ?, ?, ?, ?, ?)";
+             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         // Prepare the KeyHolder to capture the generated key
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -136,10 +140,12 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
             ps.setString(1, parkingLot.getName());
             ps.setLong(2, parkingLot.getManagedBy());
             ps.setString(3, parkingLot.getLocation());
-            ps.setDouble(4, parkingLot.getTimeLimit());
-            ps.setDouble(5, parkingLot.getAutomaticReleaseTime());
-            ps.setDouble(6, parkingLot.getNotShowingUpPenalty());
-            ps.setDouble(7, parkingLot.getOverTimeScale());
+            ps.setDouble(4, parkingLot.getLatitude());
+            ps.setDouble(5, parkingLot.getLongitude());
+            ps.setDouble(6, parkingLot.getTimeLimit());
+            ps.setDouble(7, parkingLot.getAutomaticReleaseTime());
+            ps.setDouble(8, parkingLot.getNotShowingUpPenalty());
+            ps.setDouble(9, parkingLot.getOverTimeScale());
             return ps;
         }, keyHolder);
         Number key = keyHolder.getKey();

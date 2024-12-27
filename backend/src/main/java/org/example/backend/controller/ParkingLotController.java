@@ -99,7 +99,7 @@ public class ParkingLotController {
         && !"ROLE_ADMIN".equals(currentUser.getRole())) {
             return ResponseEntity.status(401).build();
         }
-        if (this.parkingLotService.updateParkingLot(parkingLotDTO, currentUser.getId())) {
+        if (this.parkingLotService.updateParkingLot(parkingLotDTO, parkingLotDTO.getId())) {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.status(400).build();

@@ -25,6 +25,8 @@ export default function ManageLots() {
           id: lot.id,
           name: lot.name,
           location: lot.location,
+          latitude: lot.latitude,
+          longitude: lot.longitude,
           timeLimit: 0, // Assuming default value as it's not present in response
           automaticReleaseTime: 0, // Assuming default value as it's not present in response
           notShowingUpPenalty: 0, // Assuming default value as it's not present in response
@@ -71,6 +73,7 @@ export default function ManageLots() {
     }
   };
   const handleEditLot = (lot) => {
+    console.log("Editing lot: ", lot);
     setEditingLot(lot);
     setShowAddEditModal(true);
   };
