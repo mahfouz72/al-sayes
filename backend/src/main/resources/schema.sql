@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS Account (
     username varchar(45) NOT NULL,
     email varchar(255) NOT NULL,
     password varchar(255) NOT NULL,
-    role_name varchar(45) NOT NULL,
+    role_name ENUM('ROLE_DRIVER', 'ROLE_MANAGER', 'ROLE_ADMIN') NOT NULL,
     status ENUM('BLOCKED', 'ACTIVE') NOT NULL,
     PRIMARY KEY (id),
     UNIQUE KEY (username)
@@ -28,17 +28,10 @@ CREATE TABLE IF NOT EXISTS ParkingSpot (
     id bigint NOT NULL,
     lot_id bigint NOT NULL,
     cost decimal(10, 6) NOT NULL,
-    current_status varchar(255) NOT NULL,
-    type varchar(255) NOT NULL,
+    current_status ENUM('AVAILABLE', 'OCCUPIED', 'FAULTY') NOT NULL,
+    type ENUM('REGULAR', 'DISABLED', 'EV_CHARGING') NOT NULL,
     PRIMARY KEY (id, lot_id),
     FOREIGN KEY (lot_id) REFERENCES ParkingLot(id) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS Driver (
-    account_id BIGINT NOT NULL,
-    license_plate VARCHAR(255) NOT NULL,
-    PRIMARY KEY (account_id),
-    FOREIGN KEY (account_id) REFERENCES Account(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Reservation (

@@ -109,13 +109,10 @@ public class StatisticsDAO {
                     a.username,
                     COUNT(*) AS total_reservations,
                     COALESCE(SUM(r.price), 0) AS total_spent
-                FROM (
-                    SELECT *
-                    FROM Reservation
-                    WHERE status != 'EXPIRED'
-                ) AS r
+                FROM Reservation r
                 JOIN Account a ON r.driver_id = a.id
-                GROUP BY r.driver_id
+                WHERE r.status != 'EXPIRED'
+                GROUP BY a.id
                 ORDER BY total_reservations DESC, total_spent DESC
                 LIMIT ?;
             """;
