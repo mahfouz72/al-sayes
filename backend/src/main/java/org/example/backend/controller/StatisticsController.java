@@ -69,6 +69,7 @@ public class StatisticsController {
 
     @PostMapping("/block-user")
     public ResponseEntity<?> blockUser(@RequestParam String username) {
+        System.out.println(username);
         statisticsService.blockUser(username);
         return ResponseEntity.ok("User blocked successfully");
     }
