@@ -4,6 +4,7 @@ import java.security.cert.PKIXRevocationChecker.Option;
 import java.util.Optional;
 
 import org.example.backend.dao.AccountDAO;
+import org.example.backend.dao.ReservationDAO;
 import org.example.backend.dto.ReservationDTO;
 import org.example.backend.entity.Account;
 import org.example.backend.enums.ReservationStatus;
@@ -24,11 +25,13 @@ public class ReservationController {
     private final ReservationService reservationService;
     private final AuthenticationService authenticationService;
     private final AccountDAO accountDAO;
+    private final ReservationDAO reservationDAO;
 
-    public ReservationController(ReservationService reservationService, AuthenticationService authenticationService, AccountDAO accountDAO) {
+    public ReservationController(ReservationService reservationService, AuthenticationService authenticationService, AccountDAO accountDAO, ReservationDAO reservationDAO) {
         this.reservationService = reservationService;
         this.authenticationService = authenticationService;
         this.accountDAO = accountDAO;
+        this.reservationDAO = reservationDAO;
     }
 
     @PostMapping("/create")
@@ -40,7 +43,10 @@ public class ReservationController {
             // reservationDTO.setStatus(ReservationStatus.PENDING);
             // reservationDTO.setViolationDuration(0);
             // reservationDTO.setPenalty(0);
-            if (reservationService.reserveSpot(reservationDTO)) {
+            // if (reservationService.reserveSpot(reservationDTO)) {
+            //     return ResponseEntity.ok().build();
+            // }
+            if (reservationDAO.reserveSpot(reservationDTO)) {
                 return ResponseEntity.ok().build();
             }
         }
