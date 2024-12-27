@@ -68,7 +68,7 @@ public class ReservationService {
             LocalDateTime now = LocalDateTime.now();
             double autoRelease = parkingLotDAO.getByPK(res.getLotId()).map(ParkingLot::getAutomaticReleaseTime)
                     .orElse(0.0);
-            LocalDateTime releaseTime = res.getStartTime().toLocalDateTime().plusSeconds((long) autoRelease * 60);
+            LocalDateTime releaseTime = res.getStartTime().toLocalDateTime().plusSeconds((long) (autoRelease * 60));
             // System.out.println("Now: " + now);
             // System.out.println("Start Time: " + res.getStartTime().toLocalDateTime());
             // System.out.println("Auto Release: " + autoRelease + " minutes");
