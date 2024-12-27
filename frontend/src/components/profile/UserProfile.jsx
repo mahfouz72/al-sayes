@@ -4,14 +4,6 @@ import ProfileHeader from "./ProfileHeader";
 import ProfileCard from "./ProfileCard";
 import axios from "axios";
 
-const mockUser = {
-    username: "John Doe",
-    email: "john@gmail.com",
-    role: "admin",
-    licensePlate: "ABC123",
-    paymentMethod: "Visa",
-};
-
 export default function UserProfile() {
     const [userDetails, setUserDetails] = useState({});
     const fetchUser = async () => {

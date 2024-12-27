@@ -2,6 +2,7 @@ package org.example.backend.dao;
 
 import org.example.backend.dto.ParkingLotCard;
 import org.example.backend.dto.ParkingLotDetails;
+import org.example.backend.dto.ParkingLotStatisticsDTO;
 import org.example.backend.entity.ParkingLot;
 import org.example.backend.entity.ParkingSpot;
 import org.springframework.dao.DataAccessException;
@@ -35,6 +36,22 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
         parkingLot.setOverTimeScale(rs.getDouble("over_time_scale"));
         parkingLot.setNotShowingUpPenalty(rs.getDouble("not_showing_up_penalty"));
         return parkingLot;
+    };
+    
+    private RowMapper<ParkingLotStatisticsDTO> statisticsRowMapper = (rs, rowNum) -> {
+        ParkingLotStatisticsDTO statistics = new ParkingLotStatisticsDTO();
+        statistics.setLotId(rs.getLong("lot_id"));
+        statistics.setTotalSpots(rs.getInt("capacity"));
+        statistics.setOccupiedSpots(rs.getInt("occupied_count"));
+        statistics.setAvailableSpots(statistics.getTotalSpots() - statistics.getOccupiedSpots());
+        statistics.setAvgPrice(rs.getDouble("average_price"));
+        statistics.setRegularSpots(rs.getInt("regular_spots"));
+        statistics.setDisabledSpots(rs.getInt("disabled_spots"));
+        statistics.setEvSpots(rs.getInt("ev_spots"));
+        statistics.setReservations(rs.getInt("reservations"));
+        statistics.setTotalRevenue(rs.getDouble("total_revenue"));
+        statistics.setTotalViolations(rs.getInt("total_violations"));
+        return statistics;
     };
 
     public ParkingLotDAO(JdbcTemplate jdbcTemplate) {
@@ -89,28 +106,23 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
 
     public List<ParkingLotDetails> getLotsDetailsByManagerId(long managerId) {
         String sql = """
-            SELECT
+            SELECT 
                 p.id AS lot_id,
                 p.name AS lot_name,
-                p.location,
+                p.location AS location,
                 p.latitude,
                 p.longitude,
-                COUNT(DISTINCT ps.id) AS capacity,
-                COUNT(DISTINCT CASE WHEN ps.current_status = 'OCCUPIED' THEN ps.id END) AS occupied_count,
-                COALESCE(SUM(r.price + r.penalty), 0) AS total_revenue,
-                COUNT(CASE WHEN r.violation_duration IS NOT NULL AND r.violation_duration > 0 THEN 1 ELSE NULL END) AS total_violations
-            FROM
+                s.total_spots AS capacity,
+                s.occupied_spots AS occupied_count,
+                s.total_revenue AS total_revenue,
+                s.total_violations AS total_violations
+            FROM 
                 ParkingLot p
-            LEFT JOIN
-                ParkingSpot ps ON p.id = ps.lot_id
-            LEFT JOIN
-                Reservation r ON ps.id = r.spot_id AND p.id = r.lot_id
+            JOIN 
+                Statistics s ON s.lot_id = p.id
             WHERE
-                p.managed_by = ?
-            GROUP BY
-                p.id, p.name, p.location, p.latitude, p.longitude
+                p.managed_by = ?;
         """;
-
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
             ParkingLotDetails details = new ParkingLotDetails();
             details.setId(rs.getLong("lot_id"));
@@ -120,7 +132,7 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
             details.setLongitude(rs.getDouble("longitude"));
             details.setCapacity(rs.getInt("capacity"));
             details.setRevenue(rs.getDouble("total_revenue"));
-            details.setOccupancyRate(rs.getInt("occupied_count") * 100.0 / details.getCapacity());
+            details.setOccupancyRate(details.getCapacity() == 0 ? 0 : (double) rs.getInt("occupied_count") * 100 / details.getCapacity());
             details.setViolations(rs.getDouble("total_violations"));
             return details;
         }, managerId);
@@ -153,24 +165,22 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
     }
     public List<ParkingLotCard> getLotsCards() {
         String sql = """
-            SELECT 
+            SELECT
                 p.id AS lot_id,
                 p.name AS lot_name,
                 p.location,
                 p.latitude,
                 p.longitude,
-                IFNULL(ROUND(AVG(ps.cost), 2), 0) AS average_price,
-                COUNT(ps.id) AS total_spots,
-                COUNT(CASE WHEN ps.current_status = 'AVAILABLE' THEN 1 END) AS available_spots,
-                COUNT(CASE WHEN ps.type = 'REGULAR' THEN 1 END) AS regular_spots,
-                COUNT(CASE WHEN ps.type = 'DISABLED' THEN 1 END) AS disabled_spots,
-                COUNT(CASE WHEN ps.type = 'EV_CHARGING' THEN 1 END) AS ev_spots
-            FROM 
+                s.avg_price AS average_price,
+                s.total_spots,
+                s.available_spots,
+                s.regular_spots,
+                s.disabled_spots,
+                s.ev_spots
+            FROM
                 ParkingLot p
-            LEFT JOIN 
-                ParkingSpot ps ON p.id = ps.lot_id
-            GROUP BY 
-                p.id, p.name, p.location
+            JOIN
+                Statistics s ON p.id = s.lot_id
         """;
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
