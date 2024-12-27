@@ -16,13 +16,14 @@ public class ReservationScheduler {
     // Run every 5 minutes
     @Scheduled(fixedRate = 300000)
     public void releaseExpiredReservations() {
-        System.out.println("Releasing expired reservations");
+        // System.out.println("Releasing expired reservations");
         reservationService.releaseExpiredReservations();
     }
 
     // Run every 5 minutes
     @Scheduled(fixedRate = 300000)
     public void applyPenalties() {
+        // System.out.println("Applying penalties");
         reservationService.checkPenalties();
     }
 }

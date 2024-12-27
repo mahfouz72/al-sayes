@@ -69,6 +69,8 @@ public class ReservationService {
             double autoRelease = parkingLotDAO.getByPK(res.getLotId()).map(ParkingLot::getAutomaticReleaseTime)
                     .orElse(0.0);
             LocalDateTime releaseTime = res.getStartTime().toLocalDateTime().plusSeconds((long) (autoRelease * 60));
+            LocalDateTime endTime = res.getEndTime().toLocalDateTime();
+            releaseTime = releaseTime.isAfter(endTime) ? endTime : releaseTime;
             // System.out.println("Now: " + now);
             // System.out.println("Start Time: " + res.getStartTime().toLocalDateTime());
             // System.out.println("Auto Release: " + autoRelease + " minutes");
@@ -89,16 +91,17 @@ public class ReservationService {
         for (Reservation res : reservations) {
             LocalDateTime now = LocalDateTime.now();
             if (now.isAfter(res.getEndTime().toLocalDateTime())) {
-                Duration extraTime = Duration.between(res.getEndTime().toLocalDateTime(), now);
+                Duration duration = Duration.between(res.getEndTime().toLocalDateTime(), now);
                 Optional<ParkingSpot> spot = parkingSpotDAO.getByPK(Pair.of(res.getSpotId(), res.getLotId()));
                 Optional<ParkingLot> lot = parkingLotDAO.getByPK(res.getLotId());
                 double pricePerHour = spot.map(ParkingSpot::getCost).orElse(0.0)
                         * lot.map(ParkingLot::getOverTimeScale).orElse(0.0);
-                double penalty = extraTime.toSeconds() / 3600.0 * pricePerHour;
-                reservationDAO.updateByKeys(res.getDriverId(), res.getSpotId(), res.getLotId(), res.getStartTime(),
+
+                double extratime = duration.toSeconds() - res.getViolationDuration() * 60.0;
+                double penalty = extratime > 0 ? extratime * pricePerHour / 3600.0 : 0.0;
+                reservationDAO.updateByKeys(res.getDriverId(), res.getLotId(), res.getSpotId(), res.getStartTime(),
                         new Reservation(res.getDriverId(), res.getLotId(), res.getSpotId(), res.getStartTime(),
-                                Timestamp.valueOf(now), res.getPrice() + penalty, ReservationStatus.ONGOING,
-                                extraTime.toHours(), penalty));
+                                res.getEndTime(), res.getPrice(), res.getStatus(), duration.toMinutes(), res.getPenalty() + penalty));
             }
         }
     }

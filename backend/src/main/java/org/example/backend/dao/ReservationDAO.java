@@ -95,9 +95,9 @@ public class ReservationDAO implements DAO<Reservation, ReservationKey> {
 
     public boolean isSpotAvailable(Long lotId, Long spotId, Timestamp startTime, Timestamp endTime) {
         // Check if the spot is available in the given time range (start_time <= startTime < end_time) or (start_time < endTime <= end_time) and the status is not CANCELLED
-        System.out.printf("Checking if spot %d in lot %d is available from %s to %s\n", spotId, lotId, startTime.toString(), endTime.toString());
-        String sql = "SELECT * FROM Reservation WHERE lot_id = ? AND spot_id = ? AND ((start_time <= ? AND ? < end_time) OR (start_time < ? AND ? <= end_time)) AND status != ?";
-        List<Reservation> reservations = jdbcTemplate.query(sql, rowMapper, lotId, spotId, startTime, startTime, endTime, endTime, ReservationStatus.CANCELLED.name());
+        // System.out.printf("Checking if spot %d in lot %d is available from %s to %s\n", spotId, lotId, startTime.toString(), endTime.toString());
+        String sql = "SELECT * FROM Reservation WHERE lot_id = ? AND spot_id = ? AND ((start_time <= ? AND ? < end_time) OR (start_time < ? AND ? <= end_time)) AND (status != ? OR status != ?)";
+        List<Reservation> reservations = jdbcTemplate.query(sql, rowMapper, lotId, spotId, startTime, startTime, endTime, endTime, ReservationStatus.EXPIRED.name(), ReservationStatus.FULFILLED.name());
         return reservations.isEmpty();
     }
 
