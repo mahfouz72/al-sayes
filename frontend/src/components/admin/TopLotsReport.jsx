@@ -9,14 +9,19 @@ export default function TopLotsReport() {
   const [limit, setLimit] = useState(10);
   const [limitError, setLimitError] = useState('');
 
+  const token = localStorage.getItem('token');
+  let headers = {
+    'Authorization': `Bearer ${token}`
+  };
+
 
   const fetchData = async (url, setter, method = 'GET', data = null) => {
     try {
       let response;
       if (method === 'POST') {
-        response = await axios.post(url, data);
+        response = await axios.post(url, data, headers);
       } else {
-        response = await axios.get(url);
+        response = await axios.get(url, headers);
       }
       setter(response.data);
       console.log(response.data);
