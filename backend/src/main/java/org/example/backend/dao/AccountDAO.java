@@ -4,6 +4,7 @@ import org.example.backend.dto.UserDetails;
 import org.example.backend.entity.Account;
 import org.example.backend.entity.ParkingLot;
 import org.example.backend.enums.PaymentMethod;
+import org.example.backend.enums.UserStatus;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -23,6 +24,7 @@ public class AccountDAO implements DAO<Account, Long>  {
         account.setEmail(rs.getString("email"));
         account.setPassword(rs.getString("password"));
         account.setRole(rs.getString("role_name"));
+        account.setStatus(UserStatus.valueOf(rs.getString("status")));
         return account;
     };
 
@@ -39,9 +41,10 @@ public class AccountDAO implements DAO<Account, Long>  {
     @Override
     public void insert(Account account) {
         String accountSql =
-                "INSERT INTO Account(username, email, password, role_name) VALUES(?,?,?,?)";
+                "INSERT INTO Account(username, email, password, role_name, status) VALUES(?,?,?,?,?)";
         jdbcTemplate.update(accountSql, account.getUsername(),
-                account.getEmail(), account.getPassword(), "ROLE_" + account.getRole().toUpperCase());
+                account.getEmail(), account.getPassword(), "ROLE_" + account.getRole().toUpperCase(),
+                UserStatus.ACTIVE.name());
     }
 
     public String getRoleByUsername(String username) {
@@ -111,5 +114,20 @@ public class AccountDAO implements DAO<Account, Long>  {
             // Not Found
         }
         return Optional.ofNullable(userDetails[0]);
+    }
+
+    public void blockUser(String username) {
+        String sql = "UPDATE Account SET status = ? WHERE username = ?";
+        jdbcTemplate.update(sql, UserStatus.BLOCKED.name(), username);
+    }
+
+    public void unblockUser(String username) {
+        String sql = "UPDATE Account SET status = ? WHERE username = ?";
+        jdbcTemplate.update(sql, UserStatus.ACTIVE.name(), username);
+    }
+
+    public boolean isActive(String username) {
+        String sql = "SELECT status FROM Account WHERE username = ?";
+        return UserStatus.ACTIVE.name().equals(jdbcTemplate.queryForObject(sql, String.class, username));
     }
 }

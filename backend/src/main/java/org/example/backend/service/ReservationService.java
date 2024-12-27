@@ -68,16 +68,18 @@ public class ReservationService {
             LocalDateTime now = LocalDateTime.now();
             double autoRelease = parkingLotDAO.getByPK(res.getLotId()).map(ParkingLot::getAutomaticReleaseTime)
                     .orElse(0.0);
-            if (now.isAfter(res.getStartTime().toLocalDateTime().plusSeconds((long) autoRelease * 3600))) {
-                reservationDAO.updateByKeys(res.getDriverId(), res.getSpotId(), res.getLotId(), res.getStartTime(),
+            LocalDateTime releaseTime = res.getStartTime().toLocalDateTime().plusSeconds((long) (autoRelease * 60));
+            LocalDateTime endTime = res.getEndTime().toLocalDateTime();
+            releaseTime = releaseTime.isAfter(endTime) ? endTime : releaseTime;
+            // System.out.println("Now: " + now);
+            // System.out.println("Start Time: " + res.getStartTime().toLocalDateTime());
+            // System.out.println("Auto Release: " + autoRelease + " minutes");
+            // System.out.println("Release Time: " + releaseTime);
+            if (now.isAfter(releaseTime)) {
+                // System.out.println("Releasing reservation: " + res);
+                reservationDAO.updateByKeys(res.getDriverId(), res.getLotId(), res.getSpotId(), res.getStartTime(),
                         new Reservation(res.getDriverId(), res.getLotId(), res.getSpotId(), res.getStartTime(),
                                 res.getEndTime(), res.getPrice(), ReservationStatus.EXPIRED, 0, 0));
-                Optional<ParkingSpot> spot = parkingSpotDAO.getByPK(Pair.of(res.getSpotId(), res.getLotId()));
-                if (spot.isPresent()) {
-                    parkingSpotDAO.update(Pair.of(res.getSpotId(), res.getLotId()),
-                            new ParkingSpot(res.getSpotId(), res.getLotId(), spot.get().getCost(), "AVAILABLE",
-                                    spot.get().getType()));
-                }
                 // TODO: Not Showing Up Penalty
             }
 
@@ -87,19 +89,24 @@ public class ReservationService {
     public void checkPenalties() {
         List<Reservation> reservations = reservationDAO.listAllStatus(ReservationStatus.ONGOING);
         for (Reservation res : reservations) {
-            LocalDateTime now = LocalDateTime.now();
-            if (now.isAfter(res.getEndTime().toLocalDateTime())) {
-                Duration extraTime = Duration.between(res.getEndTime().toLocalDateTime(), now);
-                Optional<ParkingSpot> spot = parkingSpotDAO.getByPK(Pair.of(res.getSpotId(), res.getLotId()));
-                Optional<ParkingLot> lot = parkingLotDAO.getByPK(res.getLotId());
-                double pricePerHour = spot.map(ParkingSpot::getCost).orElse(0.0)
-                        * lot.map(ParkingLot::getOverTimeScale).orElse(0.0);
-                double penalty = extraTime.toSeconds() / 3600.0 * pricePerHour;
-                reservationDAO.updateByKeys(res.getDriverId(), res.getSpotId(), res.getLotId(), res.getStartTime(),
-                        new Reservation(res.getDriverId(), res.getLotId(), res.getSpotId(), res.getStartTime(),
-                                Timestamp.valueOf(now), res.getPrice() + penalty, ReservationStatus.ONGOING,
-                                extraTime.toHours(), penalty));
-            }
+            checkReservationPenalty(res);
+        }
+    }
+
+    public void checkReservationPenalty(Reservation res) {
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isAfter(res.getEndTime().toLocalDateTime())) {
+            Duration duration = Duration.between(res.getEndTime().toLocalDateTime(), now);
+            Optional<ParkingSpot> spot = parkingSpotDAO.getByPK(Pair.of(res.getSpotId(), res.getLotId()));
+            Optional<ParkingLot> lot = parkingLotDAO.getByPK(res.getLotId());
+            double pricePerHour = spot.map(ParkingSpot::getCost).orElse(0.0)
+                    * lot.map(ParkingLot::getOverTimeScale).orElse(0.0);
+
+            double extratime = duration.toSeconds() - res.getViolationDuration() * 60.0;
+            double penalty = extratime > 0 ? extratime * pricePerHour / 3600.0 : 0.0;
+            reservationDAO.updateByKeys(res.getDriverId(), res.getLotId(), res.getSpotId(), res.getStartTime(),
+                    new Reservation(res.getDriverId(), res.getLotId(), res.getSpotId(), res.getStartTime(),
+                            res.getEndTime(), res.getPrice(), res.getStatus(), duration.toMinutes(), res.getPenalty() + penalty));
         }
     }
 }

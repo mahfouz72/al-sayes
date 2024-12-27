@@ -2,7 +2,7 @@ import { Fragment, useState, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import ParkingSpotGrid from "./ParkingSpotGrid";
-import { format, addHours, isAfter } from "date-fns";
+import { format, addHours, isAfter, addMinutes } from "date-fns";
 import axios from "axios";
 
 export default function ReservationModal({
@@ -22,8 +22,11 @@ export default function ReservationModal({
             // Set start time to current time
             const now = new Date();
             const newStartTime = format(now, "yyyy-MM-dd'T'HH:mm");
-            // Set end time to current time + 2 hours
-            const newEndTime = format(addHours(now, 2), "yyyy-MM-dd'T'HH:mm");
+            // Set end time to a start time + floor(parkingLot.timeLimit) minutes
+            const newEndTime = format(
+                addMinutes(now, Math.floor(parkingLot.timeLimit)),
+                "yyyy-MM-dd'T'HH:mm"
+            );
 
             setSelectedSpot(null); // Reset selected spot
             setStartTime(newStartTime); // Set start time to now
@@ -62,8 +65,18 @@ export default function ReservationModal({
         if (start && end) {
             const startDate = new Date(start);
             const endDate = new Date(end);
+            const maxDate = addMinutes(
+                startDate,
+                Math.floor(parkingLot.timeLimit)
+            );
             if (isAfter(startDate, endDate)) {
                 setError("End time must be after start time");
+            } else if (isAfter(endDate, maxDate)) {
+                setError(
+                    "End time must be within the time limit, which is " +
+                        parkingLot.timeLimit +
+                        " minutes"
+                );
             } else fetchParkingLotSpots(start, end);
         }
     };

@@ -78,7 +78,7 @@ public class AuthenticationService {
                 ));
 
         ResponseEntity<LoginResponseDTO> response;
-        if (authentication.isAuthenticated()) {
+        if (authentication.isAuthenticated() && accountDAO.isActive(username)) {
             LoginResponseDTO loginResponse = prepareResponse(username);
             response = new ResponseEntity<>(loginResponse, HttpStatus.OK);
         } else {
