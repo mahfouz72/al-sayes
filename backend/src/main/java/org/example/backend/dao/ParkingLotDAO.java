@@ -132,7 +132,7 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
             details.setLongitude(rs.getDouble("longitude"));
             details.setCapacity(rs.getInt("capacity"));
             details.setRevenue(rs.getDouble("total_revenue"));
-            details.setOccupancyRate(details.getCapacity() == 0 ? 0 : (double) rs.getInt("occupied_count") / details.getCapacity());
+            details.setOccupancyRate(details.getCapacity() == 0 ? 0 : (double) rs.getInt("occupied_count") * 100 / details.getCapacity());
             details.setViolations(rs.getDouble("total_violations"));
             return details;
         }, managerId);
