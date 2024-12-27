@@ -89,31 +89,37 @@ public class AccountDAO implements DAO<Account, Long>  {
     }
 
     public Optional<UserDetails> getUserDetailsByUsername(String username) {
-        String sql = "SELECT * FROM Account WHERE username = ?";
-        final UserDetails[] userDetails = {null};
+        String sql = """
+                SELECT 
+                    a.id,
+                    a.username,
+                    a.email,
+                    a.role_name,
+                    d.license_plate,
+                    d.payment_method
+                FROM Account a
+                LEFT JOIN Driver d ON a.id = d.account_id
+                WHERE a.username = ?;
+                """;
+        UserDetails userDetails = null;
         try {
-            userDetails[0] = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
-                UserDetails user = UserDetails.builder()
-                        .id(rs.getLong("id"))
-                        .username(rs.getString("username"))
-                        .email(rs.getString("email"))
-                        .role(rs.getString("role_name").split("_")[1].toLowerCase())
-                        .build();
-                return user;
+            userDetails = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
+                UserDetails details = new UserDetails();
+                details.setId(rs.getLong("id"));
+                details.setUsername(rs.getString("username"));
+                details.setEmail(rs.getString("email"));
+                details.setRole(rs.getString("role_name").split("_")[1].toLowerCase());
+                // Driver details if exists
+                if (rs.getString("license_plate") != null) {
+                    details.setLicensePlate(rs.getString("license_plate"));
+                    details.setPaymentMethod(rs.getString("payment_method").toLowerCase());
+                }
+                return details;
             }, username);
-            if (userDetails[0] != null && "driver".equalsIgnoreCase(userDetails[0].getRole())) {
-                String driverSql = "SELECT * FROM Driver WHERE account_id = ?";
-                jdbcTemplate.queryForObject(driverSql, (rs, rowNum) -> {
-                    userDetails[0].setLicensePlate(rs.getString("license_plate"));
-                    userDetails[0].setPaymentMethod(rs.getString("payment_method").toLowerCase());
-                    return null;
-                }, userDetails[0].getId());
-            }
-
         } catch(DataAccessException e) {
             // Not Found
         }
-        return Optional.ofNullable(userDetails[0]);
+        return Optional.ofNullable(userDetails);
     }
 
     public void blockUser(String username) {
