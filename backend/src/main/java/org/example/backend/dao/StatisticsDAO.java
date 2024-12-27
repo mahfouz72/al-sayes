@@ -142,6 +142,7 @@ public class StatisticsDAO {
                     DATE_FORMAT(start_time, '%Y-%m-%d') AS date, 
                     COUNT(*) AS reserved_spots
                 FROM Reservation
+                WHERE status != 'EXPIRED'
                 GROUP BY date
                 ORDER BY date DESC
                 LIMIT ?
