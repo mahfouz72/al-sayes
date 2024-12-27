@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS Account (
     email varchar(255) NOT NULL,
     password varchar(255) NOT NULL,
     role_name varchar(45) NOT NULL,
-    status varchar(45) NOT NULL,
+    status ENUM('BLOCKED', 'ACTIVE') NOT NULL,
     PRIMARY KEY (id),
     UNIQUE KEY (username)
 );
