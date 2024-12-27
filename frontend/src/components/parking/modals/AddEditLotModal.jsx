@@ -7,7 +7,7 @@ import LotAPI from '../../../apis/LotAPI'
 
 export default function AddEditLotModal({ isOpen, onClose, lot = null, onSaveLot }) {
   const [formData, setFormData] = useState({
-    lot_id: lot?.id || -1,
+    id: lot?.id || -1,
     name: lot?.name || '',
     location: lot?.location || '',
     spotTypes: {
@@ -35,8 +35,9 @@ export default function AddEditLotModal({ isOpen, onClose, lot = null, onSaveLot
   const handleSubmit = async (e) => {
     e.preventDefault();
     // Handle form submission
+    console.log("Lot data: ", lot);
     let payload = {
-      id: formData.lot_id,
+      id: lot?.id || null,
       name: formData.name,
       location: formData.location,
       timeLimit: formData.rules.timeLimit,
@@ -63,8 +64,8 @@ export default function AddEditLotModal({ isOpen, onClose, lot = null, onSaveLot
   };
   const getAveragePrice = (spotTypes) => {
     const totalBasePrice = Object.values(spotTypes).reduce((total, type) => total + (type.basePricePerHour * type.capacity), 0);
-    const numberOfTypes = Object.values(spotTypes).length;
-    return totalBasePrice / numberOfTypes;
+    const totalCapacity = Object.values(spotTypes).reduce((total, type) => total + type.capacity, 0);
+    return (totalBasePrice / totalCapacity).toFixed(2);
   };
 
   const updateSpotType = (type, field, value) => {
@@ -163,7 +164,8 @@ export default function AddEditLotModal({ isOpen, onClose, lot = null, onSaveLot
                           />
                         </div>
                       </div>
-
+                      {!lot && (
+                        <>
                       <SpotTypeSection 
                         spotTypes={formData.spotTypes} 
                         onUpdate={updateSpotType} 
@@ -173,7 +175,8 @@ export default function AddEditLotModal({ isOpen, onClose, lot = null, onSaveLot
                         rules={formData.rules} 
                         onUpdate={updateRule} 
                       />
-
+                      </>
+                      )}
                       <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
                         <button
                           type="submit"

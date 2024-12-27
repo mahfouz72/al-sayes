@@ -152,7 +152,7 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
                 COUNT(CASE WHEN ps.current_status = 'AVAILABLE' THEN 1 END) AS available_spots,
                 COUNT(CASE WHEN ps.type = 'REGULAR' THEN 1 END) AS regular_spots,
                 COUNT(CASE WHEN ps.type = 'DISABLED' THEN 1 END) AS disabled_spots,
-                COUNT(CASE WHEN ps.type = 'EV' THEN 1 END) AS ev_spots
+                COUNT(CASE WHEN ps.type = 'EV_CHARGING' THEN 1 END) AS ev_spots
             FROM 
                 ParkingLot p
             LEFT JOIN 

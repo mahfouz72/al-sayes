@@ -20,7 +20,7 @@ export default function ManageLots() {
     // Fetch all parking lots when the page first renders
     LotAPI.getParkingLotsCardsViewInManager()
       .then(response => {
-        console.log(response);
+        console.log("Response before conversion: ", response);
         const responseConverted = response.map( lot => ({
           id: lot.id,
           name: lot.name,
@@ -36,6 +36,7 @@ export default function ManageLots() {
           },
           averagePrice: lot.averagePrice
         }));
+        console.log("Response after conversion: ", responseConverted);
         setParkingLots(responseConverted);
       })
       .catch(error => {
