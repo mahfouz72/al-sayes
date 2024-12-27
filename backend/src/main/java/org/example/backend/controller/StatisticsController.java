@@ -65,5 +65,17 @@ public class StatisticsController {
         List<?> dailyReservedSpots = statisticsService.getDailyReservedSpots(limit);
         return ResponseEntity.ok(dailyReservedSpots);
     }
+
+    @PostMapping("/block-user")
+    public ResponseEntity<?> blockUser(@RequestParam String username) {
+        statisticsService.blockUser(username);
+        return ResponseEntity.ok("User blocked successfully");
+    }
+
+    @PostMapping("/unblock-user")
+    public ResponseEntity<?> unblockUser(@RequestParam String username) {
+        statisticsService.unblockUser(username);
+        return ResponseEntity.ok("User unblocked successfully");
+    }
 }
 

@@ -1,5 +1,6 @@
 package org.example.backend.service;
 
+import org.example.backend.dao.AccountDAO;
 import org.example.backend.dao.StatisticsDAO;
 import org.example.backend.dto.StatisticsDTO;
 import org.example.backend.dto.UserDetailsDTO;
@@ -13,9 +14,11 @@ import java.util.Map;
 public class StatisticsService {
 
     private final StatisticsDAO statisticsDAO;
+    private final AccountDAO accountDAO;
 
-    public StatisticsService(StatisticsDAO statisticsDAO) {
+    public StatisticsService(StatisticsDAO statisticsDAO, AccountDAO accountDAO) {
         this.statisticsDAO = statisticsDAO;
+        this.accountDAO = accountDAO;
     }
 
     public StatisticsDTO getStatistics() {
@@ -56,5 +59,13 @@ public class StatisticsService {
 
     public List<Map<String, Object>> getDailyReservedSpots(int limit) {
         return statisticsDAO.getDailyReservedSpots(limit);
+    }
+
+    public void blockUser(String username) {
+        accountDAO.blockUser(username);
+    }
+
+    public void unblockUser(String username) {
+        accountDAO.unblockUser(username);
     }
 }
