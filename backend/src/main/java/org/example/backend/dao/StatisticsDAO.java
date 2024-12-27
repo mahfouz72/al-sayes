@@ -34,11 +34,12 @@ public class StatisticsDAO {
 
     public List<UserDetailsDTO> listAllUsers(int page, int size) {
         int offset = (page - 1) * size;
-        String sql = "SELECT username, role_name FROM Account LIMIT ? OFFSET ?";
+        String sql = "SELECT username, role_name, status FROM Account LIMIT ? OFFSET ?";
         return jdbcTemplate.query(sql, new Object[]{size, offset}, (rs, rowNum) -> {
             UserDetailsDTO account = new UserDetailsDTO();
             account.setUsername(rs.getString("username"));
             account.setRole(rs.getString("role_name"));
+            account.setStatus(rs.getString("status"));
             return account;
         });
     }

@@ -15,6 +15,8 @@ export default function AdminDashboard() {
   const [editingUser, setEditingUser] = useState(null);
   const [role, setRole] = useState('');
   const [limitError, setLimitError] = useState('');
+  const [userState, setUserStatus] = useState('');
+  
 
 
 
@@ -106,6 +108,20 @@ export default function AdminDashboard() {
       user.username === username ? { ...user, role: newRole } : user
     );
     setEditingUser(updatedUsers);
+  };
+
+  const handleActivateUser = (user) => {
+    const username = user.username;
+    fetchData(`http://localhost:8080/api/statistics/unblock-user?username=${username}`, setUserStatus, 'POST', { username });
+    user.status = 'ACTIVE';
+
+  };
+
+  const handleDisableUser = (user) => {
+    const username = user.username;
+    fetchData(`http://localhost:8080/api/statistics/block-user?username=${username}`, setUserStatus, 'POST', { username });
+    user.status = 'BLOCKED';
+
   };
 
 
@@ -222,10 +238,10 @@ export default function AdminDashboard() {
                     roleMapping[user.role] || user.role
                   )}
                 </td>
-                <td className="px-6 py-4 border-b">Active</td>
+                <td className="px-6 py-4 border-b">{user.status}</td>
                 <td className="px-6 py-4 border-b">
-                  <button className="text-green-500 hover:text-green-700 mr-2">Activate</button>
-                  <button className="text-red-500 hover:text-red-700">Disable</button>
+                  <button className="text-green-500 hover:text-green-700 mr-2" onClick={() => handleActivateUser(user)}>Activate</button>
+                  <button className="text-red-500 hover:text-red-700" onClick={() => handleDisableUser(user)}>Disable</button>
                 </td>
               </tr>
             ))}
