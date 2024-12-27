@@ -114,16 +114,22 @@ export default function AdminDashboard() {
   };
 
   const handleActivateUser = (user) => {
-    const username = user.username;
     fetchData(`http://localhost:8080/api/statistics/unblock-user?username=${username}`, setUserStatus, 'POST', { username });
-    user.status = 'ACTIVE';
+    setUsers(prevState => 
+      prevState.map(u => 
+        u.username === user.username ? { ...u, status: 'ACTIVE' } : u
+      )
+    );
 
   };
 
   const handleDisableUser = (user) => {
-    const username = user.username;
     fetchData(`http://localhost:8080/api/statistics/block-user?username=${username}`, setUserStatus, 'POST', { username });
-    user.status = 'BLOCKED';
+    setUsers(prevState => 
+      prevState.map(u => 
+        u.username === user.username ? { ...u, status: 'BLOCKED' } : u
+      )
+    );
 
   };
 
