@@ -89,7 +89,7 @@ export default function Navbar() {
                                                 Open user menu
                                             </span>
                                             <div className="h-8 w-8 rounded-full bg-gray-600 flex items-center justify-center text-white">
-                                                {user?.name?.[0] || "U"}
+                                                {user[0].toUpperCase() || "U"}
                                             </div>
                                         </Menu.Button>
                                     </div>
