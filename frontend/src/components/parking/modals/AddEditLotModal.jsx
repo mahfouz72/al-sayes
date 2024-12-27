@@ -1,4 +1,4 @@
-import { Fragment, useState } from 'react';
+import { useEffect, Fragment, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { SpotTypeSection  } from './SpotTypeSection';
@@ -7,44 +7,90 @@ import LotAPI from '../../../apis/LotAPI'
 
 export default function AddEditLotModal({ isOpen, onClose, lot = null, onSaveLot }) {
   const [formData, setFormData] = useState({
-    id: lot?.id || -1,
-    name: lot?.name || '',
-    location: lot?.location || '',
+    id: lot?.id ?? null,
+    name: lot?.name ?? '',
+    location: lot?.location ?? '',
     spotTypes: {
       REGULAR: {
-        capacity: lot?.spotTypes?.REGULAR?.capacity || 0,
-        basePricePerHour: lot?.spotTypes?.REGULAR?.basePricePerHour || 0,
+        capacity: lot?.spotTypes?.REGULAR?.capacity ?? 0,
+        basePricePerHour: lot?.spotTypes?.REGULAR?.basePricePerHour ?? 0,
       },
       DISABLED: {
-        capacity: lot?.spotTypes?.DISABLED?.capacity || 0,
-        basePricePerHour: lot?.spotTypes?.DISABLED?.basePricePerHour || 0,
+        capacity: lot?.spotTypes?.DISABLED?.capacity ?? 0,
+        basePricePerHour: lot?.spotTypes?.DISABLED?.basePricePerHour ?? 0,
       },
       EV_CHARGING: {
-        capacity: lot?.spotTypes?.EV_CHARGING?.capacity || 0,
-        basePricePerHour: lot?.spotTypes?.EV_CHARGING?.basePricePerHour || 0,
+        capacity: lot?.spotTypes?.EV_CHARGING?.capacity ?? 0,
+        basePricePerHour: lot?.spotTypes?.EV_CHARGING?.basePricePerHour ?? 0,
       },
     },
     rules: {
-      timeLimit: lot?.rules?.timeLimit || 24,
-      automaticReleaseTime: lot?.rules?.automaticReleaseTime || 0.5,
-      notShowingUpPenalty: lot?.rules?.notShowingUpPenalty || 10,
-      overTimeScale: lot?.rules?.overTimeScale || 1.5,
+      timeLimit: lot?.rules?.timeLimit ?? 24,
+      automaticReleaseTime: lot?.rules?.automaticReleaseTime ?? 0.5,
+      notShowingUpPenalty: lot?.rules?.notShowingUpPenalty ?? 10,
+      overTimeScale: lot?.rules?.overTimeScale ?? 1.5,
     },
+    averagePrice: lot?.averagePrice ?? 0.0,
   });
+
+    // Update formData when lot prop changes
+    useEffect(() => {
+      if (lot) {
+        setFormData({
+          id: lot.id ?? null,
+          name: lot.name ?? '',
+          location: lot.location ?? '',
+          spotTypes: {
+            REGULAR: {
+              capacity: lot?.spotTypes?.REGULAR?.capacity ?? 0,
+              basePricePerHour: lot?.spotTypes?.REGULAR?.basePricePerHour ?? 0,
+            },
+            DISABLED: {
+              capacity: lot?.spotTypes?.DISABLED?.capacity ?? 0,
+              basePricePerHour: lot?.spotTypes?.DISABLED?.basePricePerHour ?? 0,
+            },
+            EV_CHARGING: {
+              capacity: lot?.spotTypes?.EV_CHARGING?.capacity ?? 0,
+              basePricePerHour: lot?.spotTypes?.EV_CHARGING?.basePricePerHour ?? 0,
+            },
+          },
+          rules: {
+            timeLimit: lot?.rules?.timeLimit ?? 24,
+            automaticReleaseTime: lot?.rules?.automaticReleaseTime ?? 0.5,
+            notShowingUpPenalty: lot?.rules?.notShowingUpPenalty ?? 10,
+            overTimeScale: lot?.rules?.overTimeScale ?? 1.5,
+          },
+          averagePrice: lot.averagePrice,
+        });
+      }
+    }, [lot]); // Dependency on 'lot' prop
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     // Handle form submission
     console.log("Lot data: ", lot);
     let payload = {
-      id: lot?.id || null,
+      id: lot?.id ?? null,
       name: formData.name,
       location: formData.location,
-      timeLimit: formData.rules.timeLimit,
+      timeLimit: formData?.rules.timeLimit,
       automaticReleaseTime: formData.rules.automaticReleaseTime,
       notShowingUpPenalty: formData.rules.notShowingUpPenalty,
       overTimeScale: formData.rules.overTimeScale,
-      parkingTypes: formData.spotTypes,
+      parkingTypes: {
+        REGULAR: {
+          capacity: formData.spotTypes.REGULAR.capacity,
+          basePricePerHour: formData.spotTypes.REGULAR.basePricePerHour,
+        },
+        DISABLED: {
+          capacity: formData.spotTypes.DISABLED.capacity,
+          basePricePerHour: formData.spotTypes.DISABLED.basePricePerHour,
+        },
+        EV_CHARGING: {
+          capacity: formData.spotTypes.EV_CHARGING.capacity,
+          basePricePerHour: formData.spotTypes.EV_CHARGING.basePricePerHour,
+        },
+      },
       averagePrice: formData.averagePrice > 0 ? formData.averagePrice : getAveragePrice(formData.spotTypes)
     };
     console.log('Form data:', payload);

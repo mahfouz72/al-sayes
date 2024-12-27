@@ -52,6 +52,7 @@ const handleUpdateLot = async (payload) => {
     let headers = {
       'Authorization': `Bearer ${token}`
     };
+    console.log("Inside handle update lot: ", payload);
     await axios.put(`${config.BASE_API_URL}/lots/update`, payload, { headers });
     return;
   } catch (error) {

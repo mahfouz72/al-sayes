@@ -108,32 +108,10 @@ public class ParkingLotService {
             return false;
         }
 
-        // Map the incoming DTO to the entity
-        ParkingLot lotToUpdate = parkingLotMapper.fromDTO(parkingLotDTO, id);  // Update the ParkingLot entity with the DTO values
-
-        // Update parking lot properties
+        ParkingLot lotToUpdate = parkingLotMapper.fromDTO(parkingLotDTO, id);
+        lotToUpdate.setName(parkingLotDTO.getName());
+        lotToUpdate.setLocation(parkingLotDTO.getLocation());
         parkingLotDAO.update(lotToUpdate.getId(), lotToUpdate);
-
-        // If parking types have changed, update the parking spots
-        if (parkingLotDTO.getParkingTypes() != null) {
-            for (Map.Entry<ParkingType, ParkingTypeDetails> entry : parkingLotDTO.getParkingTypes().entrySet()) {
-                ParkingType type = entry.getKey();
-                ParkingTypeDetails typeDetails = entry.getValue();
-
-                // Check if the existing parking spots need updating
-                List<ParkingSpot> spotsToUpdate = parkingSpotDAO.listAllSpotsFilterByLotId(id);
-                for (ParkingSpot spot : spotsToUpdate) {
-                    if (!spot.getType().equals(type.name())) {
-                        // Update spot type and price
-                        spot.setType(type.name());
-                        spot.setCost(typeDetails.getBasePricePerHour());
-                        spot.setCurrentStatus("AVAILABLE");  // Reset to available or as required
-                        parkingSpotDAO.update(Pair.of(spot.getId(), spot.getLotId()), spot);
-                    }
-                }
-            }
-        }
-
         return true;
     }
 }

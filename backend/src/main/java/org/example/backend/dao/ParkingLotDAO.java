@@ -69,10 +69,10 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
 
     @Override
     public void update(Long id, ParkingLot parkingLot) {
-        String sql = "UPDATE ParkingLot SET location = ?, time_limit = ?, " +
+        String sql = "UPDATE ParkingLot SET name = ?, location = ?, time_limit = ?, " +
                      "automatic_release_time = ?, not_showing_up_penalty = ?, " +
                      "over_time_scale = ? WHERE id = ?";
-        jdbcTemplate.update(sql, parkingLot.getLocation(),
+        jdbcTemplate.update(sql, parkingLot.getName(), parkingLot.getLocation(),
                 parkingLot.getTimeLimit(), parkingLot.getAutomaticReleaseTime(),
                 parkingLot.getNotShowingUpPenalty(), parkingLot.getOverTimeScale(),
                 id);
