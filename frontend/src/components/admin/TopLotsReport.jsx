@@ -19,9 +19,9 @@ export default function TopLotsReport() {
     try {
       let response;
       if (method === 'POST') {
-        response = await axios.post(url, data, headers);
+        response = await axios.post(url, data, { headers });
       } else {
-        response = await axios.get(url, headers);
+        response = await axios.get(url, { headers });
       }
       setter(response.data);
       console.log(response.data);
