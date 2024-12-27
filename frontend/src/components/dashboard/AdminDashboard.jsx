@@ -141,13 +141,15 @@ export default function AdminDashboard() {
             setUserStatus,
             "POST",
             { username }
-        );
-        fetchData(
-            `http://localhost:8080/api/statistics/users?page=${currentPage}&size=${pageSize}`,
-            setUsers,
-            "POST",
-            { currentPage, pageSize }
-        );
+        ).then(() => {
+            // After the unblock action is successful, refetch the users
+            fetchData(
+                `http://localhost:8080/api/statistics/users?page=${currentPage}&size=${pageSize}`,
+                setUsers,
+                "POST",
+                { currentPage, pageSize }
+            );
+        });
     };
 
     const handleDisableUser = (username) => {
@@ -156,13 +158,15 @@ export default function AdminDashboard() {
             setUserStatus,
             "POST",
             { username }
-        );
-        fetchData(
-            `http://localhost:8080/api/statistics/users?page=${currentPage}&size=${pageSize}`,
-            setUsers,
-            "POST",
-            { currentPage, pageSize }
-        );
+        ).then(() => {
+            // After the unblock action is successful, refetch the users
+            fetchData(
+                `http://localhost:8080/api/statistics/users?page=${currentPage}&size=${pageSize}`,
+                setUsers,
+                "POST",
+                { currentPage, pageSize }
+            );
+        });
     };
 
     return (
@@ -281,7 +285,6 @@ export default function AdminDashboard() {
                                 <th className="px-6 py-3 border-b">Actions</th>
                             </tr>
                         </thead>
-                        {/* align the table data to the center */}
                         <tbody className="text-center">
                             {users.map((user) => (
                                 <tr key={user.username}>
@@ -325,7 +328,9 @@ export default function AdminDashboard() {
                                         <button
                                             className="text-green-500 hover:text-green-700 mr-2"
                                             onClick={() =>
-                                                handleActivateUser(user)
+                                                handleActivateUser(
+                                                    user.username
+                                                )
                                             }
                                         >
                                             Activate
@@ -333,7 +338,7 @@ export default function AdminDashboard() {
                                         <button
                                             className="text-red-500 hover:text-red-700"
                                             onClick={() =>
-                                                handleDisableUser(user)
+                                                handleDisableUser(user.username)
                                             }
                                         >
                                             Disable

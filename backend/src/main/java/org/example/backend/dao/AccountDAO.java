@@ -24,6 +24,7 @@ public class AccountDAO implements DAO<Account, Long>  {
         account.setEmail(rs.getString("email"));
         account.setPassword(rs.getString("password"));
         account.setRole(rs.getString("role_name"));
+        account.setStatus(UserStatus.valueOf(rs.getString("status")));
         return account;
     };
 
@@ -123,5 +124,10 @@ public class AccountDAO implements DAO<Account, Long>  {
     public void unblockUser(String username) {
         String sql = "UPDATE Account SET status = ? WHERE username = ?";
         jdbcTemplate.update(sql, UserStatus.ACTIVE.name(), username);
+    }
+
+    public boolean isActive(String username) {
+        String sql = "SELECT status FROM Account WHERE username = ?";
+        return UserStatus.ACTIVE.name().equals(jdbcTemplate.queryForObject(sql, String.class, username));
     }
 }
