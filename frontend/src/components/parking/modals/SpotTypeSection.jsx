@@ -25,7 +25,7 @@ export function SpotTypeSection({ spotTypes, onUpdate }) {
                 value={data.capacity}
                 onChange={(e) => onUpdate(type, 'capacity', Number(e.target.value))}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                min={1}
+                min={0}
                 required
               />
             </div>
