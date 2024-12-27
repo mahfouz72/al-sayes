@@ -1,6 +1,7 @@
 package org.example.backend.entity;
 
 
+import org.springframework.data.util.Pair;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,6 +19,8 @@ public class ParkingLot {
     private Long managedBy; // user id
 
     private String location;
+    private double latitude;
+    private double longitude;
     // Longest possible reservation duration
     private double timeLimit;
 

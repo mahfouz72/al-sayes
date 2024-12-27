@@ -9,6 +9,8 @@ public class ParkingLotCard {
     private Long id;
     private String name;
     private String location;
+    private double latitude;
+    private double longitude;
     private double averagePrice;
     private int totalSpots;
     private int availableSpots;

@@ -5,6 +5,7 @@ import org.example.backend.dto.ParkingLotDetails;
 import org.example.backend.entity.ParkingLot;
 import org.example.backend.entity.ParkingSpot;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.util.Pair;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -27,6 +28,8 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
         parkingLot.setId(rs.getLong("id"));
         parkingLot.setName(rs.getString("name"));
         parkingLot.setLocation(rs.getString("location"));
+        parkingLot.setLatitude(rs.getDouble("latitude"));
+        parkingLot.setLongitude(rs.getDouble("longitude"));
         parkingLot.setAutomaticReleaseTime(rs.getDouble("automatic_release_time"));
         parkingLot.setTimeLimit(rs.getDouble("time_limit"));
         parkingLot.setOverTimeScale(rs.getDouble("over_time_scale"));
@@ -46,13 +49,14 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
 
     @Override
     public void insert(ParkingLot parkingLot) {
-        String sql = "INSERT INTO ParkingLot(name, managed_by, location, " +
-                     "time_limit, automatic_release_time, not_showing_up_penalty, over_time_scale) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sql, parkingLot.getName(), parkingLot.getManagedBy(),
-                parkingLot.getLocation(), parkingLot.getTimeLimit(),
-                parkingLot.getAutomaticReleaseTime(), parkingLot.getNotShowingUpPenalty(),
-                parkingLot.getOverTimeScale());
+    String sql = "INSERT INTO ParkingLot(name, managed_by, location, latitude, longitude, " +
+                 "time_limit, automatic_release_time, not_showing_up_penalty, over_time_scale) " +
+                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    jdbcTemplate.update(sql, parkingLot.getName(), parkingLot.getManagedBy(),
+            parkingLot.getLocation(), parkingLot.getLatitude(), parkingLot.getLongitude(),
+            parkingLot.getTimeLimit(),
+            parkingLot.getAutomaticReleaseTime(), parkingLot.getNotShowingUpPenalty(),
+            parkingLot.getOverTimeScale());
     }
 
     @Override
@@ -69,10 +73,10 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
 
     @Override
     public void update(Long id, ParkingLot parkingLot) {
-        String sql = "UPDATE ParkingLot SET location = ?, time_limit = ?, " +
-                     "automatic_release_time = ?, not_showing_up_penalty = ?, " +
-                     "over_time_scale = ? WHERE id = ?";
-        jdbcTemplate.update(sql, parkingLot.getLocation(),
+        String sql = "UPDATE ParkingLot SET location = ?, latitude = ?, longitude = ?, " +
+                "time_limit = ?, automatic_release_time = ?, not_showing_up_penalty = ?, " +
+                "over_time_scale = ? WHERE id = ?";
+        jdbcTemplate.update(sql, parkingLot.getLocation(), parkingLot.getLatitude(), parkingLot.getLongitude(),
                 parkingLot.getTimeLimit(), parkingLot.getAutomaticReleaseTime(),
                 parkingLot.getNotShowingUpPenalty(), parkingLot.getOverTimeScale(),
                 id);
@@ -147,12 +151,14 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
                 p.id AS lot_id,
                 p.name AS lot_name,
                 p.location,
+                p.latitude,
+                p.longitude,
                 IFNULL(ROUND(AVG(ps.cost), 2), 0) AS average_price,
                 COUNT(ps.id) AS total_spots,
                 COUNT(CASE WHEN ps.current_status = 'AVAILABLE' THEN 1 END) AS available_spots,
                 COUNT(CASE WHEN ps.type = 'REGULAR' THEN 1 END) AS regular_spots,
                 COUNT(CASE WHEN ps.type = 'DISABLED' THEN 1 END) AS disabled_spots,
-                COUNT(CASE WHEN ps.type = 'EV' THEN 1 END) AS ev_spots
+                COUNT(CASE WHEN ps.type = 'EV_CHARGING' THEN 1 END) AS ev_spots
             FROM 
                 ParkingLot p
             LEFT JOIN 
@@ -166,6 +172,8 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
             card.setId(rs.getLong("lot_id"));
             card.setName(rs.getString("lot_name"));
             card.setLocation(rs.getString("location"));
+            card.setLatitude(rs.getDouble("latitude"));
+            card.setLongitude(rs.getDouble("longitude"));
             card.setAveragePrice(rs.getDouble("average_price"));
             card.setTotalSpots(rs.getInt("total_spots"));
             card.setAvailableSpots(rs.getInt("available_spots"));
@@ -174,13 +182,5 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
             card.setEvSpots(rs.getInt("ev_spots"));
             return card;
         });
-    }
-
-    public static void main(String[] args) {
-        ParkingLotDAO parkingLotDAO = new ParkingLotDAO(null);
-        List<ParkingLotCard> cards = parkingLotDAO.getLotsCards();
-        for (ParkingLotCard card : cards) {
-            System.out.println(card);
-        }
     }
 }

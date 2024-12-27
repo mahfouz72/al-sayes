@@ -1,15 +1,18 @@
 import { useState } from "react";
 import { MapPinIcon, ClockIcon } from "@heroicons/react/24/outline";
+import NavigationButton from "../map/NavigationButton";
+import NavigationModal from "../map/NavigationModal";
 
 export default function ParkingLotCard({ lot, onReserve }) {
     const [showDetails, setShowDetails] = useState(false);
+    const [showNavigation, setShowNavigation] = useState(false);
 
     return (
         <div className="bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
             <div className="p-6">
                 <div className="flex justify-between items-start">
                     <div>
-                        <h3 className="text-xl font-bold text-gray-900">
+                        <h3 className="text-xl font-bold text-gray-900 h-16 overflow-elipsis mt-1">
                             {lot.name}
                         </h3>
                         <div className="flex items-center mt-2 text-gray-600">
@@ -60,13 +63,14 @@ export default function ParkingLotCard({ lot, onReserve }) {
                     </div>
                 </div>
 
-                <div className="mt-6 flex gap-4">
+                <div className="mt-5 flex gap-3 text-sm">
                     <button
                         onClick={() => onReserve(lot)}
                         className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                     >
                         Reserve Spot
                     </button>
+                    <NavigationButton onClick={() => setShowNavigation(true)} />
                     <button
                         onClick={() => setShowDetails(!showDetails)}
                         className="flex-1 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
@@ -87,13 +91,21 @@ export default function ParkingLotCard({ lot, onReserve }) {
                             <ul className="text-sm text-gray-600 list-disc list-inside">
                                 <li>Security cameras</li>
                                 <li>24/7 security personnel</li>
-                                <li>EV charging stations</li>
+                                {lot.evSpots > 0 && (
+                                    <li>EV charging stations</li>
+                                )}
                                 <li>Covered parking</li>
                             </ul>
                         </div>
                     </div>
                 )}
             </div>
+
+            <NavigationModal
+                isOpen={showNavigation}
+                onClose={() => setShowNavigation(false)}
+                destination={lot}
+            />
         </div>
     );
 }
