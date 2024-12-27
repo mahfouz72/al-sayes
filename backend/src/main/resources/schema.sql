@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS ParkingSpot (
     current_status varchar(255) NOT NULL,
     type varchar(255) NOT NULL,
     PRIMARY KEY (id, lot_id),
-    FOREIGN KEY (lot_id) REFERENCES ParkingLot(id)
+    FOREIGN KEY (lot_id) REFERENCES ParkingLot(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Driver (

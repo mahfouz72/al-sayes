@@ -60,6 +60,21 @@ const handleUpdateLot = async (payload) => {
   }
 };
 
+// Update an existing lot
+const handleDeleteLot = async (lotId) => {
+  try {
+    const token = getUserToken();
+    let headers = {
+      'Authorization': `Bearer ${token}`
+    };
+    await axios.delete(`${config.BASE_API_URL}/lots/delete/${lotId}`, { headers });
+    return;
+  } catch (error) {
+    console.error('Error deleting lot:', error);
+    throw error;
+  }
+};
+
 export default {
-  getParkingLots, handleCreateNewLot, handleUpdateLot, getParkingLotsCardsViewInManager
+  getParkingLots, handleCreateNewLot, handleUpdateLot, getParkingLotsCardsViewInManager, handleDeleteLot
 };

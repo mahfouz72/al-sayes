@@ -44,6 +44,23 @@ public class ParkingLotController {
         }
         return ResponseEntity.ok(lots);
     }
+    @DeleteMapping("/delete/{lotId}")
+    public ResponseEntity<Void> deleteLot(@PathVariable Long lotId) {
+        Optional<Account> currentUserOptional = authenticationService.getCurrentAccount();
+        if (currentUserOptional.isEmpty()) {
+            return ResponseEntity.status(401).build();
+        }
+        Account currentUser = currentUserOptional.get();
+        if (!"ROLE_MANAGER".equals(currentUser.getRole())
+            && !"ROLE_ADMIN".equals(currentUser.getRole())) {
+            return ResponseEntity.status(401).build();
+        }
+        if (this.parkingLotService.deleteParkingLot(lotId)) {
+            return ResponseEntity.ok().build();
+        }
+        else
+            return ResponseEntity.status(400).build();
+    }
     @GetMapping("/get/cards")
     public ResponseEntity<List<ParkingLotCard>> listParkingLotsCards() {
         List<ParkingLotCard> lots = this.parkingLotService.findAllParkingLotsCards();

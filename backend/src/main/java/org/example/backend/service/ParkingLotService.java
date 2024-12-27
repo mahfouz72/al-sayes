@@ -89,4 +89,13 @@ public class ParkingLotService {
     public List<ParkingLotCard> findAllParkingLotsCards() {
         return parkingLotDAO.getLotsCards();
     }
+
+    public boolean deleteParkingLot(Long lotId) {
+        Optional<ParkingLot> lot = parkingLotDAO.getByPK(lotId);
+        if (lot.isEmpty()) {
+            return false;
+        }
+        parkingLotDAO.delete(lotId);
+        return true;
+    }
 }

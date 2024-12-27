@@ -74,8 +74,10 @@ export default function ManageLots() {
     setShowAddEditModal(true);
   };
 
-  const handleDeleteLot = (lotId) => {
+  const handleDeleteLot = async (lotId) => {
     if (window.confirm('Are you sure you want to delete this parking lot?')) {
+      await LotAPI.handleDeleteLot(lotId);
+      console.log("Deleted successfully with lot Id: ", lotId);
       setParkingLots(parkingLots.filter(lot => lot.id !== lotId));
     }
   };
