@@ -31,8 +31,8 @@ public class DriverDAO implements DAO<Driver, Long> {
         String getAccountIdSql = "SELECT LAST_INSERT_ID()";
         Long accountId = jdbcTemplate.queryForObject(getAccountIdSql, Long.class);
 
-        String DriverSql = "INSERT INTO Driver(account_id, license_plate) VALUES(?,?)";
-        jdbcTemplate.update(DriverSql, accountId, driver.getLicensePlate());
+        String DriverSql = "INSERT INTO Driver(account_id, license_plate, payment_method) VALUES(?, ?, ?)";
+        jdbcTemplate.update(DriverSql, accountId, driver.getLicensePlate(), driver.getPaymentMethod().name());
     }
 
     @Override

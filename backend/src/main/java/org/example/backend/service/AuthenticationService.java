@@ -55,6 +55,7 @@ public class AuthenticationService {
         Driver driver = Driver.builder()
                 .account(account)
                 .licensePlate(registrationDTO.licensePlate())
+                .paymentMethod(registrationDTO.paymentMethod())
                 .build();
         driverDAO.insert(driver);
     }
