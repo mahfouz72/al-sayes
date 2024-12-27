@@ -224,7 +224,7 @@ export default function AdminDashboard() {
                 </td>
                 <td className="px-6 py-4 border-b">Active</td>
                 <td className="px-6 py-4 border-b">
-                  <button className="text-blue-500 hover:text-blue-700 mr-2">Edit</button>
+                  <button className="text-green-500 hover:text-green-700 mr-2">Activate</button>
                   <button className="text-red-500 hover:text-red-700">Disable</button>
                 </td>
               </tr>
