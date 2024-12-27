@@ -17,4 +17,5 @@ public class ParkingLotCard {
     private int regularSpots;
     private int disabledSpots;
     private int evSpots;
+    private double timeLimit;
 }
