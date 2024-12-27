@@ -19,8 +19,8 @@ export default function ManagerDashboard() {
     const [selectedLot, setSelectedLot] = useState(parkingLots[0]);
     const [selectedLotSpots, setSelectedLotSpots] = useState([]); // Store spots for selected lot
     const [showSpotGrid, setShowSpotGrid] = useState(false);
+    // Fetch all parking lots when the page first renders
     useEffect(() => {
-        // Fetch all parking lots when the page first renders
         LotAPI.getParkingLots()
             .then((response) => {
                 setParkingLots(response);
@@ -47,11 +47,17 @@ export default function ManagerDashboard() {
                 },
                 debug: (str) => console.log(str),
                 onConnect: () => {
-                    console.log('Connected to WebSocket');
-                    client.subscribe(`/app/spots/${selectedLot.id}`, (message) => {
-                        const spots = JSON.parse(message.body);
-                        console.log("spots received in ws: ", spots);
-                        setSelectedLotSpots(spots);
+                    console.log('Connected to WebSocket in selectedLot.id = ' + selectedLot.id);
+                    // Subscribe to the topic where the backend will send the parking spots
+                    client.subscribe(`/topic/spots/${selectedLot.id}`, (message) => {
+                        const spots = JSON.parse(message.body); // Parse the spots from the response
+                        console.log("Received spots:", spots);
+                        setSelectedLotSpots(spots); // Update the state with the parking spots
+                    });
+
+                    // Send a message to the backend (with selected lot ID) to request parking spots
+                    client.publish({
+                        destination: `/app/spots/${selectedLot.id}`, // Send request to backend
                     });
                 },
                 onStompError: (frame) => {
