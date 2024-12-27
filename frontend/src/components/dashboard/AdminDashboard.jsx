@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
 import axios from 'axios';
+import { AlertCircle } from 'lucide-react';
 
 export default function AdminDashboard() {
   const [users, setUsers] = useState([]);
@@ -13,6 +14,7 @@ export default function AdminDashboard() {
   const [limit, setLimit] = useState(10);
   const [editingUser, setEditingUser] = useState(null);
   const [role, setRole] = useState('');
+  const [limitError, setLimitError] = useState('');
 
 
 
@@ -60,10 +62,35 @@ export default function AdminDashboard() {
 
   const handleLimit = (e) => {
     const value = e.target.value;
-    if (value === '' || !isNaN(value)) {
-      setLimit(value);
+    const numValue = parseInt(value, 10);
+    
+    // Clear error when input is empty
+    if (value === '') {
+      setLimit('');
+      setLimitError('');
+      return;
     }
+    
+    // Validate input
+    if (isNaN(numValue)) {
+      setLimitError('Please enter a valid number');
+      return;
+    }
+    
+    if (numValue < 1) {
+      setLimitError('Limit must be at least 1');
+      return;
+    }
+    
+    if (numValue > 100) {
+      setLimitError('Limit cannot exceed 100');
+      return;
+    }
+    
+    setLimit(numValue);
+    setLimitError('');
   };
+
 
   const roleMapping = {
     ROLE_USER: "User",
@@ -79,11 +106,6 @@ export default function AdminDashboard() {
       user.username === username ? { ...user, role: newRole } : user
     );
     setEditingUser(updatedUsers);
-  };
-
-  const handleEditClick = (user) => {
-    setEditingUser(user.username);
-    setRole(user.role); 
   };
 
 
@@ -117,20 +139,35 @@ export default function AdminDashboard() {
           <p className="text-2xl">${systemStats.totalRevenue}</p>
         </div>
       </div>
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Number of days to display in graphs
+        </label>
+        <div className="relative">
+          <input
+            type="number"
+            min="1"
+            max="100"
+            placeholder="Enter days (1-100)"
+            value={limit}
+            onChange={handleLimit}
+            className={`
+              w-48 px-4 py-2 border rounded-md shadow-sm
+              focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+              ${limitError ? 'border-red-500' : 'border-gray-300'}
+            `}
+          />
+          {limitError && (
+            <div className="absolute mt-1 flex items-center text-sm text-red-600">
+              <AlertCircle className="w-4 h-4 mr-1" />
+              {limitError}
+            </div>
+          )}
+        </div>
+      </div>
 
       <div className="mb-8 flex flex-wrap">
         <h2 className="text-xl font-semibold mb-4">Revenue Trend</h2>
-        <input
-          placeholder="Limit"
-          value={limit}
-          onChange={handleLimit}
-          style={{
-            border: '1px solid black',
-            padding: '2px 2px 2px 2px',
-            margin: '10px 10px 10px 10px',
-            fontSize: '14px',
-            borderRadius: '5px'
-           }}/>
         <div className="w-full overflow-x-auto">
           <LineChart width={1400} height={300} data={systemRevenueGraph}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -153,8 +190,6 @@ export default function AdminDashboard() {
           </LineChart>
         </div>
       </div>
-
-      
 
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4">User Management</h2>

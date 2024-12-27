@@ -68,16 +68,24 @@ public class StatisticsDAO {
     }
 
     public List<Map<String, Object>> getParkingSlotsWithRevenueAndOccupancy(int limit) {
-        String sql = "SELECT name, COALESCE(SUM(price), 0) AS total_revenue, SUM(0) AS occupancy_rate " +
-                     "FROM ParkingLot JOIN Reservation ON ParkingLot.id = lot_id " +
-                     "GROUP BY lot_id ORDER BY total_revenue DESC LIMIT ?";
+        String sql = """
+                     SELECT name,
+                     COALESCE(SUM(price+penalty), 0) AS total_revenue,
+                     COUNT(DISTINCT CASE WHEN ps.current_status = 'OCCUPIED' THEN ps.id END) * 100.0 / COUNT(DISTINCT ps.id) AS occupancy_rate
+                     FROM ParkingLot p
+                     JOIN Reservation r ON p.id = r.lot_id
+                     JOIN ParkingSpot ps ON ps.lot_id = p.id
+                     GROUP BY r.lot_id
+                     ORDER BY total_revenue DESC
+                     LIMIT ?;
+        """;
         return jdbcTemplate.queryForList(sql, limit);
     }
 
     public List<Map<String, Object>> getTopUsersWithMostReservations(int limit) {
         String sql = "SELECT username, COUNT(*) as total_reservations, COALESCE(SUM(price+penalty), 0) as total_spent " +
                      "FROM Reservation JOIN Account ON driver_id = id " +
-                     "GROUP BY driver_id ORDER BY total_reservations, total_revenue DESC LIMIT ?";
+                     "GROUP BY driver_id ORDER BY total_reservations, total_spent DESC LIMIT ?";
         return jdbcTemplate.queryForList(sql, limit);
     }
 
@@ -90,7 +98,6 @@ public class StatisticsDAO {
                 ) AS temp
                 ORDER BY date ASC
         """;
-
         return jdbcTemplate.queryForList(sql, limit);
     }
 
@@ -103,7 +110,6 @@ public class StatisticsDAO {
                 ) AS temp
                 ORDER BY date ASC
         """;
-
         return jdbcTemplate.queryForList(sql, limit);
     }
 
