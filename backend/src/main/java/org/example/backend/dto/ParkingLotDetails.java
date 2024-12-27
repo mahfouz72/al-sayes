@@ -20,6 +20,8 @@ public class ParkingLotDetails {
     private String name;
     private int capacity;
     private String location;
+    private double latitude;
+    private double longitude;
     private double occupancyRate;
     private double revenue;
     private double violations;

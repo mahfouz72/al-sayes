@@ -17,6 +17,8 @@ public class ParkingLotDTO {
     private String name;
 
     private String location;
+    private double latitude;
+    private double longitude;
 
     // Longest possible reservation duration
     private double timeLimit;

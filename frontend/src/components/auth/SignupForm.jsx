@@ -23,10 +23,11 @@ export default function SignupForm() {
         try {
             setError("");
 
-            if (data.role === "Driver" && !data.licensePlate) {
-                setError("License plate is required for drivers.");
+            if (data.role === "Driver" && (!data.licensePlate || !data.paymentMethod)) {
+                setError("License plate and payment method are required for drivers.");
                 return;
             }
+            const paymentMethod = data.paymentMethod.toUpperCase();
 
             const response = await axios.post(
                 "http://localhost:8080/register",
@@ -35,8 +36,8 @@ export default function SignupForm() {
                     email: data.email,
                     password: data.password,
                     role: data.role,
-                    licensePlate:
-                        data.role === "Driver" ? data.licensePlate : null,
+                    licensePlate: data.role === "Driver" ? data.licensePlate : null,
+                    paymentMethod: data.role === "Driver" ? paymentMethod : null,
                 }
             );
 
@@ -157,29 +158,56 @@ export default function SignupForm() {
                             )}
                         </div>
                         {selectedRole === "Driver" && (
-                            <div>
-                                <label
-                                    htmlFor="licensePlate"
-                                    className="sr-only"
-                                >
-                                    License Plate Number
-                                </label>
-                                <input
-                                    {...register("licensePlate", {
-                                        required:
-                                            selectedRole === "Driver" &&
-                                            "License plate is required",
-                                    })}
-                                    type="text"
-                                    className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                                    placeholder="License Plate Number"
-                                />
-                                {errors.licensePlate && (
-                                    <p className="text-red-500 text-xs mt-1">
-                                        {errors.licensePlate.message}
-                                    </p>
-                                )}
-                            </div>
+                            <>
+                                <div>
+                                    <label
+                                        htmlFor="licensePlate"
+                                        className="sr-only"
+                                    >
+                                        License Plate Number
+                                    </label>
+                                    <input
+                                        {...register("licensePlate", {
+                                            required:
+                                                selectedRole === "Driver" &&
+                                                "License plate is required",
+                                        })}
+                                        type="text"
+                                        className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                                        placeholder="License Plate Number"
+                                    />
+                                    {errors.licensePlate && (
+                                        <p className="text-red-500 text-xs mt-1">
+                                            {errors.licensePlate.message}
+                                        </p>
+                                    )}
+                                </div>
+                                <div>
+                                    <label
+                                        htmlFor="paymentMethod"
+                                        className="sr-only"
+                                    >
+                                        Payment Method
+                                    </label>
+                                    <select
+                                        {...register("paymentMethod", {
+                                            required:
+                                                selectedRole === "Driver" &&
+                                                "Payment method is required",
+                                        })}
+                                        className="appearance-none block w-full px-3 py-3 border border-gray-300 bg-white rounded-md shadow-sm placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    >
+                                        <option value="">Select Payment Method</option>
+                                        <option value="Visa">Visa</option>
+                                        <option value="Cash">Cash</option>
+                                    </select>
+                                    {errors.paymentMethod && (
+                                        <p className="text-red-500 text-xs mt-1">
+                                            {errors.paymentMethod.message}
+                                        </p>
+                                    )}
+                                </div>
+                            </>
                         )}
                         <div className="relative">
                             <label htmlFor="password" className="sr-only">
