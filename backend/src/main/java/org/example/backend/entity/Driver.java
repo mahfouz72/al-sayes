@@ -3,6 +3,7 @@ package org.example.backend.entity;
 import org.example.backend.enums.PaymentMethod;
 
 import lombok.*;
+import org.example.backend.enums.PaymentMethod;
 
 @Data
 @Builder
