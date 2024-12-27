@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
 import ParkingLotCard from "../parking/ParkingLotCard";
 import ReservationModal from "../parking/ReservationModal";
 import ParkingLotsMap from "../map/ParkingLotsMap";
@@ -11,6 +12,13 @@ export default function DriverDashboard() {
     const [isReservationModalOpen, setIsReservationModalOpen] = useState(false);
     const [parkingLots, setParkingLots] = useState([]);
     const [selectedLotSpots, setSelectedLotSpots] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(6);
+
+    const totalPages = Math.ceil(parkingLots.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = currentPage * itemsPerPage;
+    const paginatedParkingLots = parkingLots.slice(startIndex, endIndex);
 
     const fetchParkingLots = async () => {
         try {
@@ -78,19 +86,6 @@ export default function DriverDashboard() {
                 </p>
             </div>
 
-            {/* <div className="mb-8">
-                <div className="max-w-xl relative">
-                    <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-3 text-gray-400" />
-                    <input
-                        type="text"
-                        placeholder="Search by location..."
-                        className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        value={searchLocation}
-                        onChange={(e) => setSearchLocation(e.target.value)}
-                    />
-                </div>
-            </div> */}
-
             <div className="mb-8">
                 <ParkingLotsMap
                     parkingLots={parkingLots}
@@ -99,13 +94,67 @@ export default function DriverDashboard() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {parkingLots.map((lot) => (
+                {paginatedParkingLots.map((lot) => (
                     <ParkingLotCard
                         key={lot.id}
                         lot={lot}
                         onReserve={handleReservation}
                     />
                 ))}
+            </div>
+
+            <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 sm:px-6">
+                <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                    <p className="text-sm text-gray-700">
+                        Showing{" "}
+                        <span className="font-medium">{startIndex + 1}</span> to{" "}
+                        <span className="font-medium">
+                            {Math.min(endIndex, parkingLots.length)}
+                        </span>{" "}
+                        of{" "}
+                        <span className="font-medium">
+                            {parkingLots.length}
+                        </span>{" "}
+                        results
+                    </p>
+                    <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                        <button
+                            onClick={() =>
+                                setCurrentPage((page) => Math.max(page - 1, 1))
+                            }
+                            disabled={currentPage === 1}
+                            className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                        >
+                            <span className="sr-only">Previous</span>
+                            <ChevronLeftIcon className="h-5 w-5" />
+                        </button>
+                        {[...Array(totalPages)].map((_, i) => (
+                            <button
+                                key={i + 1}
+                                onClick={() => setCurrentPage(i + 1)}
+                                className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                                    currentPage === i + 1
+                                        ? "z-10 bg-blue-50 border-blue-500 text-blue-600"
+                                        : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
+                                }`}
+                            >
+                                {i + 1}
+                            </button>
+                        ))}
+                        <button
+                            onClick={() =>
+                                setCurrentPage((page) =>
+                                    Math.min(page + 1, totalPages)
+                                )
+                            }
+                            disabled={currentPage === totalPages}
+                            className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                        >
+                            <span className="sr-only">Next</span>
+                            <ChevronRightIcon className="h-5 w-5" />
+                        </button>
+                    </nav>
+                </div>
             </div>
 
             <ReservationModal

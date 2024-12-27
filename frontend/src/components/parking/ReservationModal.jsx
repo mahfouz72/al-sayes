@@ -198,7 +198,6 @@ export default function ReservationModal({
                                                     type="datetime-local"
                                                     id="start-time"
                                                     min={minDateTime}
-                                                    max={maxDateTime}
                                                     value={startTime}
                                                     onChange={(e) =>
                                                         handleTimeChange(
@@ -222,7 +221,6 @@ export default function ReservationModal({
                                                     min={
                                                         startTime || minDateTime
                                                     }
-                                                    max={maxDateTime}
                                                     value={endTime}
                                                     onChange={(e) =>
                                                         handleTimeChange(

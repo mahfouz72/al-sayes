@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS Reservation (
 CREATE TABLE IF NOT EXISTS Driver (
     account_id BIGINT NOT NULL,
     license_plate VARCHAR(255) NOT NULL,
+    payment_method ENUM('CASH', 'VISA') NOT NULL,
     PRIMARY KEY (account_id),
     FOREIGN KEY (account_id) REFERENCES Account(id) ON DELETE CASCADE
 );
