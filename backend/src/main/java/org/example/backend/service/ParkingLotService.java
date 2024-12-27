@@ -14,6 +14,7 @@ import org.example.backend.entity.ParkingSpot;
 import org.example.backend.enums.ParkingType;
 import org.example.backend.mapper.ParkingLotMapper;
 import org.example.backend.mapper.ParkingSpotMapper;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -63,10 +64,10 @@ public class ParkingLotService {
         return parkingLotDAO.getLotsDetailsByManagerId(managerId);
     }
 
-    public boolean createParkingLot(ParkingLotDTO parkingLotDTO, Long id) {
+    public Long createParkingLot(ParkingLotDTO parkingLotDTO, Long id) {
         Long lotId = parkingLotDAO.insertAndReturnKey(parkingLotMapper.fromDTO(parkingLotDTO, id));
         if (lotId == null) {
-            return false;
+            return -1L;
         }
         Long index = 1L;
         for (Map.Entry<ParkingType, ParkingTypeDetails> entry : parkingLotDTO.getParkingTypes().entrySet()) {
@@ -83,10 +84,36 @@ public class ParkingLotService {
                 index++;
             }
         }
-        return true;
+        return lotId;
     }
 
     public List<ParkingLotCard> findAllParkingLotsCards() {
         return parkingLotDAO.getLotsCards();
+    }
+
+    public boolean deleteParkingLot(Long lotId) {
+        Optional<ParkingLot> lot = parkingLotDAO.getByPK(lotId);
+        if (lot.isEmpty()) {
+            return false;
+        }
+        parkingLotDAO.delete(lotId);
+        return true;
+    }
+
+    public boolean updateParkingLot(ParkingLotDTO parkingLotDTO, Long id) {
+        Optional<ParkingLot> existingLot = parkingLotDAO.getByPK(id);
+        // Check if the parking lot exists
+        if (existingLot.isEmpty()) {
+            System.out.println("ID: " + id + " not found");
+            return false;
+        }
+
+        ParkingLot lotToUpdate = parkingLotMapper.fromDTO(parkingLotDTO, id);
+        lotToUpdate.setName(parkingLotDTO.getName());
+        lotToUpdate.setLocation(parkingLotDTO.getLocation());
+        lotToUpdate.setLatitude(parkingLotDTO.getLatitude());
+        lotToUpdate.setLongitude(parkingLotDTO.getLongitude());
+        parkingLotDAO.update(lotToUpdate.getId(), lotToUpdate);
+        return true;
     }
 }

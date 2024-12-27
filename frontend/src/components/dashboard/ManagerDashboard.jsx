@@ -109,10 +109,9 @@ export default function ManagerDashboard() {
                         Total Violations
                     </h3>
                     <p className="mt-2 text-3xl font-bold text-red-600">
-                        $
                         {parkingLots
                             .reduce((sum, lot) => sum + lot.violations, 0)
-                            .toFixed(2)}
+                            }
                     </p>
                 </div>
             </div>

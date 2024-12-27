@@ -27,11 +27,8 @@ public class ParkingSpotController {
         this.parkingSpotService = parkingSpotService;
     }
 
-    @PostMapping("/{lot_id}/update")
-    public ResponseEntity<Void> updateSpotStatus(@RequestBody ParkingSpotDTO spotDTO,
-                                                            @PathVariable Long lot_id) {
-        // TODO: Fix this non-sense :)
-        spotDTO.setLotId(lot_id);
+    @PutMapping("/update")
+    public ResponseEntity<Void> updateSpotStatus(@RequestBody ParkingSpotDTO spotDTO) {
         parkingSpotService.updateParkingSpot(spotDTO);
         return ResponseEntity.ok().build();
     }
