@@ -15,6 +15,18 @@ const getParkingSpots = async (lotId) => {
   }
 };
 
+const updateParkingSpot = async(spot) => {
+  try {
+    const token = getUserToken();
+    let headers = {
+      'Authorization': `Bearer ${token}`
+    };
+    await axios.put(`${config.BASE_API_URL}/spots/update`, spot, { headers } );
+  } catch (error) {
+    console.error('Error fetching parking spots:', error);
+    throw error;
+  }
+}
 export default {
-  getParkingSpots,
+  getParkingSpots,updateParkingSpot
 };

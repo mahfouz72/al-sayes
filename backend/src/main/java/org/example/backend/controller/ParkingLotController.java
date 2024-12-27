@@ -30,7 +30,7 @@ public class ParkingLotController {
     @GetMapping("/get")
     public ResponseEntity<List<ParkingLotDetails>> listUserManagedLots() {
         Optional<Account> currentUserOptional = authenticationService.getCurrentAccount();
-        if (!currentUserOptional.isPresent()) {
+        if (currentUserOptional.isEmpty()) {
             return ResponseEntity.status(401).build();
         }
         Account currentUser = currentUserOptional.get();
@@ -44,7 +44,23 @@ public class ParkingLotController {
         }
         return ResponseEntity.ok(lots);
     }
-
+    @DeleteMapping("/delete/{lotId}")
+    public ResponseEntity<Void> deleteLot(@PathVariable Long lotId) {
+        Optional<Account> currentUserOptional = authenticationService.getCurrentAccount();
+        if (currentUserOptional.isEmpty()) {
+            return ResponseEntity.status(401).build();
+        }
+        Account currentUser = currentUserOptional.get();
+        if (!"ROLE_MANAGER".equals(currentUser.getRole())
+            && !"ROLE_ADMIN".equals(currentUser.getRole())) {
+            return ResponseEntity.status(401).build();
+        }
+        if (this.parkingLotService.deleteParkingLot(lotId)) {
+            return ResponseEntity.ok().build();
+        }
+        else
+            return ResponseEntity.status(400).build();
+    }
     @GetMapping("/get/cards")
     public ResponseEntity<List<ParkingLotCard>> listParkingLotsCards() {
         List<ParkingLotCard> lots = this.parkingLotService.findAllParkingLotsCards();
@@ -55,9 +71,9 @@ public class ParkingLotController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Void> createParkingLot(@RequestBody ParkingLotDTO parkingLotDTO) {
+    public ResponseEntity<Long> createParkingLot(@RequestBody ParkingLotDTO parkingLotDTO) {
         Optional<Account> currentUserOptional = authenticationService.getCurrentAccount();
-        if (!currentUserOptional.isPresent()) {
+        if (currentUserOptional.isEmpty()) {
             return ResponseEntity.status(401).build();
         }
         Account currentUser = currentUserOptional.get();
@@ -65,7 +81,25 @@ public class ParkingLotController {
         && !"ROLE_ADMIN".equals(currentUser.getRole())) {
             return ResponseEntity.status(401).build();
         }
-        if (this.parkingLotService.createParkingLot(parkingLotDTO, currentUser.getId())) {
+        Long id = this.parkingLotService.createParkingLot(parkingLotDTO, currentUser.getId());
+        if (id != -1) {
+            return ResponseEntity.ok(id);
+        }
+        return ResponseEntity.status(400).build();
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<Void> updateParkingLot(@RequestBody ParkingLotDTO parkingLotDTO) {
+        Optional<Account> currentUserOptional = authenticationService.getCurrentAccount();
+        if (currentUserOptional.isEmpty()) {
+            return ResponseEntity.status(401).build();
+        }
+        Account currentUser = currentUserOptional.get();
+        if (!"ROLE_MANAGER".equals(currentUser.getRole())
+        && !"ROLE_ADMIN".equals(currentUser.getRole())) {
+            return ResponseEntity.status(401).build();
+        }
+        if (this.parkingLotService.updateParkingLot(parkingLotDTO, parkingLotDTO.getId())) {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.status(400).build();

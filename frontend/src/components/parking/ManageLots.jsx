@@ -1,59 +1,87 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import ParkingSpotGrid from './ParkingSpotGrid';
 import AddEditLotModal from './modals/AddEditLotModal';
 import SpotManagementModal from './modals/SpotManagementModal';
-
-const mockParkingLots = [
-  {
-    id: 1,
-    name: 'Downtown Parking',
-    location: '123 Main St',
-    totalSpots: 100,
-    pricePerHour: 5,
-    spots: Array(100).fill(null).map((_, i) => ({
-      id: i + 1,
-      number: `A${i + 1}`,
-      type: i < 80 ? 'REGULAR' : i < 90 ? 'DISABLED' : 'EV',
-      status: Math.random() > 0.5 ? 'AVAILABLE' : 'OCCUPIED'
-    }))
-  },
-  {
-    id: 2,
-    name: 'Mall Parking',
-    location: '456 Shopping Ave',
-    totalSpots: 150,
-    pricePerHour: 3,
-    spots: Array(150).fill(null).map((_, i) => ({
-      id: i + 1,
-      number: `B${i + 1}`,
-      type: i < 120 ? 'REGULAR' : i < 140 ? 'DISABLED' : 'EV',
-      status: Math.random() > 0.5 ? 'AVAILABLE' : 'OCCUPIED'
-    }))
-  }
-];
+import LotAPI from '../../apis/LotAPI';
+import SpotAPI from '../../apis/SpotAPI';
 
 export default function ManageLots() {
-  const [parkingLots, setParkingLots] = useState(mockParkingLots);
+  const [parkingLots, setParkingLots] = useState([]);
   const [selectedLot, setSelectedLot] = useState(null);
   const [showSpotGrid, setShowSpotGrid] = useState(false);
   const [showAddEditModal, setShowAddEditModal] = useState(false);
   const [showSpotModal, setShowSpotModal] = useState(false);
   const [selectedSpot, setSelectedSpot] = useState(null);
   const [editingLot, setEditingLot] = useState(null);
+  const [selectedLotSpots, setSelectedLotSpots] = useState([])  // Store spots for selected lot
+
+  useEffect(() => {
+    // Fetch all parking lots when the page first renders
+    LotAPI.getParkingLotsCardsViewInManager()
+      .then(response => {
+        console.log("Response before conversion: ", response);
+        const responseConverted = response.map( lot => ({
+          id: lot.id,
+          name: lot.name,
+          location: lot.location,
+          latitude: lot.latitude,
+          longitude: lot.longitude,
+          timeLimit: 0, // Assuming default value as it's not present in response
+          automaticReleaseTime: 0, // Assuming default value as it's not present in response
+          notShowingUpPenalty: 0, // Assuming default value as it's not present in response
+          overTimeScale: 0, // Assuming default value as it's not present in response,
+          parkingTypes: {
+            REGULAR: { capacity: lot.regularSpots, basePricePerHour: 0 },
+            EV_CHARGING: { capacity: lot.evSpots, basePricePerHour: 0 },
+            DISABLED: { capacity: lot.disabledSpots, basePricePerHour: 0 }
+          },
+          averagePrice: lot.averagePrice
+        }));
+        console.log("Response after conversion: ", responseConverted);
+        setParkingLots(responseConverted);
+      })
+      .catch(error => {
+        console.error('There was an error fetching the parking lots data:', error)
+      })
+  }, [])
+
+  // Fetch parking spots when selected lot changes
+  useEffect(() => {
+    if (selectedLot) {
+      SpotAPI.getParkingSpots(selectedLot.id)
+        .then(response => {
+          setSelectedLotSpots(response)
+        })
+        .catch(error => {
+          console.error('Error fetching parking spots:', error)
+        })
+    }
+  }, [selectedLot])
 
   const handleAddLot = () => {
     setEditingLot(null);
     setShowAddEditModal(true);
   };
-
+  const handleSaveLot = (lot, newlyCreated) => {
+    if (newlyCreated) {
+      setParkingLots([...parkingLots, lot]);
+    } else {
+      setParkingLots(parkingLots.map(existingLot => 
+        existingLot.id === lot.id ? lot : existingLot
+      ));
+    }
+  };
   const handleEditLot = (lot) => {
+    console.log("Editing lot: ", lot);
     setEditingLot(lot);
     setShowAddEditModal(true);
   };
 
-  const handleDeleteLot = (lotId) => {
+  const handleDeleteLot = async (lotId) => {
     if (window.confirm('Are you sure you want to delete this parking lot?')) {
+      await LotAPI.handleDeleteLot(lotId);
+      console.log("Deleted successfully with lot Id: ", lotId);
       setParkingLots(parkingLots.filter(lot => lot.id !== lotId));
     }
   };
@@ -63,11 +91,14 @@ export default function ManageLots() {
     setShowSpotModal(true);
   };
 
-  const handleAddSpot = () => {
-    setSelectedSpot(null);
-    setShowSpotModal(true);
+  const handleSaveSpot = (spot) => {
+    setSelectedLotSpots(selectedLotSpots.map(existingSpot => 
+      existingSpot.id === spot.id ? spot : existingSpot
+    ));
   };
-
+  const getTotalCapacity = (parkingTypes)  => {
+    return Object.values(parkingTypes).reduce((total, type) => total + type.capacity, 0);
+  };
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="sm:flex sm:items-center sm:justify-between">
@@ -104,7 +135,7 @@ export default function ManageLots() {
                       Total Spots
                     </th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Price/Hour
+                      Average Price/Hour
                     </th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                       Status
@@ -121,8 +152,8 @@ export default function ManageLots() {
                         {lot.name}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{lot.location}</td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{lot.totalSpots}</td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">${lot.pricePerHour}</td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{getTotalCapacity(lot.parkingTypes)}</td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">${lot.averagePrice}</td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">
                           Active
@@ -162,7 +193,7 @@ export default function ManageLots() {
 
       {selectedLot && showSpotGrid && (
         <div className="mt-8">
-          <div className="flex justify-between items-center mb-4">
+          {/* <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold">{selectedLot.name} - Spot Layout</h2>
             <button
               onClick={handleAddSpot}
@@ -171,9 +202,9 @@ export default function ManageLots() {
               <PlusIcon className="-ml-0.5 mr-1.5 h-5 w-5" />
               Add Spot
             </button>
-          </div>
+          </div> */}
           <ParkingSpotGrid
-            spots={selectedLot.spots}
+            spots={selectedLotSpots}
             onSpotSelect={handleSpotUpdate}
             isManager={true}
           />
@@ -183,6 +214,7 @@ export default function ManageLots() {
       <AddEditLotModal
         isOpen={showAddEditModal}
         onClose={() => setShowAddEditModal(false)}
+        onSaveLot={handleSaveLot}
         lot={editingLot}
       />
 
@@ -190,6 +222,7 @@ export default function ManageLots() {
         isOpen={showSpotModal}
         onClose={() => setShowSpotModal(false)}
         spot={selectedSpot}
+        onSaveSpot = {handleSaveSpot}
       />
     </div>
   );
