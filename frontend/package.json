@@ -12,6 +12,7 @@
   "dependencies": {
     "@headlessui/react": "^1.7.18",
     "@heroicons/react": "^2.1.1",
+    "@stomp/stompjs": "^7.0.0",
     "al-sayes-city-parking": "file:",
     "al-sayes-parking": "file:",
     "autoprefixer": "^10.4.18",
