@@ -199,6 +199,8 @@ export default function AddEditLotModal({ isOpen, onClose, lot = null, onSaveLot
                             value={formData.name}
                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            minLength={2} 
+                            maxLength={254}
                             required
                           />
                         </div>
@@ -212,6 +214,8 @@ export default function AddEditLotModal({ isOpen, onClose, lot = null, onSaveLot
                             value={formData.location}
                             onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            minLength={3} 
+                            maxLength={1023}
                             required
                           />
                         </div>
@@ -226,6 +230,8 @@ export default function AddEditLotModal({ isOpen, onClose, lot = null, onSaveLot
                             value={formData.latitude}
                             onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            min={-90}
+                            max={90}
                             required
                           />
                         </div>
@@ -240,6 +246,8 @@ export default function AddEditLotModal({ isOpen, onClose, lot = null, onSaveLot
                             value={formData.longitude}
                             onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            min={-180} 
+                            max={180}
                             required
                           />
                         </div>

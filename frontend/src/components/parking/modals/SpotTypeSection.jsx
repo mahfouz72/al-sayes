@@ -22,10 +22,10 @@ export function SpotTypeSection({ spotTypes, onUpdate }) {
               </label>
               <input
                 type="number"
-                min="0"
                 value={data.capacity}
                 onChange={(e) => onUpdate(type, 'capacity', Number(e.target.value))}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                min={1}
                 required
               />
             </div>

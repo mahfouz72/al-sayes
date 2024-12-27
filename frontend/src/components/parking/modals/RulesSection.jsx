@@ -16,7 +16,7 @@ export function RulesSection({ rules, onUpdate }) {
           </label>
           <input
             type="number"
-            min="0"
+            min={0}
             step="0.5"
             value={rules.timeLimit}
             onChange={(e) => onUpdate('timeLimit', Number(e.target.value))}
@@ -29,7 +29,7 @@ export function RulesSection({ rules, onUpdate }) {
           </label>
           <input
             type="number"
-            min="0"
+            min={0}
             step="0.5"
             value={rules.automaticReleaseTime}
             onChange={(e) => onUpdate('automaticReleaseTime', Number(e.target.value))}
@@ -42,7 +42,7 @@ export function RulesSection({ rules, onUpdate }) {
           </label>
           <input
             type="number"
-            min="0"
+            min={0}
             step="0.01"
             value={rules.notShowingUpPenalty}
             onChange={(e) => onUpdate('notShowingUpPenalty', Number(e.target.value))}
@@ -55,7 +55,7 @@ export function RulesSection({ rules, onUpdate }) {
           </label>
           <input
             type="number"
-            min="0"
+            min={0}
             step="0.01"
             value={rules.overTimeScale}
             onChange={(e) => onUpdate('overTimeScale', Number(e.target.value))}
