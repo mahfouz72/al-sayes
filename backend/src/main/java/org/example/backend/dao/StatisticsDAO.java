@@ -72,7 +72,7 @@ public class StatisticsDAO {
         String sql = """
                      SELECT name,
                      COALESCE(SUM(price+penalty), 0) AS total_revenue,
-                     COUNT(DISTINCT CASE WHEN ps.current_status = 'OCCUPIED' THEN ps.id END) * 100.0 / COUNT(DISTINCT ps.id) AS occupancy_rate
+                     ROUND(COUNT(DISTINCT CASE WHEN ps.current_status = 'OCCUPIED' THEN ps.id END) * 100.0 / COUNT(DISTINCT ps.id), 2)AS occupancy_rate
                      FROM ParkingLot p
                      JOIN Reservation r ON p.id = r.lot_id
                      JOIN ParkingSpot ps ON ps.lot_id = p.id
