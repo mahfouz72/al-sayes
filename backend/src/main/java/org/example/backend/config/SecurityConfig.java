@@ -55,7 +55,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("/login", "/register").permitAll()
+                                .requestMatchers("/login", "/register", "/ws/**").permitAll()
                                 .anyRequest().authenticated()
             );
         http.cors(Customizer.withDefaults());

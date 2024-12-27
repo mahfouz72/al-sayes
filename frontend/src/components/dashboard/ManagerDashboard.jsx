@@ -10,7 +10,9 @@ import {
 } from "recharts";
 import ParkingSpotGrid from "../parking/ParkingSpotGrid";
 import LotAPI from "../../apis/LotAPI";
-import SpotAPI from "../../apis/SpotAPI";
+// import SpotAPI from "../../apis/SpotAPI";
+import { Client } from '@stomp/stompjs';
+import { getUserToken } from "../../apis/config";
 
 export default function ManagerDashboard() {
     const [parkingLots, setParkingLots] = useState([]);
@@ -38,13 +40,38 @@ export default function ManagerDashboard() {
     // Fetch parking spots when selected lot changes
     useEffect(() => {
         if (selectedLot) {
-            SpotAPI.getParkingSpots(selectedLot.id)
-                .then((response) => {
-                    setSelectedLotSpots(response);
-                })
-                .catch((error) => {
-                    console.error("Error fetching parking spots:", error);
-                });
+            const client = new Client({
+                brokerURL: 'ws://localhost:8080/ws',
+                headers: {
+                    Authorization: `Bearer ${getUserToken()}`,
+                },
+                debug: (str) => console.log(str),
+                onConnect: () => {
+                    console.log('Connected to WebSocket');
+                    client.subscribe(`/app/spots/${selectedLot.id}`, (message) => {
+                        const spots = JSON.parse(message.body);
+                        console.log("spots received in ws: ", spots);
+                        setSelectedLotSpots(spots);
+                    });
+                },
+                onStompError: (frame) => {
+                    console.error('WebSocket error:', frame);
+                    console.error('Broker reported error: ', frame.headers['message']);
+                    console.error('Additional details: ', frame.body);
+                },
+                onDisconnect: () => {
+                    console.log('WebSocket connection closed');
+                },
+            });
+            client.activate();
+
+            // Cleanup on component unmount
+            return () => {
+                if (client.active) {
+                    client.deactivate();
+                    console.log('WebSocket connection deactivated');
+                }
+            };
         }
     }, [selectedLot]);
 
