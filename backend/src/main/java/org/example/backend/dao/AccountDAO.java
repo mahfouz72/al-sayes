@@ -1,7 +1,9 @@
 package org.example.backend.dao;
 
+import org.example.backend.dto.UserDetails;
 import org.example.backend.entity.Account;
 import org.example.backend.entity.ParkingLot;
+import org.example.backend.enums.PaymentMethod;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -81,5 +83,33 @@ public class AccountDAO implements DAO<Account, Long>  {
             // Not Found
         }
         return Optional.ofNullable(account);
+    }
+
+    public Optional<UserDetails> getUserDetailsByUsername(String username) {
+        String sql = "SELECT * FROM Account WHERE username = ?";
+        final UserDetails[] userDetails = {null};
+        try {
+            userDetails[0] = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
+                UserDetails user = UserDetails.builder()
+                        .id(rs.getLong("id"))
+                        .username(rs.getString("username"))
+                        .email(rs.getString("email"))
+                        .role(rs.getString("role_name").split("_")[1].toLowerCase())
+                        .build();
+                return user;
+            }, username);
+            if (userDetails[0] != null && "driver".equalsIgnoreCase(userDetails[0].getRole())) {
+                String driverSql = "SELECT * FROM Driver WHERE account_id = ?";
+                jdbcTemplate.queryForObject(driverSql, (rs, rowNum) -> {
+                    userDetails[0].setLicensePlate(rs.getString("license_plate"));
+                    userDetails[0].setPaymentMethod(rs.getString("payment_method").toLowerCase());
+                    return null;
+                }, userDetails[0].getId());
+            }
+
+        } catch(DataAccessException e) {
+            // Not Found
+        }
+        return Optional.ofNullable(userDetails[0]);
     }
 }
