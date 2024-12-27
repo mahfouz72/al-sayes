@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS ParkingLot (
     not_showing_up_penalty decimal(10, 6) NOT NULL,
     over_time_scale decimal(10, 6) NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (managed_by) REFERENCES Account(id)
+    FOREIGN KEY (managed_by) REFERENCES Account(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS ParkingSpot (
@@ -29,7 +29,15 @@ CREATE TABLE IF NOT EXISTS ParkingSpot (
     cost decimal(10, 6) NOT NULL,
     current_status varchar(255) NOT NULL,
     type varchar(255) NOT NULL,
-    PRIMARY KEY (id, lot_id)
+    PRIMARY KEY (id, lot_id),
+    FOREIGN KEY (lot_id) REFERENCES ParkingLot(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Driver (
+    account_id BIGINT NOT NULL,
+    license_plate VARCHAR(255) NOT NULL,
+    PRIMARY KEY (account_id),
+    FOREIGN KEY (account_id) REFERENCES Account(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Reservation (

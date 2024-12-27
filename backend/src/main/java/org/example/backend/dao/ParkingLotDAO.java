@@ -90,11 +90,11 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
 
     @Override
     public void update(Long id, ParkingLot parkingLot) {
-        String sql = "UPDATE ParkingLot SET location = ?, latitude = ?, longitude = ?, " +
+        String sql = "UPDATE ParkingLot SET name = ?, location = ?, latitude = ?, longitude = ?, " +
                 "time_limit = ?, automatic_release_time = ?, not_showing_up_penalty = ?, " +
                 "over_time_scale = ? WHERE id = ?";
-        jdbcTemplate.update(sql, parkingLot.getLocation(), parkingLot.getLatitude(), parkingLot.getLongitude(),
-                parkingLot.getTimeLimit(), parkingLot.getAutomaticReleaseTime(),
+        jdbcTemplate.update(sql, parkingLot.getName(), parkingLot.getLocation(), parkingLot.getLatitude(),
+                parkingLot.getLongitude(), parkingLot.getTimeLimit(), parkingLot.getAutomaticReleaseTime(),
                 parkingLot.getNotShowingUpPenalty(), parkingLot.getOverTimeScale(),
                 id);
     }
@@ -110,6 +110,8 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
                 p.id AS lot_id,
                 p.name AS lot_name,
                 p.location AS location,
+                p.latitude,
+                p.longitude,
                 s.total_spots AS capacity,
                 s.occupied_spots AS occupied_count,
                 s.total_revenue AS total_revenue,
@@ -126,6 +128,8 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
             details.setId(rs.getLong("lot_id"));
             details.setName(rs.getString("lot_name"));
             details.setLocation(rs.getString("location"));
+            details.setLatitude(rs.getDouble("latitude"));
+            details.setLongitude(rs.getDouble("longitude"));
             details.setCapacity(rs.getInt("capacity"));
             details.setRevenue(rs.getDouble("total_revenue"));
             details.setOccupancyRate(details.getCapacity() == 0 ? 0 : (double) rs.getInt("occupied_count") / details.getCapacity());
@@ -135,9 +139,9 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
     }
 
     public Long insertAndReturnKey(ParkingLot parkingLot) {
-        String sql = "INSERT INTO ParkingLot(name, managed_by, location, " +
+        String sql = "INSERT INTO ParkingLot(name, managed_by, location, latitude, longitude, " +
              "time_limit, automatic_release_time, not_showing_up_penalty, over_time_scale) " +
-             "VALUES (?, ?, ?, ?, ?, ?, ?)";
+             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         // Prepare the KeyHolder to capture the generated key
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -148,10 +152,12 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
             ps.setString(1, parkingLot.getName());
             ps.setLong(2, parkingLot.getManagedBy());
             ps.setString(3, parkingLot.getLocation());
-            ps.setDouble(4, parkingLot.getTimeLimit());
-            ps.setDouble(5, parkingLot.getAutomaticReleaseTime());
-            ps.setDouble(6, parkingLot.getNotShowingUpPenalty());
-            ps.setDouble(7, parkingLot.getOverTimeScale());
+            ps.setDouble(4, parkingLot.getLatitude());
+            ps.setDouble(5, parkingLot.getLongitude());
+            ps.setDouble(6, parkingLot.getTimeLimit());
+            ps.setDouble(7, parkingLot.getAutomaticReleaseTime());
+            ps.setDouble(8, parkingLot.getNotShowingUpPenalty());
+            ps.setDouble(9, parkingLot.getOverTimeScale());
             return ps;
         }, keyHolder);
         Number key = keyHolder.getKey();

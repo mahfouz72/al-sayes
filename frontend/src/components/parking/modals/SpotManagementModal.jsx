@@ -1,18 +1,30 @@
 import { Fragment, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import SpotAPI from '../../../apis/SpotAPI';
 
-export default function SpotManagementModal({ isOpen, onClose, spot = null }) {
+export default function SpotManagementModal({ isOpen, onClose, spot = null, onSaveSpot }) {
   const [formData, setFormData] = useState({
-    number: spot?.number || '',
+    id: spot?.id || '',
+    lotId:spot?.lotId || '',
+    cost: spot?.cost || 0,
+    currentStatus: spot?.currentStatus || 'AVAILABLE',
     type: spot?.type || 'REGULAR',
-    status: spot?.status || 'AVAILABLE',
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const updatedData = {
+      ...formData,
+      id: spot?.id || formData.id,
+      lotId: spot?.lotId || formData.lotId,
+      cost: spot?.cost || formData.cost,
+    };
+    
+    setFormData(updatedData);
     // Handle form submission
-    console.log('Spot data:', formData);
+    SpotAPI.updateParkingSpot(updatedData);
+    onSaveSpot(updatedData);
     onClose();
   };
 
@@ -60,19 +72,6 @@ export default function SpotManagementModal({ isOpen, onClose, spot = null }) {
                     </Dialog.Title>
                     <form onSubmit={handleSubmit} className="mt-6 space-y-4">
                       <div>
-                        <label htmlFor="number" className="block text-sm font-medium text-gray-700">
-                          Spot Number
-                        </label>
-                        <input
-                          type="text"
-                          id="number"
-                          value={formData.number}
-                          onChange={(e) => setFormData({ ...formData, number: e.target.value })}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                          required
-                        />
-                      </div>
-                      <div>
                         <label htmlFor="type" className="block text-sm font-medium text-gray-700">
                           Type
                         </label>
@@ -84,7 +83,7 @@ export default function SpotManagementModal({ isOpen, onClose, spot = null }) {
                         >
                           <option value="REGULAR">Regular</option>
                           <option value="DISABLED">Disabled</option>
-                          <option value="EV">EV Charging</option>
+                          <option value="EV_CHARGING">EV Charging</option>
                         </select>
                       </div>
                       <div>
@@ -93,13 +92,13 @@ export default function SpotManagementModal({ isOpen, onClose, spot = null }) {
                         </label>
                         <select
                           id="status"
-                          value={formData.status}
-                          onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                          value={formData.currentStatus}
+                          onChange={(e) => setFormData({ ...formData, currentStatus: e.target.value })}
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                         >
                           <option value="AVAILABLE">Available</option>
                           <option value="OCCUPIED">Occupied</option>
-                          <option value="MAINTENANCE">Maintenance</option>
+                          {/* <option value="MAINTENANCE">Maintenance</option> */}
                         </select>
                       </div>
                       <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
