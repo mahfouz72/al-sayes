@@ -18,6 +18,8 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.time.DayOfWeek;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -42,6 +44,49 @@ public class ParkingLotService {
         }
         return requestedSpotsDTO;
     }
+    private double calculateDynamicPricing(double baseCost, Timestamp start, Timestamp end,
+                                           int totalSpots, int availableSpots) {
+        double dynamicPrice = baseCost;
+
+        // 1. Time-based Pricing (increase price during peak hours)
+        dynamicPrice = applyTimeBasedPricing(dynamicPrice, start, end);
+
+        // 2. Demand-based Pricing (higher prices when fewer spots are available)
+        dynamicPrice = applyDemandBasedPricing(dynamicPrice, totalSpots, availableSpots);
+        return dynamicPrice;
+    }
+
+    private double applyDemandBasedPricing(double currentPrice, int totalSpots, int availableSpots) {
+        // Price increases when fewer spots are available
+        double occupancyRate = 1.0 - (double) availableSpots / totalSpots;
+
+        if (occupancyRate > 0.8) { // If 80% or more of the spots are occupied
+            currentPrice *= 1.3; // Increase by 30%
+        }
+        return currentPrice;
+    }
+
+    private double applyTimeBasedPricing(double currentPrice, Timestamp start, Timestamp end) {
+        // Convert Timestamp to Java Calendar/LocalDateTime to easily extract hour
+        LocalDateTime startTime = start.toLocalDateTime();
+        LocalDateTime endTime = end.toLocalDateTime();
+        final double WEEKENDS_SCALE = 1.1;
+        final double PEAK_HOURS_SCALE = 1.2;
+        // Increase prices during peak hours (12 PM to 6 PM)
+        int startHour = startTime.getHour();
+        int endHour = endTime.getHour();
+
+        if ((startHour >= 12 && startHour <= 18) || (endHour >= 12 && endHour <= 18)) {
+            currentPrice *= PEAK_HOURS_SCALE; // Increase by 20% during peak hours
+        }
+
+        // Weekend pricing (Friday/Saturday)
+        DayOfWeek startDay = startTime.getDayOfWeek();
+        if (startDay == DayOfWeek.FRIDAY || startDay == DayOfWeek.SATURDAY) {
+            currentPrice *= WEEKENDS_SCALE; // Increase by 10% on weekends
+        }
+        return currentPrice;
+    }
 
     public List<ParkingSpotDTO> listAllSpotsInLotAvailable(long lot_id, Timestamp start, Timestamp end) {
         List<ParkingSpot> spots = parkingSpotDAO.listAllSpotsFilterByLotId(lot_id);
@@ -55,6 +100,9 @@ public class ParkingLotService {
         for (ParkingSpot spot : availableSpots) {
             ParkingSpotDTO spotDTO = parkingSpotMapper.toDTO(spot);
             spotDTO.setCurrentStatus("AVAILABLE");
+            // Dynamic Pricing:
+            spotDTO.setCost(calculateDynamicPricing(spot.getCost(), start,end,
+                    spots.size(), availableSpots.size()));
             availableSpotsDTO.add(spotDTO);
         }
         return availableSpotsDTO;
