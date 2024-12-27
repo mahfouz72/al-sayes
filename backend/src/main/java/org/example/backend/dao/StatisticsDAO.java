@@ -50,7 +50,14 @@ public class StatisticsDAO {
     }
 
     public Integer getTotalRevenue() {
-        String sql = "SELECT COALESCE(SUM(price + penalty), 0) FROM Reservation";
+        String sql = """
+                SELECT
+                    COALESCE(SUM(price), 0)
+                FROM
+                    Reservation
+                WHERE
+                    status != 'EXPIRED';
+            """;
         return jdbcTemplate.queryForObject(sql, Integer.class);
     }
 
@@ -60,60 +67,90 @@ public class StatisticsDAO {
     }
 
     public Integer getMonthlyRevenue() {
-        String sql = "SELECT COALESCE(SUM(price + penalty), 0) FROM Reservation WHERE MONTH(start_time) = MONTH(CURRENT_DATE())";
+        // revenue from now() - 30 days
+        String sql = """
+                SELECT
+                    COALESCE(SUM(price), 0)
+                FROM
+                    Reservation
+                WHERE
+                    start_time >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY) AND status != 'EXPIRED';
+                """;
         return jdbcTemplate.queryForObject(sql, Integer.class);
     }
     public Integer getMonthlyRevenue(int month) {
-        String sql = "SELECT COALESCE(SUM(price + penalty), 0) FROM Reservation WHERE MONTH(start_time) = ?";
+        String sql = """
+                SELECT
+                    COALESCE(SUM(price), 0)
+                FROM Reservation
+                WHERE 
+                    MONTH(start_time) = ? AND status != 'EXPIRED';
+            """;
         return jdbcTemplate.queryForObject(sql, Integer.class, month);
     }
 
     public List<Map<String, Object>> getParkingSlotsWithRevenueAndOccupancy(int limit) {
         String sql = """
-                     SELECT name,
-                     COALESCE(SUM(price+penalty), 0) AS total_revenue,
-                     ROUND(COUNT(DISTINCT CASE WHEN ps.current_status = 'OCCUPIED' THEN ps.id END) * 100.0 / COUNT(DISTINCT ps.id), 2)AS occupancy_rate
-                     FROM ParkingLot p
-                     JOIN Reservation r ON p.id = r.lot_id
-                     JOIN ParkingSpot ps ON ps.lot_id = p.id
-                     GROUP BY r.lot_id
-                     ORDER BY total_revenue DESC
-                     LIMIT ?;
-        """;
+                SELECT
+                p.name,
+                s.total_revenue,
+                IFNULL(ROUND(s.occupied_spots * 100.0 / s.total_spots, 2), 0) AS occupancy_rate
+                FROM ParkingLot p
+                JOIN Statistics s ON p.id = s.lot_id
+                ORDER BY s.total_revenue DESC
+                LIMIT ?;
+            """;
         return jdbcTemplate.queryForList(sql, limit);
     }
 
     public List<Map<String, Object>> getTopUsersWithMostReservations(int limit) {
-        String sql = "SELECT username, COUNT(*) as total_reservations, COALESCE(SUM(price+penalty), 0) as total_spent " +
-                     "FROM Reservation JOIN Account ON driver_id = id " +
-                     "GROUP BY driver_id ORDER BY total_reservations, total_spent DESC LIMIT ?";
+        String sql = """
+                SELECT
+                    a.username,
+                    COUNT(*) AS total_reservations,
+                    COALESCE(SUM(r.price), 0) AS total_spent
+                FROM (
+                    SELECT *
+                    FROM Reservation
+                    WHERE status != 'EXPIRED'
+                ) AS r
+                JOIN Account a ON r.driver_id = a.id
+                GROUP BY r.driver_id
+                ORDER BY total_reservations DESC, total_spent DESC
+                LIMIT ?;
+            """;
         return jdbcTemplate.queryForList(sql, limit);
     }
 
     public List<Map<String, Object>> getDailyRevenue(int limit) {
         String sql = """
                 SELECT * FROM (
-                SELECT DATE_FORMAT(start_time, '%Y-%m-%d') as date, 
-                       COALESCE(SUM(price + penalty), 0) as revenue
-                FROM Reservation GROUP BY date ORDER BY date DESC LIMIT ?
+                    SELECT DATE_FORMAT(start_time, '%Y-%m-%d') AS date, 
+                        COALESCE(SUM(price), 0) AS revenue
+                    FROM Reservation
+                    WHERE status != 'EXPIRED'
+                    GROUP BY DATE_FORMAT(start_time, '%Y-%m-%d')
+                    ORDER BY date DESC
+                    LIMIT ?
                 ) AS temp
-                ORDER BY date ASC
+                ORDER BY date ASC;
         """;
         return jdbcTemplate.queryForList(sql, limit);
     }
 
     public List<Map<String, Object>> getDailyReservedSpots(int limit) {
         String sql = """
-                SELECT * FROM (
-                SELECT DATE_FORMAT(start_time, '%Y-%m-%d') as date, 
-                       COUNT(*) as reserved_spots
-                FROM Reservation GROUP BY date ORDER BY date DESC LIMIT ?
-                ) AS temp
-                ORDER BY date ASC
+            SELECT * FROM (
+                SELECT 
+                    DATE_FORMAT(start_time, '%Y-%m-%d') AS date, 
+                    COUNT(*) AS reserved_spots
+                FROM Reservation
+                GROUP BY date
+                ORDER BY date DESC
+                LIMIT ?
+            ) AS temp
+            ORDER BY date ASC
         """;
         return jdbcTemplate.queryForList(sql, limit);
     }
-
-
-
 }
