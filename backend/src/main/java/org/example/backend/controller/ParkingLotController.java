@@ -87,4 +87,21 @@ public class ParkingLotController {
         }
         return ResponseEntity.status(400).build();
     }
+
+    @PutMapping("/update")
+    public ResponseEntity<Void> updateParkingLot(@RequestBody ParkingLotDTO parkingLotDTO) {
+        Optional<Account> currentUserOptional = authenticationService.getCurrentAccount();
+        if (currentUserOptional.isEmpty()) {
+            return ResponseEntity.status(401).build();
+        }
+        Account currentUser = currentUserOptional.get();
+        if (!"ROLE_MANAGER".equals(currentUser.getRole())
+        && !"ROLE_ADMIN".equals(currentUser.getRole())) {
+            return ResponseEntity.status(401).build();
+        }
+        if (this.parkingLotService.updateParkingLot(parkingLotDTO, currentUser.getId())) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.status(400).build();
+    }
 }

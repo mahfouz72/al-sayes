@@ -55,7 +55,7 @@ const handleUpdateLot = async (payload) => {
     await axios.put(`${config.BASE_API_URL}/lots/update`, payload, { headers });
     return;
   } catch (error) {
-    console.error('Error creating new lot:', error);
+    console.error('Error updating lot', error);
     throw error;
   }
 };

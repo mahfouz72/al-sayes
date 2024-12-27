@@ -14,6 +14,7 @@ import org.example.backend.entity.ParkingSpot;
 import org.example.backend.enums.ParkingType;
 import org.example.backend.mapper.ParkingLotMapper;
 import org.example.backend.mapper.ParkingSpotMapper;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -96,6 +97,43 @@ public class ParkingLotService {
             return false;
         }
         parkingLotDAO.delete(lotId);
+        return true;
+    }
+
+    public boolean updateParkingLot(ParkingLotDTO parkingLotDTO, Long id) {
+        Optional<ParkingLot> existingLot = parkingLotDAO.getByPK(id);
+
+        // Check if the parking lot exists
+        if (existingLot.isEmpty()) {
+            return false;
+        }
+
+        // Map the incoming DTO to the entity
+        ParkingLot lotToUpdate = parkingLotMapper.fromDTO(parkingLotDTO, id);  // Update the ParkingLot entity with the DTO values
+
+        // Update parking lot properties
+        parkingLotDAO.update(lotToUpdate.getId(), lotToUpdate);
+
+        // If parking types have changed, update the parking spots
+        if (parkingLotDTO.getParkingTypes() != null) {
+            for (Map.Entry<ParkingType, ParkingTypeDetails> entry : parkingLotDTO.getParkingTypes().entrySet()) {
+                ParkingType type = entry.getKey();
+                ParkingTypeDetails typeDetails = entry.getValue();
+
+                // Check if the existing parking spots need updating
+                List<ParkingSpot> spotsToUpdate = parkingSpotDAO.listAllSpotsFilterByLotId(id);
+                for (ParkingSpot spot : spotsToUpdate) {
+                    if (!spot.getType().equals(type.name())) {
+                        // Update spot type and price
+                        spot.setType(type.name());
+                        spot.setCost(typeDetails.getBasePricePerHour());
+                        spot.setCurrentStatus("AVAILABLE");  // Reset to available or as required
+                        parkingSpotDAO.update(Pair.of(spot.getId(), spot.getLotId()), spot);
+                    }
+                }
+            }
+        }
+
         return true;
     }
 }

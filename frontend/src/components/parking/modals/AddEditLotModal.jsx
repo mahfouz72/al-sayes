@@ -51,7 +51,6 @@ export default function AddEditLotModal({ isOpen, onClose, lot = null, onSaveLot
       if (!lot) {
         const insertedId = await LotAPI.handleCreateNewLot(payload);
         payload.id = insertedId;
-        formData.id = insertedId;
         onSaveLot(payload, true);
       } else {
         await LotAPI.handleUpdateLot(payload);
