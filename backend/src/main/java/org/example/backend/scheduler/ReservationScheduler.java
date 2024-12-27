@@ -13,14 +13,15 @@ public class ReservationScheduler {
         this.reservationService = reservationService;
     }
 
-    // Run every 15 minutes
-    @Scheduled(fixedRate = 900000)
+    // Run every 5 minutes
+    @Scheduled(fixedRate = 300000)
     public void releaseExpiredReservations() {
+        System.out.println("Releasing expired reservations");
         reservationService.releaseExpiredReservations();
     }
 
-    // Run every 15 minutes
-    @Scheduled(fixedRate = 900000)
+    // Run every 5 minutes
+    @Scheduled(fixedRate = 300000)
     public void applyPenalties() {
         reservationService.checkPenalties();
     }

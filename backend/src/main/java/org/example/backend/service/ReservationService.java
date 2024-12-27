@@ -68,16 +68,16 @@ public class ReservationService {
             LocalDateTime now = LocalDateTime.now();
             double autoRelease = parkingLotDAO.getByPK(res.getLotId()).map(ParkingLot::getAutomaticReleaseTime)
                     .orElse(0.0);
-            if (now.isAfter(res.getStartTime().toLocalDateTime().plusSeconds((long) autoRelease * 3600))) {
-                reservationDAO.updateByKeys(res.getDriverId(), res.getSpotId(), res.getLotId(), res.getStartTime(),
+            LocalDateTime releaseTime = res.getStartTime().toLocalDateTime().plusSeconds((long) autoRelease * 60);
+            // System.out.println("Now: " + now);
+            // System.out.println("Start Time: " + res.getStartTime().toLocalDateTime());
+            // System.out.println("Auto Release: " + autoRelease + " minutes");
+            // System.out.println("Release Time: " + releaseTime);
+            if (now.isAfter(releaseTime)) {
+                // System.out.println("Releasing reservation: " + res);
+                reservationDAO.updateByKeys(res.getDriverId(), res.getLotId(), res.getSpotId(), res.getStartTime(),
                         new Reservation(res.getDriverId(), res.getLotId(), res.getSpotId(), res.getStartTime(),
                                 res.getEndTime(), res.getPrice(), ReservationStatus.EXPIRED, 0, 0));
-                Optional<ParkingSpot> spot = parkingSpotDAO.getByPK(Pair.of(res.getSpotId(), res.getLotId()));
-                if (spot.isPresent()) {
-                    parkingSpotDAO.update(Pair.of(res.getSpotId(), res.getLotId()),
-                            new ParkingSpot(res.getSpotId(), res.getLotId(), spot.get().getCost(), "AVAILABLE",
-                                    spot.get().getType()));
-                }
                 // TODO: Not Showing Up Penalty
             }
 
