@@ -164,4 +164,46 @@ public class ReservationDAO implements DAO<Reservation, ReservationKey> {
             return reservationDetailsDTO;
         });
     }
+
+    public List<ReservationDetailsDTO> getReservationsNearEndTime(long accountId) {
+        String sql = """
+                   SELECT
+                   	p.name,
+                   	CONCAT('S', e.spot_id) AS spot_id
+                   FROM reservation e
+                    JOIN parkinglot p ON e.lot_id = p.id
+                    JOIN parkingspot s ON e.spot_id = s.id
+                    WHERE
+                   	    TIMESTAMPDIFF(MINUTE, e.end_time, NOW()) <= 30
+                   	    AND status LIKE 'ONGOING'
+                        AND driver_id =  ?;
+                """;
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            ReservationDetailsDTO reservationDetailsDTO = new ReservationDetailsDTO();
+            reservationDetailsDTO.setSpotNumber(rs.getString("spot_id"));
+            reservationDetailsDTO.setParkingLot(rs.getString("name"));
+            return reservationDetailsDTO;
+        }, accountId);
+    }
+
+    public List<ReservationDetailsDTO> getReservationsNearStartTime(long accountId) {
+         String sql = """
+                   SELECT
+                   	p.name,
+                   	CONCAT('S', e.spot_id) AS spot_id
+                   FROM reservation e
+                    JOIN parkinglot p ON e.lot_id = p.id
+                    JOIN parkingspot s ON e.spot_id = s.id
+                    WHERE
+                   	    TIMESTAMPDIFF(MINUTE, e.start_time, NOW()) <= 30
+                   	    AND status LIKE 'ONGOING'
+                        AND driver_id =  ?;
+                """;
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            ReservationDetailsDTO reservationDetailsDTO = new ReservationDetailsDTO();
+            reservationDetailsDTO.setSpotNumber(rs.getString("spot_id"));
+            reservationDetailsDTO.setParkingLot(rs.getString("name"));
+            return reservationDetailsDTO;
+        }, accountId);
+    }
 }

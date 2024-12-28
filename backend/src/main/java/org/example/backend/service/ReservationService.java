@@ -22,12 +22,14 @@ public class ReservationService {
     private final ReservationDAO reservationDAO;
     private final ParkingSpotDAO parkingSpotDAO;
     private final ParkingLotDAO parkingLotDAO;
+    private final NotificationService notificationService;
 
     public ReservationService(ReservationDAO reservationDAO, ParkingSpotDAO parkingSpotDAO,
-            ParkingLotDAO parkingLotDAO) {
+                              ParkingLotDAO parkingLotDAO, NotificationService notificationService) {
         this.reservationDAO = reservationDAO;
         this.parkingSpotDAO = parkingSpotDAO;
         this.parkingLotDAO = parkingLotDAO;
+        this.notificationService = notificationService;
     }
 
     public boolean reserveSpot(ReservationDTO reservationDTO) {
@@ -78,7 +80,7 @@ public class ReservationService {
                             new ParkingSpot(res.getSpotId(), res.getLotId(), spot.get().getCost(), "AVAILABLE",
                                     spot.get().getType()));
                 }
-                // TODO: Not Showing Up Penalty
+                notificationService.notifyNotShowingUpPenalty(res.getLotId(), res.getSpotId(), res.getPenalty());
             }
 
         }

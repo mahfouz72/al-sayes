@@ -1,9 +1,4 @@
-import {
-    BrowserRouter as Router,
-    Routes,
-    Route,
-    Navigate,
-} from "react-router-dom";
+import {BrowserRouter as Router, Navigate, Route, Routes,} from "react-router-dom";
 import Navbar from "./components/layout/Navbar";
 import LoginForm from "./components/auth/LoginForm";
 import SignupForm from "./components/auth/SignupForm";
@@ -16,6 +11,8 @@ import TopLotsReport from "./components/admin/TopLotsReport";
 import ManageLots from "./components/parking/ManageLots";
 import Reservations from "./components/reservations/Reservations";
 import "./index.css";
+import Notifications from "./components/notification/Notifications.jsx";
+import {WebSocketProvider} from "./components/notification/WebSocketProvider.jsx";
 
 function PrivateRoute({ children, allowedRoles }) {
     const role = localStorage.getItem("role");
@@ -54,6 +51,7 @@ function DashboardRouter() {
 
 function App() {
     return (
+        <WebSocketProvider>
         <Router>
             <Routes>
                 <Route path="/login" element={<LoginForm />} />
@@ -101,9 +99,18 @@ function App() {
                         </PrivateRoute>
                     }
                 />
+                <Route
+                    path="/notifications"
+                    element={
+                        <PrivateRoute>
+                                <Notifications/>
+                        </PrivateRoute>
+                    }
+                />
                 <Route path="/" element={<Navigate to="/login" />} />
             </Routes>
         </Router>
+        </WebSocketProvider>
     );
 }
 
