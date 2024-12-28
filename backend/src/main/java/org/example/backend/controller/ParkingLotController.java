@@ -69,6 +69,19 @@ public class ParkingLotController {
         }
         return ResponseEntity.ok(lots);
     }
+    @GetMapping("/get/cards_manager")
+    public ResponseEntity<List<ParkingLotCard>> listParkingLotsCardsOfManager() {
+        Optional<Account> currentUserOptional = authenticationService.getCurrentAccount();
+        if (currentUserOptional.isEmpty()) {
+            return ResponseEntity.status(401).build();
+        }
+        Account currentUser = currentUserOptional.get();
+        List<ParkingLotCard> lots = this.parkingLotService.findAllParkingLotsCardsOfManager(currentUser.getId());
+        if (lots.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(lots);
+    }
 
     @PostMapping("/create")
     public ResponseEntity<Long> createParkingLot(@RequestBody ParkingLotDTO parkingLotDTO) {

@@ -22,7 +22,7 @@ const getParkingLotsCardsViewInManager = async () => {
     let headers = {
       'Authorization': `Bearer ${token}`
     };
-    const response = await axios.get(`${config.BASE_API_URL}/lots/get/cards`, { headers });
+    const response = await axios.get(`${config.BASE_API_URL}/lots/get/cards_manager`, { headers });
     console.log(response);
     return response.data;
   } catch (error) {
