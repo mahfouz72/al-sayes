@@ -10,6 +10,10 @@ import {
 } from "recharts";
 import axios from "axios";
 import { AlertCircle } from "lucide-react";
+import UserActionButtons from "./UserActionButtons";
+import UserStatusBadge from "./UserStatusBadge";
+import Pagination from "./Pagination";
+import UsersTable from "./UsersTable";
 
 export default function AdminDashboard() {
     const [users, setUsers] = useState([]);
@@ -18,7 +22,7 @@ export default function AdminDashboard() {
     const [systemSpotsGraph, setSystemSpotsGraph] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
-    const [pageSize] = useState(10);
+    const [pageSize] = useState(5);
     const [limit, setLimit] = useState(10);
     const [editingUser, setEditingUser] = useState(null);
     const [role, setRole] = useState("");
@@ -43,6 +47,15 @@ export default function AdminDashboard() {
         } catch (error) {
             console.error("Error fetching data:", error);
         }
+    };
+
+    const fetchUsers = async () => {
+        fetchData(
+            `http://localhost:8080/api/statistics/users?page=${currentPage}&size=${pageSize}`,
+            setUsers,
+            "POST",
+            { currentPage, pageSize }
+        );
     };
 
     useEffect(() => {
@@ -70,12 +83,7 @@ export default function AdminDashboard() {
     }, [limit]);
 
     useEffect(() => {
-        fetchData(
-            `http://localhost:8080/api/statistics/users?page=${currentPage}&size=${pageSize}`,
-            setUsers,
-            "POST",
-            { currentPage, pageSize }
-        );
+        fetchUsers();
     }, [currentPage]);
 
     if (loading) {
@@ -125,16 +133,6 @@ export default function AdminDashboard() {
         ROLE_MANAGER: "Manager",
     };
 
-    const handleRoleChange = (event, username) => {
-        const newRole = event.target.value;
-        setRole(newRole);
-
-        const updatedUsers = users.map((user) =>
-            user.username === username ? { ...user, role: newRole } : user
-        );
-        setEditingUser(updatedUsers);
-    };
-
     const handleActivateUser = (username) => {
         fetchData(
             `http://localhost:8080/api/statistics/unblock-user?username=${username}`,
@@ -142,13 +140,7 @@ export default function AdminDashboard() {
             "POST",
             { username }
         ).then(() => {
-            // After the unblock action is successful, refetch the users
-            fetchData(
-                `http://localhost:8080/api/statistics/users?page=${currentPage}&size=${pageSize}`,
-                setUsers,
-                "POST",
-                { currentPage, pageSize }
-            );
+            fetchUsers();
         });
     };
 
@@ -159,16 +151,24 @@ export default function AdminDashboard() {
             "POST",
             { username }
         ).then(() => {
-            // After the unblock action is successful, refetch the users
-            fetchData(
-                `http://localhost:8080/api/statistics/users?page=${currentPage}&size=${pageSize}`,
-                setUsers,
-                "POST",
-                { currentPage, pageSize }
-            );
+            fetchUsers();
         });
     };
 
+    const handleRoleChange = async (username, newRole) => {
+        try {
+            await fetchData(
+                `http://localhost:8080/api/statistics/change-role?username=${username}&role=${newRole}`,
+                setUserStatus,
+                "POST",
+                { username, role: newRole }
+            ).then(() => {
+                fetchUsers();
+            });
+        } catch (error) {
+            console.error("Error changing user role:", error);
+        }
+    };
     return (
         <div className="p-6">
             <h1 className="text-2xl font-bold mb-6">System Administration</h1>
@@ -260,7 +260,12 @@ export default function AdminDashboard() {
                         data={systemSpotsGraph}
                     >
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="date" angle={50} textAnchor="start" />
+                        <XAxis
+                            dataKey="date"
+                            angle={50}
+                            textAnchor="start"
+                            height={60}
+                        />
                         <YAxis />
                         <Tooltip />
                         <Legend />
@@ -275,99 +280,21 @@ export default function AdminDashboard() {
 
             <div className="mb-8">
                 <h2 className="text-xl font-semibold mb-4">User Management</h2>
-                <div className="overflow-x-auto">
-                    <table className="min-w-full bg-white">
-                        <thead>
-                            <tr>
-                                <th className="px-6 py-3 border-b">Name</th>
-                                <th className="px-6 py-3 border-b">Role</th>
-                                <th className="px-6 py-3 border-b">Status</th>
-                                <th className="px-6 py-3 border-b">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="text-center">
-                            {users.map((user) => (
-                                <tr key={user.username}>
-                                    <td className="px-6 py-4 border-b font-semibold">
-                                        {user.username}
-                                    </td>
-                                    <td className="px-6 py-4 border-b">
-                                        {editingUser === user.username ? (
-                                            <select
-                                                value={role}
-                                                onChange={(e) =>
-                                                    handleRoleChange(
-                                                        e,
-                                                        user.username
-                                                    )
-                                                }
-                                                className="border rounded-md"
-                                            >
-                                                <option value="ROLE_ADMIN">
-                                                    Admin
-                                                </option>
-                                                <option value="ROLE_DRIVER">
-                                                    Driver
-                                                </option>
-                                                <option value="ROLE_MANAGER">
-                                                    Manager
-                                                </option>
-                                            </select>
-                                        ) : (
-                                            roleMapping[user.role] || user.role
-                                        )}
-                                    </td>
-                                    <td className="px-6 py-4 border-b">
-                                        {user.status
-                                            .toLowerCase()
-                                            .replace(/\b\w/g, (l) =>
-                                                l.toUpperCase()
-                                            )}
-                                    </td>
-                                    <td className="px-6 py-4 border-b">
-                                        <button
-                                            className="text-green-500 hover:text-green-700 mr-2"
-                                            onClick={() =>
-                                                handleActivateUser(
-                                                    user.username
-                                                )
-                                            }
-                                        >
-                                            Activate
-                                        </button>
-                                        <button
-                                            className="text-red-500 hover:text-red-700"
-                                            onClick={() =>
-                                                handleDisableUser(user.username)
-                                            }
-                                        >
-                                            Disable
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-                <div className="flex justify-between items-center mt-4">
-                    <button
-                        className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
-                        onClick={() => handlePageChange(currentPage - 1)}
-                        disabled={currentPage === 1}
-                    >
-                        Previous
-                    </button>
-                    <span>
-                        Page {currentPage} of {totalPages}
-                    </span>
-                    <button
-                        className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
-                        onClick={() => handlePageChange(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                    >
-                        Next
-                    </button>
-                </div>
+                <UsersTable
+                    users={users}
+                    onActivate={handleActivateUser}
+                    onDisable={handleDisableUser}
+                    onRoleChange={handleRoleChange}
+                />
+                {systemStats.totalUsers > 0 && (
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={handlePageChange}
+                        totalItems={systemStats.totalUsers}
+                        pageSize={pageSize}
+                    />
+                )}
             </div>
         </div>
     );

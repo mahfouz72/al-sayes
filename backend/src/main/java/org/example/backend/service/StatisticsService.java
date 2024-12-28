@@ -68,4 +68,8 @@ public class StatisticsService {
     public void unblockUser(String username) {
         accountDAO.unblockUser(username);
     }
+
+    public void changeUserRole(String username, String role) {
+        accountDAO.changeUserRole(username, role);
+    }
 }
