@@ -37,7 +37,7 @@ public class NotificationService {
         this.notificationDAO = notificationDAO;
     }
     // every 30 seconds
-    @Scheduled(fixedRate = 30000)
+    @Scheduled(fixedRate = 300000)
     public void sendNotification() {
         System.out.println("Sending notifications...");
         Optional<Account> account = accountDAO.getByUsername(currentUserName);
