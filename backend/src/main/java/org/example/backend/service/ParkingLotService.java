@@ -164,4 +164,8 @@ public class ParkingLotService {
         parkingLotDAO.update(lotToUpdate.getId(), lotToUpdate);
         return true;
     }
+
+    public List<ParkingLotCard> findAllParkingLotsCardsOfManager(Long managerId) {
+         return parkingLotDAO.getLotsCardsOfManager(managerId);
+    }
 }
