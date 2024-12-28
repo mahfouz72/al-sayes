@@ -36,6 +36,7 @@ An innovative solution for managing urban parking challenges, designed to stream
 - **Driver Dashboard**: Check nearby parking spots in real-time.
 
 ![driver.png](./assets/driver.png)
+![driver.png](./assets/driver-2.png)
 
 - **Manager Interface**: Manage parking lots and view analytics.
 
