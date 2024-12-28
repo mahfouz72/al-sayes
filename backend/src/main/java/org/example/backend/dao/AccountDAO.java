@@ -132,6 +132,11 @@ public class AccountDAO implements DAO<Account, Long>  {
         jdbcTemplate.update(sql, UserStatus.ACTIVE.name(), username);
     }
 
+    public void changeUserRole(String username, String role) {
+        String sql = "UPDATE Account SET role_name = ? WHERE username = ?";
+        jdbcTemplate.update(sql, role.toUpperCase(), username);
+    }
+
     public boolean isActive(String username) {
         String sql = "SELECT status FROM Account WHERE username = ?";
         return UserStatus.ACTIVE.name().equals(jdbcTemplate.queryForObject(sql, String.class, username));

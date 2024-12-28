@@ -106,7 +106,7 @@ public class ReservationService {
             double penalty = extratime > 0 ? extratime * pricePerHour / 3600.0 : 0.0;
             reservationDAO.updateByKeys(res.getDriverId(), res.getLotId(), res.getSpotId(), res.getStartTime(),
                     new Reservation(res.getDriverId(), res.getLotId(), res.getSpotId(), res.getStartTime(),
-                            res.getEndTime(), res.getPrice(), res.getStatus(), duration.toMinutes(), res.getPenalty() + penalty));
+                            res.getEndTime(), res.getPrice() + penalty, res.getStatus(), duration.toMinutes(), res.getPenalty() + penalty));
         }
     }
 }

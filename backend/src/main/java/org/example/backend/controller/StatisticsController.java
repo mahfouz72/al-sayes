@@ -79,5 +79,11 @@ public class StatisticsController {
         statisticsService.unblockUser(username);
         return ResponseEntity.ok("User unblocked successfully");
     }
+
+    @PostMapping("/change-role")
+    public ResponseEntity<?> changeRole(@RequestParam String username, @RequestParam String role) {
+        statisticsService.changeUserRole(username, role);
+        return ResponseEntity.ok("Role changed successfully");
+    }
 }
 
