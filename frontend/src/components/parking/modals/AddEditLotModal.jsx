@@ -34,7 +34,7 @@ export default function AddEditLotModal({ isOpen, onClose, lot = null, onSaveLot
     },
     averagePrice: lot?.averagePrice ?? 0.0,
   });
-
+  const [errorMessage,setErrorMessage] = useState("");
     // Update formData when lot prop changes
     useEffect(() => {
       if (lot) {
@@ -71,6 +71,20 @@ export default function AddEditLotModal({ isOpen, onClose, lot = null, onSaveLot
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Calculate total capacity
+    const totalCapacity = Object.values(formData.spotTypes).reduce(
+      (total, type) => total + type.capacity, 
+      0
+    );
+
+    // Check if total capacity is less than 1
+    if (totalCapacity < 1) {
+      setErrorMessage("Total capacity must be greater than 0.");
+      return;
+    }
+
+    setErrorMessage(""); // Clear error message if validation passes
+    
     // Handle form submission
     console.log("Lot data: ", lot);
     let payload = {
@@ -264,6 +278,9 @@ export default function AddEditLotModal({ isOpen, onClose, lot = null, onSaveLot
                         onUpdate={updateRule} 
                       />
                       </>
+                      )}
+                      {errorMessage != "" && (
+                        <div className="text-sm text-red-600 mt-2">{errorMessage}</div>
                       )}
                       <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
                         <button

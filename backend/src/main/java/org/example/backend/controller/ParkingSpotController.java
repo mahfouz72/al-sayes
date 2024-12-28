@@ -17,9 +17,9 @@ import java.util.Optional;
 @RequestMapping("/api/spots")
 @CrossOrigin(origins = "http://localhost:5173")
 public class ParkingSpotController {
-    private ParkingLotService parkingLotService;
+    private final ParkingLotService parkingLotService;
 
-    private ParkingSpotService parkingSpotService;
+    private final ParkingSpotService parkingSpotService;
 
     public ParkingSpotController(ParkingLotService parkingLotService,
                                  ParkingSpotService parkingSpotService) {

@@ -171,6 +171,7 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
                 p.location,
                 p.latitude,
                 p.longitude,
+                p.time_limit,
                 s.avg_price AS average_price,
                 s.total_spots,
                 s.available_spots,
@@ -190,6 +191,7 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
             card.setLocation(rs.getString("location"));
             card.setLatitude(rs.getDouble("latitude"));
             card.setLongitude(rs.getDouble("longitude"));
+            card.setTimeLimit(rs.getDouble("time_limit"));
             card.setAveragePrice(rs.getDouble("average_price"));
             card.setTotalSpots(rs.getInt("total_spots"));
             card.setAvailableSpots(rs.getInt("available_spots"));

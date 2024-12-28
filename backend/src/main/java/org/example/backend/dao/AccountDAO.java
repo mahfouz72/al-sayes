@@ -4,6 +4,7 @@ import org.example.backend.dto.UserDetails;
 import org.example.backend.entity.Account;
 import org.example.backend.entity.ParkingLot;
 import org.example.backend.enums.PaymentMethod;
+import org.example.backend.enums.UserStatus;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -23,6 +24,7 @@ public class AccountDAO implements DAO<Account, Long>  {
         account.setEmail(rs.getString("email"));
         account.setPassword(rs.getString("password"));
         account.setRole(rs.getString("role_name"));
+        account.setStatus(UserStatus.valueOf(rs.getString("status")));
         return account;
     };
 
@@ -39,9 +41,10 @@ public class AccountDAO implements DAO<Account, Long>  {
     @Override
     public void insert(Account account) {
         String accountSql =
-                "INSERT INTO Account(username, email, password, role_name) VALUES(?,?,?,?)";
+                "INSERT INTO Account(username, email, password, role_name, status) VALUES(?,?,?,?,?)";
         jdbcTemplate.update(accountSql, account.getUsername(),
-                account.getEmail(), account.getPassword(), "ROLE_" + account.getRole().toUpperCase());
+                account.getEmail(), account.getPassword(), "ROLE_" + account.getRole().toUpperCase(),
+                UserStatus.ACTIVE.name());
     }
 
     public String getRoleByUsername(String username) {
@@ -86,30 +89,56 @@ public class AccountDAO implements DAO<Account, Long>  {
     }
 
     public Optional<UserDetails> getUserDetailsByUsername(String username) {
-        String sql = "SELECT * FROM Account WHERE username = ?";
-        final UserDetails[] userDetails = {null};
+        String sql = """
+                SELECT 
+                    a.id,
+                    a.username,
+                    a.email,
+                    a.role_name,
+                    d.license_plate,
+                    d.payment_method
+                FROM Account a
+                LEFT JOIN Driver d ON a.id = d.account_id
+                WHERE a.username = ?;
+                """;
+        UserDetails userDetails = null;
         try {
-            userDetails[0] = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
-                UserDetails user = UserDetails.builder()
-                        .id(rs.getLong("id"))
-                        .username(rs.getString("username"))
-                        .email(rs.getString("email"))
-                        .role(rs.getString("role_name").split("_")[1].toLowerCase())
-                        .build();
-                return user;
+            userDetails = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
+                UserDetails details = new UserDetails();
+                details.setId(rs.getLong("id"));
+                details.setUsername(rs.getString("username"));
+                details.setEmail(rs.getString("email"));
+                details.setRole(rs.getString("role_name").split("_")[1].toLowerCase());
+                // Driver details if exists
+                if (rs.getString("license_plate") != null) {
+                    details.setLicensePlate(rs.getString("license_plate"));
+                    details.setPaymentMethod(rs.getString("payment_method").toLowerCase());
+                }
+                return details;
             }, username);
-            if (userDetails[0] != null && "driver".equalsIgnoreCase(userDetails[0].getRole())) {
-                String driverSql = "SELECT * FROM Driver WHERE account_id = ?";
-                jdbcTemplate.queryForObject(driverSql, (rs, rowNum) -> {
-                    userDetails[0].setLicensePlate(rs.getString("license_plate"));
-                    userDetails[0].setPaymentMethod(rs.getString("payment_method").toLowerCase());
-                    return null;
-                }, userDetails[0].getId());
-            }
-
         } catch(DataAccessException e) {
             // Not Found
         }
-        return Optional.ofNullable(userDetails[0]);
+        return Optional.ofNullable(userDetails);
+    }
+
+    public void blockUser(String username) {
+        String sql = "UPDATE Account SET status = ? WHERE username = ?";
+        jdbcTemplate.update(sql, UserStatus.BLOCKED.name(), username);
+    }
+
+    public void unblockUser(String username) {
+        String sql = "UPDATE Account SET status = ? WHERE username = ?";
+        jdbcTemplate.update(sql, UserStatus.ACTIVE.name(), username);
+    }
+
+    public void changeUserRole(String username, String role) {
+        String sql = "UPDATE Account SET role_name = ? WHERE username = ?";
+        jdbcTemplate.update(sql, role.toUpperCase(), username);
+    }
+
+    public boolean isActive(String username) {
+        String sql = "SELECT status FROM Account WHERE username = ?";
+        return UserStatus.ACTIVE.name().equals(jdbcTemplate.queryForObject(sql, String.class, username));
     }
 }
