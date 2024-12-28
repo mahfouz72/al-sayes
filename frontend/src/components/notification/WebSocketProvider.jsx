@@ -29,10 +29,16 @@ export const WebSocketProvider = ({ children }) => {
                 client.subscribe("/topic/notifications", (message) => {
                     console.log("Received message:", message.body);
                     const notification = JSON.parse(message.body);
-                    setNotifications((prevNotifications) => [
-                        notification,
-                        ...prevNotifications,
-                    ]);
+                    // if last notification is the same as the new one, remove it
+                    if (
+                        notifications.length > 0 &&
+                        notifications[0].message !== notification.message
+                    ) {
+                        setNotifications((prevNotifications) => [
+                            notification,
+                            ...prevNotifications,
+                        ]);
+                    }
                 });
             },
             onStompError: (frame) => {
