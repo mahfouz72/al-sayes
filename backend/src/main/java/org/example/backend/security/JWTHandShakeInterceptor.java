@@ -31,7 +31,6 @@ public class JWTHandShakeInterceptor implements HandshakeInterceptor {
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
                                    WebSocketHandler wsHandler, Map<String, Object> attributes) {
         String token = extractToken(request);
-        System.out.println(token);
         if (token != null) {
             final String username = jwtService.extractUsername(token);
             UserDetails userDetails = userDetailsManager.loadUserByUsername(username);

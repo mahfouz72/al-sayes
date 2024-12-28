@@ -238,7 +238,7 @@ public boolean reserveSpot(ReservationDTO reservationDTO) {
         
         return true;
     } catch (SQLException e) {
-        e.printStackTrace();
+        // e.printStackTrace();
         return false;
     } finally {
         try {
@@ -249,7 +249,7 @@ public boolean reserveSpot(ReservationDTO reservationDTO) {
                 connection.close();
             }
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            // ex.printStackTrace();
         }
     }
 }
