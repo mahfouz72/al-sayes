@@ -84,7 +84,7 @@ public class StatisticsDAO {
     }
 
     public List<Map<String, Object>> getTopUsersWithMostReservations(int limit) {
-        String sql = "SELECT username, COUNT(*) as total_reservations, COALESCE(SUM(price+penalty), 0) as total_spent " +
+        String sql = "SELECT username, email, COUNT(*) as total_reservations, COALESCE(SUM(price+penalty), 0) as total_spent " +
                      "FROM Reservation JOIN Account ON driver_id = id " +
                      "GROUP BY driver_id ORDER BY total_reservations, total_spent DESC LIMIT ?";
         return jdbcTemplate.queryForList(sql, limit);

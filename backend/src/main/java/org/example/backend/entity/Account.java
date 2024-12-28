@@ -13,5 +13,5 @@ public class Account {
     private String email;
     private String password;
     private String role;
-    private UserStatus status;
+    private String status;
 }

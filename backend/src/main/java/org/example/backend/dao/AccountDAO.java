@@ -24,6 +24,7 @@ public class AccountDAO implements DAO<Account, Long>  {
         account.setEmail(rs.getString("email"));
         account.setPassword(rs.getString("password"));
         account.setRole(rs.getString("role_name"));
+        account.setStatus(UserStatus.valueOf(rs.getString("status")).name());
         return account;
     };
 
