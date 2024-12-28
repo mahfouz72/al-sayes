@@ -26,35 +26,36 @@ public class ReportServices {
         this.statisticsDAO = statisticsDAO;
     }
 
-    public String exportReport(String report) throws FileNotFoundException, JRException {
+    public byte[] exportReport(String report) throws FileNotFoundException, JRException {
+        byte[] reportBytes = null;
         if (report.equals("users")) {
 
             List<Account> accounts = accountDAO.listAll();
-            generateReport(new JRBeanCollectionDataSource(accounts), "users_report.jrxml");
+            reportBytes = generateReport(new JRBeanCollectionDataSource(accounts), "users_report.jrxml");
 
         } else if (report.equals("lots")) {
 
             List<Map<String, Object>> lots = statisticsDAO.getParkingSlotsWithRevenueAndOccupancy(Integer.MAX_VALUE);
-            generateReport(new JRBeanCollectionDataSource(lots), "lots_report.jrxml");
+            reportBytes = generateReport(new JRBeanCollectionDataSource(lots), "lots_report.jrxml");
 
         } else if (report.equals("topUsers")) {
 
             List<Map<String, Object>> topUsers = statisticsDAO.getTopUsersWithMostReservations(Integer.MAX_VALUE);
-            generateReport(new JRBeanCollectionDataSource(topUsers), "topUsers_report.jrxml");
+            reportBytes = generateReport(new JRBeanCollectionDataSource(topUsers), "topUsers_report.jrxml");
 
         } else {
-            return "Report not found";
+            return null;
         }
 
-        return "Report exported";
+        return reportBytes;
     }
 
-    private void generateReport(JRBeanCollectionDataSource dataSource, String fileName) throws JRException, FileNotFoundException {
+    private byte[] generateReport(JRBeanCollectionDataSource dataSource, String fileName) throws JRException, FileNotFoundException {
         File file = ResourceUtils.getFile("classpath:reports/"+fileName);
         JasperReport jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("createdBy", "admin");
         JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
-        JasperExportManager.exportReportToPdfFile(jasperPrint, fileName.replace("jrxml", "pdf"));
+        return JasperExportManager.exportReportToPdf(jasperPrint);
     }
 }
