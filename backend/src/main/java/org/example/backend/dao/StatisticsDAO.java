@@ -106,7 +106,7 @@ public class StatisticsDAO {
     public List<Map<String, Object>> getTopUsersWithMostReservations(int limit) {
         String sql = """
                 SELECT
-                    a.username, email
+                    a.username, email,
                     COUNT(*) AS total_reservations,
                     COALESCE(SUM(r.price), 0) AS total_spent
                 FROM Reservation r
