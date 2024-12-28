@@ -72,3 +72,12 @@ CREATE TABLE IF NOT EXISTS Statistics (
     PRIMARY KEY (lot_id),
     FOREIGN KEY (lot_id) REFERENCES ParkingLot(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS Notification (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    account_id BIGINT NOT NULL,
+    message VARCHAR(255) NOT NULL,
+    timestamp timestamp NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (account_id) REFERENCES Account(id) ON DELETE CASCADE
+);

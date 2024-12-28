@@ -1,0 +1,12 @@
+.notifications-page {
+    padding: 2rem;
+    max-width: 1280px;
+    margin: 0 auto;
+}
+
+.notifications-page h1 {
+    margin-bottom: 2rem;
+    color: #1f2937;
+    font-size: 1.875rem;
+    font-weight: 600;
+}

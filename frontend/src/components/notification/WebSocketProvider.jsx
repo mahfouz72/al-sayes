@@ -1,6 +1,7 @@
-import  { createContext, useContext, useEffect, useState } from 'react';
-import { Client } from '@stomp/stompjs';
-import {getUserToken} from "../../apis/config.js";
+import { createContext, useContext, useEffect, useState } from "react";
+import { Client } from "@stomp/stompjs";
+import { getUserToken } from "../../apis/config.js";
+
 const WebSocketContext = createContext();
 
 export const useWebSocket = () => {
@@ -24,18 +25,21 @@ export const WebSocketProvider = ({ children }) => {
         const client = new Client({
             brokerURL: `ws://localhost:8080/ws?token=${getUserToken()}`,
             onConnect: () => {
-                console.log('WebSocket connected');
-                client.subscribe('/topic/notifications', (message) => {
-                    console.log('Received message:', message.body);
+                console.log("WebSocket connected");
+                client.subscribe("/topic/notifications", (message) => {
+                    console.log("Received message:", message.body);
                     const notification = JSON.parse(message.body);
-                    setNotifications((prevNotifications) => [notification, ...prevNotifications]);
+                    setNotifications((prevNotifications) => [
+                        notification,
+                        ...prevNotifications,
+                    ]);
                 });
             },
             onStompError: (frame) => {
-                console.error('WebSocket error:', frame);
+                console.error("WebSocket error:", frame);
             },
             onDisconnect: () => {
-                console.log('WebSocket disconnected');
+                console.log("WebSocket disconnected");
             },
         });
 
@@ -45,7 +49,7 @@ export const WebSocketProvider = ({ children }) => {
         return () => {
             if (client.active) {
                 client.deactivate();
-                console.log('WebSocket deactivated');
+                console.log("WebSocket deactivated");
             }
         };
     }, [token]);
