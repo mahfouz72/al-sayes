@@ -199,4 +199,9 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
             return card;
         });
     }
+
+    public String getParkingLotNameById(Long lotId) {
+        String sql = "SELECT name FROM ParkingLot WHERE id = ?";
+        return jdbcTemplate.queryForObject(sql, String.class, lotId);
+    }
 }

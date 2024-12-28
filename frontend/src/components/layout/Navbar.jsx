@@ -1,10 +1,12 @@
 import { Fragment } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Bell } from "lucide-react";
 import { Disclosure, Transition } from "@headlessui/react";
 import { Menu, X } from "lucide-react";
 import Logo from "./Logo";
 import NavLink from "./NavLink";
 import UserMenu from "./UserMenu";
+import {WebSocketProvider} from "../notification/WebSocketProvider.jsx";
 
 export default function Navbar() {
     const username = localStorage.getItem("username");
@@ -41,6 +43,12 @@ export default function Navbar() {
                             </div>
 
                             <div className="flex items-center">
+                                <NavLink
+                                    to="/notifications"
+                                    className="relative text-gray-300 hover:text-white focus:outline-none"
+                                >
+                                    <Bell className="h-6 w-6" />
+                                </NavLink>
                                 <UserMenu
                                     username={username}
                                     onLogout={handleLogout}
@@ -76,6 +84,13 @@ export default function Navbar() {
                                     {item.name}
                                 </Disclosure.Button>
                             ))}
+                            <Disclosure.Button
+                                as={Link}
+                                to="/notifications"
+                                className="block px-3 py-2 rounded-lg text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700"
+                            >
+                                Notifications
+                            </Disclosure.Button>
                         </div>
                     </Disclosure.Panel>
                 </>
