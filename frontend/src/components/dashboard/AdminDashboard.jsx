@@ -211,7 +211,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="bg-gray-100 p-4 rounded-lg">
                     <h3 className="font-bold">Total Drivers</h3>
-                    <p className="text-2xl">{systemStats.totalManagers}</p>
+                    <p className="text-2xl">{systemStats.totalDrivers}</p>
                 </div>
                 <div className="bg-cyan-100 p-4 rounded-lg">
                     <h3 className="font-bold">Parking Lots</h3>
