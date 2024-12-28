@@ -51,7 +51,13 @@
                 <property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6376147b-c987-43e3-b518-8e9e233b3439"/>
             </element>
             <element kind="textField" uuid="60283ca7-6459-445a-a5b5-cf632ebd1f65" x="318" y="0" width="138" height="20" fontSize="10.0" textAdjust="StretchHeight">
-                <expression><![CDATA[$F{role}]]></expression>
+                <expression><![CDATA[
+                    $F{role}.equals("ROLE_ADMIN") ? "Admin" :
+                    $F{role}.equals("ROLE_DRIVER") ? "Driver" :
+                    $F{role}.equals("ROLE_MANAGER") ? "Manager" :
+                    $F{role}
+                    ]]>
+                </expression>
                 <property name="com.jaspersoft.studio.spreadsheet.connectionID" value="de4b4b07-2413-42b3-89aa-a08783bfc367"/>
             </element>
             <element kind="textField" uuid="91dd81be-a687-401f-a725-1819096d6d93" x="415" y="-1" width="138" height="20" fontSize="10.0" textAdjust="StretchHeight" hTextAlign="Center">
