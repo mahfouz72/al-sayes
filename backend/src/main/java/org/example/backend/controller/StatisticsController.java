@@ -87,7 +87,7 @@ public class StatisticsController {
         return ResponseEntity.ok("User unblocked successfully");
     }
 
-    @PostMapping("/users-report/{report}")
+    @GetMapping("/users-report/{report}")
     public ResponseEntity<ByteArrayResource> generateUsersReport(
             @PathVariable String report
     ) {

@@ -133,6 +133,32 @@ export default function AdminDashboard() {
 
   };
 
+  const handleDownloadUsers = async () => {
+    const reportName = 'users';
+      const response = await fetch(`http://localhost:8080/api/statistics/users-report/${reportName}`, {
+          method: 'GET',
+          headers: {
+              'Content-Type': 'application/pdf',
+              'Authorization': `Bearer ${token}`
+
+          }
+      });
+  
+      if (response.ok) {
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${reportName}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+      } else {
+          console.error('Failed to fetch PDF');
+      }
+  };
+
+
 
   return (
     <div className="p-6">
@@ -194,7 +220,7 @@ export default function AdminDashboard() {
       <div className="mb-8 flex flex-wrap">
         <h2 className="text-xl font-semibold mb-4">Revenue Trend</h2>
         <div className="w-full overflow-x-auto">
-          <LineChart width={1400} height={300} data={systemRevenueGraph}>
+          <LineChart width={1300} height={300} data={systemRevenueGraph}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" />
             <YAxis />
@@ -205,7 +231,7 @@ export default function AdminDashboard() {
         </div>
         <h2 className="text-xl font-semibold mb-4">Slots Trend</h2>
         <div className="w-full overflow-x-auto">
-          <LineChart width={1400} height={300} data={systemSpotsGraph}>
+          <LineChart width={1300} height={300} data={systemSpotsGraph}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" />
             <YAxis />
@@ -218,6 +244,14 @@ export default function AdminDashboard() {
 
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4">User Management</h2>
+        <div className="text-right">
+          <button
+            onClick={handleDownloadUsers}
+            className="py-2 px-4 bg-blue-500 text-white font-medium text-sm rounded-lg hover:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all"
+            >
+            Download
+          </button>
+        </div>
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white">
             <thead>
