@@ -1,5 +1,6 @@
 package org.example.backend.dao;
 
+import org.example.backend.dto.ReservationDTO;
 import org.example.backend.dto.ReservationDetailsDTO;
 import org.example.backend.entity.Reservation;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -7,6 +8,11 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import org.example.backend.enums.ReservationStatus;
 import org.example.backend.models.ReservationKey;
+
+import java.math.BigDecimal;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
@@ -89,9 +95,9 @@ public class ReservationDAO implements DAO<Reservation, ReservationKey> {
 
     public boolean isSpotAvailable(Long lotId, Long spotId, Timestamp startTime, Timestamp endTime) {
         // Check if the spot is available in the given time range (start_time <= startTime < end_time) or (start_time < endTime <= end_time) and the status is not CANCELLED
-        System.out.printf("Checking if spot %d in lot %d is available from %s to %s\n", spotId, lotId, startTime.toString(), endTime.toString());
-        String sql = "SELECT * FROM Reservation WHERE lot_id = ? AND spot_id = ? AND ((start_time <= ? AND ? < end_time) OR (start_time < ? AND ? <= end_time)) AND status != ?";
-        List<Reservation> reservations = jdbcTemplate.query(sql, rowMapper, lotId, spotId, startTime, startTime, endTime, endTime, ReservationStatus.CANCELLED.name());
+        // System.out.printf("Checking if spot %d in lot %d is available from %s to %s\n", spotId, lotId, startTime.toString(), endTime.toString());
+        String sql = "SELECT * FROM Reservation WHERE lot_id = ? AND spot_id = ? AND ((start_time <= ? AND ? < end_time) OR (start_time < ? AND ? <= end_time)) AND status NOT IN (?, ?)";
+        List<Reservation> reservations = jdbcTemplate.query(sql, rowMapper, lotId, spotId, startTime, startTime, endTime, endTime, ReservationStatus.EXPIRED.name(), ReservationStatus.FULFILLED.name());
         return reservations.isEmpty();
     }
 
@@ -164,4 +170,45 @@ public class ReservationDAO implements DAO<Reservation, ReservationKey> {
             return reservationDetailsDTO;
         });
     }
+
+public boolean reserveSpot(ReservationDTO reservationDTO) {
+    Connection connection = null;
+    CallableStatement callableStatement = null;
+    
+    try {
+        // Get the database connection
+        connection = jdbcTemplate.getDataSource().getConnection();
+        
+        // Prepare the stored procedure call
+        String procedureCall = "{CALL ReserveParkingSpot(?, ?, ?, ?, ?, ?)}";
+        callableStatement = connection.prepareCall(procedureCall);
+        
+        // Set the parameters for the stored procedure
+        callableStatement.setLong(1, reservationDTO.getDriverId());  // p_driver_id
+        callableStatement.setLong(2, reservationDTO.getSpotId());    // p_spot_id
+        callableStatement.setLong(3, reservationDTO.getLotId());     // p_lot_id
+        callableStatement.setTimestamp(4, reservationDTO.getStartTime()); // p_start_time
+        callableStatement.setTimestamp(5, reservationDTO.getEndTime());   // p_end_time
+        callableStatement.setBigDecimal(6, BigDecimal.valueOf(reservationDTO.getPrice()));       // p_price
+        
+        // Execute the stored procedure
+        callableStatement.execute();
+        
+        return true;
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return false;
+    } finally {
+        try {
+            if (callableStatement != null) {
+                callableStatement.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+}
 }

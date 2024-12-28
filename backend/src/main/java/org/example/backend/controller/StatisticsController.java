@@ -17,6 +17,7 @@ import java.io.FileNotFoundException;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/api/statistics")
 public class StatisticsController {
 
@@ -77,6 +78,7 @@ public class StatisticsController {
 
     @PostMapping("/block-user")
     public ResponseEntity<?> blockUser(@RequestParam String username) {
+        System.out.println(username);
         statisticsService.blockUser(username);
         return ResponseEntity.ok("User blocked successfully");
     }
@@ -105,5 +107,10 @@ public class StatisticsController {
         }
     }
 
+    @PostMapping("/change-role")
+    public ResponseEntity<?> changeRole(@RequestParam String username, @RequestParam String role) {
+        statisticsService.changeUserRole(username, role);
+        return ResponseEntity.ok("Role changed successfully");
+    }
 }
 

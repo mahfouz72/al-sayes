@@ -34,7 +34,10 @@ export default function ProfileCard({ user, role }) {
                                     : Wallet
                             }
                             label="Payment Method"
-                            value={user.paymentMethod}
+                            value={
+                                user.paymentMethod.charAt(0).toUpperCase() +
+                                user.paymentMethod.slice(1)
+                            }
                         />
                     )}
                 </div>

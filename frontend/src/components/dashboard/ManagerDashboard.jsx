@@ -10,15 +10,17 @@ import {
 } from "recharts";
 import ParkingSpotGrid from "../parking/ParkingSpotGrid";
 import LotAPI from "../../apis/LotAPI";
-import SpotAPI from "../../apis/SpotAPI";
+// import SpotAPI from "../../apis/SpotAPI";
+import { Client } from "@stomp/stompjs";
+import { getUserToken } from "../../apis/config";
 
 export default function ManagerDashboard() {
     const [parkingLots, setParkingLots] = useState([]);
     const [selectedLot, setSelectedLot] = useState(parkingLots[0]);
     const [selectedLotSpots, setSelectedLotSpots] = useState([]); // Store spots for selected lot
     const [showSpotGrid, setShowSpotGrid] = useState(false);
+    // Fetch all parking lots when the page first renders
     useEffect(() => {
-        // Fetch all parking lots when the page first renders
         LotAPI.getParkingLots()
             .then((response) => {
                 setParkingLots(response);
@@ -38,13 +40,53 @@ export default function ManagerDashboard() {
     // Fetch parking spots when selected lot changes
     useEffect(() => {
         if (selectedLot) {
-            SpotAPI.getParkingSpots(selectedLot.id)
-                .then((response) => {
-                    setSelectedLotSpots(response);
-                })
-                .catch((error) => {
-                    console.error("Error fetching parking spots:", error);
-                });
+            const client = new Client({
+                brokerURL: "ws://localhost:8080/ws",
+                headers: {
+                    Authorization: `Bearer ${getUserToken()}`,
+                },
+                debug: (str) => console.log(str),
+                onConnect: () => {
+                    console.log(
+                        "Connected to WebSocket in selectedLot.id = " +
+                            selectedLot.id
+                    );
+                    // Subscribe to the topic where the backend will send the parking spots
+                    client.subscribe(
+                        `/topic/spots/${selectedLot.id}`,
+                        (message) => {
+                            const spots = JSON.parse(message.body); // Parse the spots from the response
+                            console.log("Received spots:", spots);
+                            setSelectedLotSpots(spots); // Update the state with the parking spots
+                        }
+                    );
+
+                    // Send a message to the backend (with selected lot ID) to request parking spots
+                    client.publish({
+                        destination: `/app/spots/${selectedLot.id}`, // Send request to backend
+                    });
+                },
+                onStompError: (frame) => {
+                    console.error("WebSocket error:", frame);
+                    console.error(
+                        "Broker reported error: ",
+                        frame.headers["message"]
+                    );
+                    console.error("Additional details: ", frame.body);
+                },
+                onDisconnect: () => {
+                    console.log("WebSocket connection closed");
+                },
+            });
+            client.activate();
+
+            // Cleanup on component unmount
+            return () => {
+                if (client.active) {
+                    client.deactivate();
+                    console.log("WebSocket connection deactivated");
+                }
+            };
         }
     }, [selectedLot]);
 
@@ -109,9 +151,10 @@ export default function ManagerDashboard() {
                         Total Violations
                     </h3>
                     <p className="mt-2 text-3xl font-bold text-red-600">
-                        {parkingLots
-                            .reduce((sum, lot) => sum + lot.violations, 0)
-                            }
+                        {parkingLots.reduce(
+                            (sum, lot) => sum + lot.violations,
+                            0
+                        )}
                     </p>
                 </div>
             </div>
@@ -122,9 +165,15 @@ export default function ManagerDashboard() {
                         Performance Overview
                     </h2>
                     <div className="w-full overflow-x-auto">
-                        <BarChart width={800} height={300} data={data}>
+                        <BarChart width={1100} height={500} data={data}>
                             <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" />
+                            <XAxis
+                                dataKey="name"
+                                angle={50}
+                                textAnchor="start"
+                                interval={0}
+                                height={200}
+                            />
                             <YAxis />
                             <Tooltip />
                             <Legend />
