@@ -65,10 +65,45 @@ export default function TopUsersReport() {
     setLimitError('');
   };
 
+  const handleDownloadUsers = async () => {
+    const reportName = 'topUsers';
+      const response = await fetch(`http://localhost:8080/api/statistics/users-report/${reportName}`, {
+          method: 'GET',
+          headers: {
+              'Content-Type': 'application/pdf',
+              'Authorization': `Bearer ${token}`
+
+          }
+      });
+  
+      if (response.ok) {
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${reportName}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+      } else {
+          console.error('Failed to fetch PDF');
+      }
+  };
+
+
+
 
   return (
     <div className="bg-white shadow rounded-lg p-6">
       <h2 className="text-xl font-semibold mb-4">Top Users by Reservations</h2>
+      <div className="text-right">
+          <button
+            onClick={handleDownloadUsers}
+            className="py-2 px-4 bg-blue-500 text-white font-medium text-sm rounded-lg hover:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all"
+            >
+            Download
+          </button>
+        </div>
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Number of users to display

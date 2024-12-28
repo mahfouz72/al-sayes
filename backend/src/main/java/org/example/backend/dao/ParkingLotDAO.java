@@ -206,4 +206,45 @@ public class ParkingLotDAO implements DAO<ParkingLot, Long> {
         String sql = "SELECT name FROM ParkingLot WHERE id = ?";
         return jdbcTemplate.queryForObject(sql, String.class, lotId);
     }
+  
+    public List<ParkingLotCard> getLotsCardsOfManager(Long managerId) {
+            String sql = """
+            SELECT
+                p.id AS lot_id,
+                p.name AS lot_name,
+                p.location,
+                p.latitude,
+                p.longitude,
+                p.time_limit,
+                s.avg_price AS average_price,
+                s.total_spots,
+                s.available_spots,
+                s.regular_spots,
+                s.disabled_spots,
+                s.ev_spots
+            FROM
+                ParkingLot p
+            JOIN
+                Statistics s ON p.id = s.lot_id
+            WHERE
+                p.managed_by = ?
+        """;
+
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            ParkingLotCard card = new ParkingLotCard();
+            card.setId(rs.getLong("lot_id"));
+            card.setName(rs.getString("lot_name"));
+            card.setLocation(rs.getString("location"));
+            card.setLatitude(rs.getDouble("latitude"));
+            card.setLongitude(rs.getDouble("longitude"));
+            card.setTimeLimit(rs.getDouble("time_limit"));
+            card.setAveragePrice(rs.getDouble("average_price"));
+            card.setTotalSpots(rs.getInt("total_spots"));
+            card.setAvailableSpots(rs.getInt("available_spots"));
+            card.setRegularSpots(rs.getInt("regular_spots"));
+            card.setDisabledSpots(rs.getInt("disabled_spots"));
+            card.setEvSpots(rs.getInt("ev_spots"));
+            return card;
+        }, managerId);
+    }
 }
