@@ -178,7 +178,7 @@ public class ReservationDAO implements DAO<Reservation, ReservationKey> {
             FROM reservation e
             JOIN parkinglot p ON e.lot_id = p.id
             WHERE
-                TIMESTAMPDIFF(MINUTE, NOW(), e.end_time) <= 30
+                TIMESTAMPDIFF(MINUTE, NOW(), e.end_time) <= 30 AND TIMESTAMPDIFF(MINUTE, NOW(), e.end_time) > 0
                 AND e.status = 'ONGOING'
                 AND e.driver_id = ?;
         """;
@@ -198,7 +198,7 @@ public class ReservationDAO implements DAO<Reservation, ReservationKey> {
             FROM reservation e
             JOIN parkinglot p ON e.lot_id = p.id
             WHERE
-                TIMESTAMPDIFF(MINUTE, NOW(), e.start_time) <= 30
+                TIMESTAMPDIFF(MINUTE, NOW(), e.start_time) <= 30 AND TIMESTAMPDIFF(MINUTE, NOW(), e.start_time) >= 0
                 AND e.status = 'CONFIRMED'
                 AND e.driver_id = ?;
         """;

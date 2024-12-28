@@ -31,7 +31,7 @@ export const WebSocketProvider = ({ children }) => {
                     const notification = JSON.parse(message.body);
                     // if last notification is the same as the new one, remove it
                     if (
-                        notifications.length > 0 &&
+                        notifications.length === 0 ||
                         notifications[0].message !== notification.message
                     ) {
                         setNotifications((prevNotifications) => [
