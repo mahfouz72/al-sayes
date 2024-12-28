@@ -1,12 +1,19 @@
 package org.example.backend.controller;
 
+import net.sf.jasperreports.engine.JRException;
 import org.example.backend.dto.StatisticsDTO;
 import org.example.backend.dto.UserDetailsDTO;
 import org.example.backend.entity.Account;
+import org.example.backend.service.ReportServices;
 import org.example.backend.service.StatisticsService;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpHeaders;
 
+
+import java.io.FileNotFoundException;
 import java.util.List;
 
 @RestController
@@ -15,9 +22,11 @@ import java.util.List;
 public class StatisticsController {
 
     private final StatisticsService statisticsService;
+    private final ReportServices reportService;
 
-    public StatisticsController(StatisticsService statisticsService) {
+    public StatisticsController(StatisticsService statisticsService, ReportServices reportService) {
         this.statisticsService = statisticsService;
+        this.reportService = reportService;
     }
 
     @GetMapping("/totals")
@@ -78,6 +87,24 @@ public class StatisticsController {
     public ResponseEntity<?> unblockUser(@RequestParam String username) {
         statisticsService.unblockUser(username);
         return ResponseEntity.ok("User unblocked successfully");
+    }
+
+    @GetMapping("/users-report/{report}")
+    public ResponseEntity<ByteArrayResource> generateUsersReport(
+            @PathVariable String report
+    ) {
+        try {
+            byte[] pdfBytes = reportService.exportReport(report);
+            ByteArrayResource resource = new ByteArrayResource(pdfBytes);
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + report + ".pdf")
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .contentLength(pdfBytes.length)
+                    .body(resource);
+        } catch (FileNotFoundException | JRException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PostMapping("/change-role")
