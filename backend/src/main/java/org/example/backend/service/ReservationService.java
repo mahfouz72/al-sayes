@@ -91,7 +91,8 @@ public class ReservationService {
                 // notification penalty is the not_showing_up_penalty in the parking lot
                 double notShowingUpPenalty = parkingLotDAO.getByPK(res.getLotId()).map(ParkingLot::getNotShowingUpPenalty)
                         .orElse(0.0);
-                notificationService.notifyNotShowingUpPenalty(res.getDriverId(), res.getLotId(), res.getSpotId(), notShowingUpPenalty);
+                Long managerId = parkingLotDAO.getByPK(res.getLotId()).map(ParkingLot::getManagedBy).orElse(null);
+                notificationService.notifyNotShowingUpPenalty(res.getDriverId(), res.getLotId(), res.getSpotId(), notShowingUpPenalty, managerId);
             }
 
         }

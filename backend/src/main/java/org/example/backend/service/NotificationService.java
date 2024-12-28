@@ -37,7 +37,7 @@ public class NotificationService {
         this.notificationDAO = notificationDAO;
     }
     // every 30 seconds
-    @Scheduled(fixedRate = 300000)
+    @Scheduled(fixedRate = 30000)
     public void sendNotification() {
         System.out.println("Sending notifications...");
         Optional<Account> account = accountDAO.getByUsername(currentUserName);
@@ -97,7 +97,7 @@ public class NotificationService {
         }
     }
 
-    public void notifyNotShowingUpPenalty(Long driverId, Long lotId, Long spotId, double penalty) {
+    public void notifyNotShowingUpPenalty(Long driverId, Long lotId, Long spotId, double penalty, Long managerId) {
         String parkingLotName = parkingLotDAO.getParkingLotNameById(lotId);
 
         String message = String.format("You have been charged a penalty of (%s $) for not showing up at %s (%s).",
@@ -111,5 +111,17 @@ public class NotificationService {
         notificationDTO.setAccountId(driverId);
         notificationDTO.setTimestamp(new Timestamp(System.currentTimeMillis()));
         notificationDAO.insert(notificationDTO);
+        message = String.format("Driver %s has been charged a penalty of (%s $) for not showing up at %s (%s).",
+                driverId,
+                penalty,
+                parkingLotName,
+                "S" + spotId);
+        Notification notification2 = new Notification(message);
+        notificationController.sendNotification(notification2);
+        notificationDTO.setMessage(message);
+        notificationDTO.setAccountId(managerId);
+        notificationDTO.setTimestamp(new Timestamp(System.currentTimeMillis()));
+        notificationDAO.insert(notificationDTO);
+        notificationController.sendNotification(notification2);
     }
 }

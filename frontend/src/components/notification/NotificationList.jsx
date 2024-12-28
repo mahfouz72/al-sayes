@@ -4,7 +4,7 @@ import "./NotificationList.css";
 export default function NotificationList() {
     const { notifications } = useWebSocket();
     const localNotifications = [...notifications];
-    notifications.splice(0, notifications.length);
+    // notifications.splice(0, notifications.length);
     if (localNotifications.length === 0) {
         return <div className="no-notifications">No notifications</div>;
     }
@@ -17,9 +17,9 @@ export default function NotificationList() {
                         <p className="notification-message">
                             {notification.message}
                         </p>
-                        <span className="notification-time">
+                        {/* <span className="notification-time">
                             {new Date(notification.timestamp).toLocaleString()}
-                        </span>
+                        </span> */}
                     </div>
                 </div>
             ))}
