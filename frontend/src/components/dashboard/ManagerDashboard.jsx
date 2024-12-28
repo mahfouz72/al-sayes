@@ -41,10 +41,10 @@ export default function ManagerDashboard() {
     useEffect(() => {
         if (selectedLot) {
             const client = new Client({
-                brokerURL: "ws://localhost:8080/ws",
-                headers: {
-                    Authorization: `Bearer ${getUserToken()}`,
-                },
+                brokerURL: `ws://localhost:8080/ws?token=${getUserToken()}`,
+                // headers: {
+                //     Authorization: `Bearer ${getUserToken()}`,
+                // },
                 debug: (str) => console.log(str),
                 onConnect: () => {
                     console.log(

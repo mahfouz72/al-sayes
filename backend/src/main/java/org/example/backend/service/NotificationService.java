@@ -38,6 +38,7 @@ public class NotificationService {
             long accountId = account.get().getId();
             String role = accountDAO.getRoleByUsername(currentUserName);
             if (role.equals("ROLE_DRIVER")) {
+                notifyNearStartTime(accountId);
                 notifyNearEndTime(accountId);
             } else if (role.equals("ROLE_MANAGER")) {
                 // notify with faulty spot
