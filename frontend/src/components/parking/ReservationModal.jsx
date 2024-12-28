@@ -71,9 +71,9 @@ export default function ReservationModal({
             );
             if (isAfter(startDate, endDate)) {
                 setError("End time must be after start time");
-            } else if (isAfter(endDate, maxDate)) {
+            } else if (isAfter(maxDate, endDate)) {
                 setError(
-                    "End time must be within the time limit, which is " +
+                    "Reservation duration must be larger than time limit, which is " +
                         parkingLot.timeLimit +
                         " minutes"
                 );
